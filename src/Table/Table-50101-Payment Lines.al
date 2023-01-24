@@ -21,6 +21,14 @@ table 50101 "Payment Lines"
         {
             Caption = 'Payment Method Code';
             TableRelation = "Payment Method";
+            trigger OnValidate()
+            var
+                PayMeth: Record "Payment Method";
+            begin
+                IF PayMeth.Get(Rec."Payment Method Code") then begin
+                    Description := PayMeth.Description;
+                end;
+            end;
         }
         field(5; Description; Text[100])
         {
