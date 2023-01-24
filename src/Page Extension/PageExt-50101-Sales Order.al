@@ -23,17 +23,31 @@ pageextension 50101 "Sales Order Payment Ext" extends "Sales Order"
                 Image = PostedPayment;
                 Caption = 'Payment Post';
                 trigger OnAction()
+                var
+                    PaymentLine: Record 50101;
+                    TotalPayemtamt: Decimal;
                 begin
                     GetGSTAmountTotal(Rec, TotalGSTAmount1);
                     GetTCSAmountTotal(Rec, TotalTCSAmt);
                     GetSalesorderStatisticsAmount(Rec, TotalAmt);
                     AmountToCust := TotalAmt + TotalGSTAmount1 + TotalTCSAmt;
+
+                    PaymentLine.Reset();
+                    PaymentLine.SetRange("Document No.", Rec."No.");
+                    if PaymentLine.FindSet() then
+                        repeat
+                            TotalPayemtamt := PaymentLine.Amount;
+                        until PaymentLine.Next() = 0;
+
+                    IF TotalPayemtamt <> AmountToCust then
+                        Error('Sales Order amount is not match with Payment amount');
+
                 end;
             }
         }
     }
 
-        
+
 
     procedure GetGSTAmountTotal(
       SalesHeader: Record 36;
@@ -141,5 +155,8 @@ pageextension 50101 "Sales Order Payment Ext" extends "Sales Order"
 
     var
         myInt: Integer;
-        AmountToCust:decimal;
+        AmountToCust: decimal;
+        TotalGSTAmount1: Decimal;
+        TotalAmt: Decimal;
+        TotalTCSAmt: Decimal;
 }
