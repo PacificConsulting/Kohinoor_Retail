@@ -20,6 +20,7 @@ page 50101 "Payment Lines Subform"
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Document No. field.';
                     Editable = false;
+                    Visible = false;
                 }
                 field("Document Type"; Rec."Document Type")
                 {
