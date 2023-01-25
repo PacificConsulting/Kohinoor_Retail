@@ -53,6 +53,22 @@ table 50101 "Payment Lines"
         }
     }
 
+    procedure PaymentLinesEditable() IsEditable: Boolean;
+    var
+        SalesHdr: Record 36;
+    begin
+        SalesHdr.Reset();
+        SalesHdr.SetRange("No.", "Document No.");
+        SalesHdr.SetRange("Document Type", "Document Type");
+        SalesHdr.SetRange(Status, SalesHdr.Status::Released);
+        if SalesHdr.FindFirst() then
+            IsEditable := false
+        else
+            IsEditable := true;
+
+
+    end;
+
     var
         myInt: Integer;
 

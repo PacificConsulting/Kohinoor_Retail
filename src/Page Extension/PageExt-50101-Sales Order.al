@@ -9,6 +9,7 @@ pageextension 50101 "Sales Order Payment Ext" extends "Sales Order"
                 ApplicationArea = Basic, Suite;
                 SubPageLink = "Document No." = FIELD("No.");
                 UpdatePropagation = Both;
+                Editable = IsPaymentLineeditable;
             }
         }
         addafter(Status)
@@ -48,36 +49,47 @@ pageextension 50101 "Sales Order Payment Ext" extends "Sales Order"
 
                 trigger OnAction()
                 var
-                    PaymentLine: Record 50101;
+                    PaymentLine: Record "Payment Lines";
                     TotalPayemtamt: Decimal;
+                    SalesHdr: Record 36;
                 begin
-                    clear(TotalGSTAmount1);
-                    Clear(TotalTCSAmt);
-                    Clear(TotalAmt);
-                    GetGSTAmountTotal(Rec, TotalGSTAmount1);
-                    GetTCSAmountTotal(Rec, TotalTCSAmt);
-                    GetSalesorderStatisticsAmount(Rec, TotalAmt);
-                    Rec."Amount To Customer" := TotalAmt + TotalGSTAmount1 + TotalTCSAmt;
-                    Rec.Modify();
+                    if not Confirm('Do you want to post payment receipt', true) then begin
+                        clear(TotalGSTAmount1);
+                        Clear(TotalTCSAmt);
+                        Clear(TotalAmt);
 
-                    Clear(TotalPayemtamt);
-                    PaymentLine.Reset();
-                    PaymentLine.SetRange("Document No.", Rec."No.");
-                    if PaymentLine.FindSet() then
-                        repeat
-                            TotalPayemtamt := PaymentLine.Amount;
-                        until PaymentLine.Next() = 0;
+                        GetGSTAmountTotal(Rec, TotalGSTAmount1);
+                        GetTCSAmountTotal(Rec, TotalTCSAmt);
+                        GetSalesorderStatisticsAmount(Rec, TotalAmt);
+                        Rec."Amount To Customer" := TotalAmt + TotalGSTAmount1 + TotalTCSAmt;
+                        Rec.Modify();
 
-                    IF TotalPayemtamt <> Rec."Amount To Customer" then
-                        Error('Sales Order amount is not match with Payment amount');
-                    //else
+                        Clear(TotalPayemtamt);
+                        PaymentLine.Reset();
+                        PaymentLine.SetRange("Document No.", Rec."No.");
+                        if PaymentLine.FindSet() then
+                            repeat
+                                TotalPayemtamt := PaymentLine.Amount;
+                            until PaymentLine.Next() = 0;
 
+                        IF TotalPayemtamt <> Rec."Amount To Customer" then
+                            Error('Sales Order amount is not match with Payment amount')
+                        else begin
+                            BankPayentReceiptAutoPost(Rec);
+                            SalesHdr.Reset();
+                            SalesHdr.SetRange("No.", rec."No.");
+                            If SalesHdr.FindFirst() then begin
+                                SalesHdr.Status := SalesHdr.Status::Released;
+                                SalesHdr.Modify();
+                            end;
+                        end;
 
-
+                    end;
                 end;
             }
         }
     }
+
 
 
 
@@ -184,11 +196,65 @@ pageextension 50101 "Sales Order Payment Ext" extends "Sales Order"
         TotalInclTaxAmount := TotalInclTaxAmount + GSTAmount + TCSAmount;
     end;
 
+    local procedure BankPayentReceiptAutoPost(Salesheader: Record "Sales Header")
+    var
+        GenJourLine: Record 81;
+        NoSeriesMgt: Codeunit 396;
+        BankAcc: Record 270;
+        PaymentLine: Record 50101;
+    begin
+        PaymentLine.Reset();
+        PaymentLine.SetRange("Document Type", Rec."Document Type");
+        PaymentLine.SetRange("Document No.", Rec."No.");
+        if PaymentLine.FindSet() then
+            repeat
+                GenJourLine.Reset();
+                GenJourLine.SetRange("Journal Template Name", 'BANKRCPTY');
+                GenJourLine.SetRange("Journal Batch Name", 'USER-A');
+                GenJourLine.Init();
+                GenJourLine."Document No." := NoSeriesMgt.GetNextNo('BANKRCPTV', Rec."Posting Date", false);
+                GenJourLine."Posting Date" := Today;
+                IF GenJourLine.FindLast() then
+                    GenJourLine."Line No." := GenJourLine."Line No." + 10000
+                else
+                    GenJourLine."Line No." := 10000;
+
+                GenJourLine."Journal Template Name" := 'BANKRCPTY';
+                GenJourLine."Journal Batch Name" := 'USER-A';
+                GenJourLine."Account Type" := GenJourLine."Account Type"::"Bank Account";
+                GenJourLine."Bal. Account Type" := GenJourLine."Bal. Account Type"::Customer;
+                GenJourLine.Validate("Bal. Account No.", rec."Sell-to Customer No.");
+                GenJourLine.validate("Account No.", 'GIRO');
+                GenJourLine."GST Group Code" := 'Goods';
+                GenJourLine.validate(Amount, PaymentLine.Amount);
+                GenJourLine.Comment := 'Auto Post';
+                GenJourLine.Insert(true);
+            Until PaymentLine.Next() = 0;
+        IF CODEUNIT.RUN(CODEUNIT::"Gen. Jnl.-Post", GenJourLine) then begin
+            PaymentLine.Reset();
+            PaymentLine.SetRange("Document Type", Rec."Document Type");
+            PaymentLine.SetRange("Document No.", Rec."No.");
+            if PaymentLine.FindSet() then
+                repeat
+                    PaymentLine.Posted := True;
+                    PaymentLine.Modify();
+                    IsPaymentLineeditable := PaymentLine.PaymentLinesEditable()
+                Until PaymentLine.Next() = 0;
+
+
+        end;
+    end;
+
+    trigger OnAfterGetRecord()
+    begin
+
+    end;
 
     var
-        myInt: Integer;
+
         AmountToCust: decimal;
         TotalGSTAmount1: Decimal;
         TotalAmt: Decimal;
         TotalTCSAmt: Decimal;
+        IsPaymentLineeditable: Boolean;
 }
