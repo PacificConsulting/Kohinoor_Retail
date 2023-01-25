@@ -11,10 +11,31 @@ pageextension 50101 "Sales Order Payment Ext" extends "Sales Order"
                 UpdatePropagation = Both;
             }
         }
+        addafter(Status)
+        {
+            field("Amount To Customer"; Rec."Amount To Customer")
+            {
+                ApplicationArea = all;
+            }
+        }
     }
 
     actions
     {
+        modify(Statistics)
+        {
+            Trigger OnAfterAction()
+            begin
+                clear(TotalGSTAmount1);
+                Clear(TotalTCSAmt);
+                Clear(TotalAmt);
+                GetGSTAmountTotal(Rec, TotalGSTAmount1);
+                GetTCSAmountTotal(Rec, TotalTCSAmt);
+                GetSalesorderStatisticsAmount(Rec, TotalAmt);
+                Rec."Amount To Customer" := TotalAmt + TotalGSTAmount1 + TotalTCSAmt;
+                Rec.Modify();
+            end;
+        }
         addafter(Post)
         {
             action("Payment Post")
@@ -22,16 +43,24 @@ pageextension 50101 "Sales Order Payment Ext" extends "Sales Order"
                 ApplicationArea = all;
                 Image = PostedPayment;
                 Caption = 'Payment Post';
+                Promoted = true;
+                PromotedIsBig = true;
+
                 trigger OnAction()
                 var
                     PaymentLine: Record 50101;
                     TotalPayemtamt: Decimal;
                 begin
+                    clear(TotalGSTAmount1);
+                    Clear(TotalTCSAmt);
+                    Clear(TotalAmt);
                     GetGSTAmountTotal(Rec, TotalGSTAmount1);
                     GetTCSAmountTotal(Rec, TotalTCSAmt);
                     GetSalesorderStatisticsAmount(Rec, TotalAmt);
-                    AmountToCust := TotalAmt + TotalGSTAmount1 + TotalTCSAmt;
+                    Rec."Amount To Customer" := TotalAmt + TotalGSTAmount1 + TotalTCSAmt;
+                    Rec.Modify();
 
+                    Clear(TotalPayemtamt);
                     PaymentLine.Reset();
                     PaymentLine.SetRange("Document No.", Rec."No.");
                     if PaymentLine.FindSet() then
@@ -39,8 +68,11 @@ pageextension 50101 "Sales Order Payment Ext" extends "Sales Order"
                             TotalPayemtamt := PaymentLine.Amount;
                         until PaymentLine.Next() = 0;
 
-                    IF TotalPayemtamt <> AmountToCust then
+                    IF TotalPayemtamt <> Rec."Amount To Customer" then
                         Error('Sales Order amount is not match with Payment amount');
+                    //else
+
+
 
                 end;
             }
