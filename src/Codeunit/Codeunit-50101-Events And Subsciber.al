@@ -11,14 +11,18 @@ codeunit 50101 "Event and Subscribers"
         PostedPayemntLine: Record "Posted Payment Lines";
         PaymentLine: Record "Payment Lines";
     begin
-        PaymentLine.Reset();
-        PaymentLine.SetRange("Document Type", SalesHeader."Document Type");
-        PaymentLine.SetRange("Document No.", SalesHeader."No.");
-        if PaymentLine.FindSet() then
-            repeat
-                PostedPayemntLine.InitFromPaymentLine(PostedPayemntLine, PaymentLine, SalesInvHeader);
-            until PaymentLine.Next() = 0;
-        DeletePayemntLines(SalesHeader, PaymentLine);
+        PostedPayemntLine.Reset();
+        PostedPayemntLine.SetRange("Document No.", SalesInvHeader."No.");
+        IF not PostedPayemntLine.Find() then begin
+            PaymentLine.Reset();
+            PaymentLine.SetRange("Document Type", SalesHeader."Document Type");
+            PaymentLine.SetRange("Document No.", SalesHeader."No.");
+            if PaymentLine.FindSet() then
+                repeat
+                    PostedPayemntLine.InitFromPaymentLine(PostedPayemntLine, PaymentLine, SalesInvHeader);
+                until PaymentLine.Next() = 0;
+            DeletePayemntLines(SalesHeader, PaymentLine);
+        end;
     end;
 
     local procedure DeletePayemntLines(salesHeaderRec: record "Sales Header"; RecPaymentLine: Record "Payment Lines")
