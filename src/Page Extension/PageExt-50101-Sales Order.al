@@ -17,6 +17,7 @@ pageextension 50101 "Sales Order Payment Ext" extends "Sales Order"
             field("Amount To Customer"; Rec."Amount To Customer")
             {
                 ApplicationArea = all;
+                Editable = false;
             }
         }
     }
@@ -230,19 +231,17 @@ pageextension 50101 "Sales Order Payment Ext" extends "Sales Order"
                 GenJourLine.Comment := 'Auto Post';
                 GenJourLine.Insert(true);
             Until PaymentLine.Next() = 0;
-        IF CODEUNIT.RUN(CODEUNIT::"Gen. Jnl.-Post", GenJourLine) then begin
-            PaymentLine.Reset();
-            PaymentLine.SetRange("Document Type", Rec."Document Type");
-            PaymentLine.SetRange("Document No.", Rec."No.");
-            if PaymentLine.FindSet() then
-                repeat
-                    PaymentLine.Posted := True;
-                    PaymentLine.Modify();
-                    IsPaymentLineeditable := PaymentLine.PaymentLinesEditable()
-                Until PaymentLine.Next() = 0;
-
-
-        end;
+        // IF CODEUNIT.RUN(CODEUNIT::"Gen. Jnl.-Post", GenJourLine) then begin
+        //     PaymentLine.Reset();
+        //     PaymentLine.SetRange("Document Type", Rec."Document Type");
+        //     PaymentLine.SetRange("Document No.", Rec."No.");
+        //     if PaymentLine.FindSet() then
+        //         repeat
+        //             PaymentLine.Posted := True;
+        //             PaymentLine.Modify();
+        //             IsPaymentLineeditable := PaymentLine.PaymentLinesEditable()
+        //         Until PaymentLine.Next() = 0;
+        // end;
     end;
 
     trigger OnAfterGetRecord()
