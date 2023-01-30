@@ -1,7 +1,17 @@
-pageextension 50102 "Posted Sales inv AmtToCust" extends "Posted Sales Invoice"
+pageextension 50102 "Posted Sales invoice Retail" extends "Posted Sales Invoice"
 {
     layout
     {
+        addafter(SalesInvLines)
+        {
+            part(PaymentLine; "Payment Lines Subform")
+            {
+                ApplicationArea = Basic, Suite;
+                SubPageLink = "Document No." = FIELD("No.");
+                UpdatePropagation = Both;
+                Editable = false;
+            }
+        }
         addafter(Closed)
         {
             field("Amount To Customer"; Rec."Amount To Customer")
