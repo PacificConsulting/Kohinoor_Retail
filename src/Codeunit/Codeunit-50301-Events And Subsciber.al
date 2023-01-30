@@ -1,4 +1,4 @@
-codeunit 50101 "Event and Subscribers"
+codeunit 50301 "Event and Subscribers"
 {
     trigger OnRun()
     begin

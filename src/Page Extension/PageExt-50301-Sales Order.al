@@ -1,4 +1,4 @@
-pageextension 50103 "Sales Invoice Retail" extends "Sales Invoice"
+pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
 {
     layout
     {
@@ -202,7 +202,7 @@ pageextension 50103 "Sales Invoice Retail" extends "Sales Invoice"
         GenJourLine: Record 81;
         NoSeriesMgt: Codeunit 396;
         BankAcc: Record 270;
-        PaymentLine: Record 50101;
+        PaymentLine: Record 50301;
     begin
         PaymentLine.Reset();
         PaymentLine.SetRange("Document Type", Rec."Document Type");
@@ -250,6 +250,7 @@ pageextension 50103 "Sales Invoice Retail" extends "Sales Invoice"
     end;
 
     var
+
         AmountToCust: decimal;
         TotalGSTAmount1: Decimal;
         TotalAmt: Decimal;

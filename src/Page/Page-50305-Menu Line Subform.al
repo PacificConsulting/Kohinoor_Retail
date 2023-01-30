@@ -1,4 +1,4 @@
-page 50105 "Menu Line Subform"
+page 50305 "Menu Line Subform"
 {
     AutoSplitKey = true;
     Caption = 'Lines';

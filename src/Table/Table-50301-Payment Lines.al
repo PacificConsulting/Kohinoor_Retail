@@ -1,66 +1,72 @@
-table 50102 "Posted Payment Lines"
+table 50301 "Payment Lines"
 {
     DataClassification = ToBeClassified;
-    Caption = 'Posted Payment Lines';
-    Extensible = false;
 
     fields
     {
         field(1; "Document Type"; Enum "Sales Document Type")
         {
             Caption = 'Document Type';
-            Editable = false;
         }
         field(2; "Document No."; Code[20])
         {
             Caption = 'Document No.';
             TableRelation = "Sales Header"."No." WHERE("Document Type" = FIELD("Document Type"));
-            Editable = false;
         }
         field(3; "Line No."; Integer)
         {
             Caption = 'Line No.';
-            Editable = false;
         }
         field(4; "Payment Method Code"; Code[10])
         {
             Caption = 'Payment Method Code';
             TableRelation = "Payment Method";
-            Editable = false;
-
+            trigger OnValidate()
+            var
+                PayMeth: Record "Payment Method";
+            begin
+                IF PayMeth.Get(Rec."Payment Method Code") then begin
+                    Description := PayMeth.Description;
+                end;
+            end;
         }
         field(5; Description; Text[100])
         {
             Caption = 'Description';
-            Editable = false;
         }
         field(6; Amount; Decimal)
         {
             Caption = 'Amount';
-            Editable = false;
         }
         field(7; Posted; Boolean)
         {
             Caption = 'Posted';
-            Editable = false;
         }
     }
 
+
     keys
     {
-        key(Key1; "Document No.", "Line No.")
+        key(Key1; "Document Type", "Document No.", "Line No.")
         {
             Clustered = true;
         }
     }
 
-
-    procedure InitFromPaymentLine(PostedpaymentLine: Record "Posted Payment Lines"; PaymentLine: Record "Payment Lines"; SalesInvHdr: Record "Sales Invoice Header")
+    procedure PaymentLinesEditable() IsEditable: Boolean;
+    var
+        SalesHdr: Record 36;
     begin
-        PostedpaymentLine.Init();
-        PostedpaymentLine.TransferFields(PaymentLine);
-        PostedpaymentLine."Document No." := SalesInvHdr."No.";
-        PostedpaymentLine.Insert();
+        SalesHdr.Reset();
+        SalesHdr.SetRange("No.", "Document No.");
+        SalesHdr.SetRange("Document Type", "Document Type");
+        SalesHdr.SetRange(Status, SalesHdr.Status::Released);
+        if SalesHdr.FindFirst() then
+            IsEditable := false
+        else
+            IsEditable := true;
+
+
     end;
 
     var

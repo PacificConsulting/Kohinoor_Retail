@@ -1,4 +1,4 @@
-table 50105 "POS Action Master"
+table 50305 "POS Action Master"
 {
     DataClassification = ToBeClassified;
 

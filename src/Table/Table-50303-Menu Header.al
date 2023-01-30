@@ -1,4 +1,4 @@
-table 50104 "Menu Line"
+table 50303 "Menu Header"
 {
     DataClassification = ToBeClassified;
 
@@ -9,33 +9,25 @@ table 50104 "Menu Line"
             DataClassification = ToBeClassified;
 
         }
-        field(2; "Menu Line"; Integer)
-        {
-            DataClassification = ToBeClassified;
-
-        }
-        field(3; Name; Text[30])
+        field(2; "Menu Name"; Text[50])
         {
             DataClassification = ToBeClassified;
         }
-        field(4; Description; Text[100])
+        field(3; "Creation ID"; Code[50])
         {
             DataClassification = ToBeClassified;
+            Editable = false;
         }
-        field(5; Action; Code[20])
+        field(4; "Creation Date"; Date)
         {
             DataClassification = ToBeClassified;
-            TableRelation = "POS Action Master".Code;
-        }
-        field(6; Parameter; Code[20])
-        {
-            DataClassification = ToBeClassified;
+            Editable = false;
         }
     }
 
     keys
     {
-        key(Key1; "Menu ID", "Menu Line")
+        key(Key1; "Menu ID")
         {
             Clustered = true;
         }
@@ -46,7 +38,8 @@ table 50104 "Menu Line"
 
     trigger OnInsert()
     begin
-
+        "Creation ID" := UserId;
+        "Creation Date" := Today;
     end;
 
     trigger OnModify()

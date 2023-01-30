@@ -1,17 +1,20 @@
-page 50104 "Menu Card"
+page 50303 MyPage
 {
-    PageType = Card;
-    Caption = 'Menu Card';
+    PageType = List;
+    Caption = 'Menu List';
     ApplicationArea = All;
     UsageCategory = Administration;
     SourceTable = "Menu Header";
-    RefreshOnActivate = true;
+    CardPageId = "Menu Card";
+    Editable = false;
+
     layout
     {
         area(Content)
         {
-            group(GroupName)
+            repeater(Control001)
             {
+
                 field("Menu ID"; Rec."Menu ID")
                 {
                     ToolTip = 'Specifies the value of the Menu ID field.';
@@ -30,12 +33,13 @@ page 50104 "Menu Card"
                     ToolTip = 'Specifies the value of the Creation ID field.';
                     Editable = false;
                 }
+                field(SystemCreatedAt; Rec.SystemCreatedAt)
+                {
+                    ToolTip = 'Specifies the value of the SystemCreatedAt field.';
+                    Editable = false;
+                }
 
-            }
-            part(Lines; "Menu Line Subform")
-            {
-                ApplicationArea = Basic, Suite;
-                SubPageLink = "Menu ID" = field("Menu ID");
+
 
             }
         }
