@@ -44,6 +44,63 @@ table 50302 "Posted Payment Lines"
             Caption = 'Posted';
             Editable = false;
         }
+        field(8; "Card Type"; Text[20])
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Card Type';
+        }
+        field(9; "Owner Name"; Text[20])
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Owner Name';
+        }
+        field(10; "Credit Card No. Last 4 digit"; Integer)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Owner Name';
+
+        }
+        field(11; "Card Expiry Date"; Date)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Card Expiry Date';
+        }
+        field(12; "Approval Code"; Code[10])
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Approval Code';
+        }
+        field(13; "Approval Date"; Date)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Approval Date';
+        }
+        field(14; "DO Number"; Code[20])
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'DO Number';
+        }
+        field(15; "Subvention by Dealer"; Text[20])
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Subvention by Dealer';
+        }
+        field(16; "MFR Sub. to be born by Dealer"; Text[20])
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'MFR Subvention Borne to be born by Dealer';
+        }
+        field(17; "Deliver Order Copy Upload"; Code[20])
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Deliver Order Copy Upload';
+        }
+        field(18; "Cheque No 6 Digit"; Integer)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Cheque No 6 Digit';
+
+        }
     }
 
     keys
