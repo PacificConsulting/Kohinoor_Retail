@@ -19,6 +19,10 @@ pageextension 50302 "Posted Sales invoice Retail" extends "Posted Sales Invoice"
                 ApplicationArea = all;
                 Editable = false;
             }
+            field("Store No."; Rec."Store No.")
+            {
+                ApplicationArea = all;
+            }
         }
     }
 

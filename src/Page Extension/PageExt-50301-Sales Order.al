@@ -19,6 +19,10 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                 ApplicationArea = all;
                 Editable = false;
             }
+            field("Store No."; Rec."Store No.")
+            {
+                ApplicationArea = all;
+            }
         }
     }
 
