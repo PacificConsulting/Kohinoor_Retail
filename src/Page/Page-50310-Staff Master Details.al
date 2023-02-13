@@ -1,4 +1,4 @@
-page 50309 "Staff Master Details"
+page 50310 "Staff Master Details"
 {
     ApplicationArea = All;
     Caption = 'Staff Master Details';

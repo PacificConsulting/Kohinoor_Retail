@@ -1,15 +1,15 @@
-page 50308 "Tender Declartion API"
+page 50308 "Tender Declartion API Hdr"
 {
     APIGroup = 'TenderGroup';
     APIPublisher = 'Pacific';
     APIVersion = 'v5.0';
     ApplicationArea = All;
-    Caption = 'tenderDeclartionAPI';
+    Caption = 'TenderDeclartionAPIHdr';
     DelayedInsert = true;
-    EntityName = 'TenderDeclartion';
-    EntitySetName = 'TenderDeclartions';
+    EntityName = 'TenderDeclartionHdr';
+    EntitySetName = 'TenderDeclartionHdrs';
     PageType = API;
-    SourceTable = "Tender Declartion";
+    SourceTable = "Tender Declartion Header";
     ODataKeyFields = SystemId;
 
     layout
@@ -30,14 +30,7 @@ page 50308 "Tender Declartion API"
                 {
                     Caption = 'Store Date';
                 }
-                field(paymentMethodCode; Rec."Payment Method code")
-                {
-                    Caption = 'Payment Method code';
-                }
-                field(amount; Rec.Amount)
-                {
-                    Caption = 'Amount';
-                }
+
             }
         }
     }

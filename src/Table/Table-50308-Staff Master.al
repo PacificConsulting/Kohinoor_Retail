@@ -1,39 +1,34 @@
-table 50306 "Tender Declartion"
+table 50308 "Staff Master"
 {
     DataClassification = ToBeClassified;
-    Caption = 'Tender Declartion';
 
     fields
     {
-        field(1; "Store No."; Code[20])
+        field(1; ID; Code[10])
         {
             DataClassification = ToBeClassified;
-            Caption = 'Store No.';
-
         }
-        field(2; "Store Date"; Date)
+        field(2; Name; Text[30])
         {
             DataClassification = ToBeClassified;
-            Caption = 'Store Date';
-
         }
-        field(3; "Payment Method code"; Code[20])
+        field(3; "E-Mail"; Text[20])
         {
             DataClassification = ToBeClassified;
-            Caption = 'Payment Method code';
-
         }
-        field(4; Amount; Decimal)
+        field(4; "Store No."; Code[20])
         {
             DataClassification = ToBeClassified;
-            Caption = 'Amount';
-
+        }
+        field(5; "Phone No."; Integer)
+        {
+            DataClassification = ToBeClassified;
         }
     }
 
     keys
     {
-        key(Key1; "Store No.")
+        key(Key1; ID)
         {
             Clustered = true;
         }
