@@ -20,7 +20,7 @@ table 50307 "Tender Declartion Line "
             Caption = 'Staff ID';
             TableRelation = "Staff Master".ID;
         }
-        field(4; "Line No."; code[10])
+        field(4; "Line No."; Integer)
         {
             DataClassification = ToBeClassified;
             Caption = 'Line No.';
@@ -30,6 +30,7 @@ table 50307 "Tender Declartion Line "
         {
             DataClassification = ToBeClassified;
             Caption = 'Payment Method code';
+            TableRelation = "Payment Method".Code;
         }
         field(6; Amount; Decimal)
         {

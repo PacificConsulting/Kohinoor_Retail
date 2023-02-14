@@ -24,32 +24,34 @@ table 50306 "Tender Declartion Header"
             DataClassification = ToBeClassified;
             Caption = 'Staff ID';
             TableRelation = "Staff Master".ID;
-            trigger OnValidate()
-            var
-                StaffMaster: Record "Staff Master";
-                TenderHdr: Record "Tender Declartion Header";
-                PagetenderCard: page "Tender Declartion Card";
-            begin
-                IF StaffMaster.Get("Staff ID") then begin
-                    TenderHdr.SetRange("Staff ID", StaffMaster.ID);
-                    TenderHdr.SetRange("Store No.", StaffMaster."Store No.");
-                    TenderHdr.SetRange("Store Date", Today);
-                    IF not TenderHdr.FindFirst() then begin
-                        "Store No." := StaffMaster."Store No.";
-                        "Store Date" := Today;
-                        Rec.Modify();
-                    end else begin
-                        TenderHdr.SetRange("Staff ID", StaffMaster.ID);
-                        TenderHdr.SetRange("Store No.", StaffMaster."Store No.");
-                        TenderHdr.SetRange("Store Date", Today);
-                        IF TenderHdr.FindFirst() then begin
-                            PagetenderCard.SetTableView(TenderHdr);
-                            PagetenderCard.Run();
-                        end;
+            // trigger OnValidate()
+            // var
+            //     StaffMaster: Record "Staff Master";
+            //     TenderHdr: Record "Tender Declartion Header";
+            //     PagetenderCard: page "Tender Declartion Card";
+            // begin
+            //     IF StaffMaster.Get("Staff ID") then begin
+            //         TenderHdr.SetRange("Staff ID", StaffMaster.ID);
+            //         TenderHdr.SetRange("Store No.", StaffMaster."Store No.");
+            //         TenderHdr.SetRange("Store Date", Today);
+            //         IF not TenderHdr.FindFirst() then begin
+            //             "Store No." := StaffMaster."Store No.";
+            //             "Store Date" := Today;
+            //         end else begin
+            //             TenderHdr.SetRange("Staff ID", StaffMaster.ID);
+            //             TenderHdr.SetRange("Store No.", StaffMaster."Store No.");
+            //             TenderHdr.SetRange("Store Date", Today);
+            //             IF TenderHdr.FindFirst() then begin
+            //                 PagetenderCard.SetTableView(TenderHdr);
+            //                 PagetenderCard.Run();
+            //                 Rec.Delete();
+            //                 PagetenderCard.SetTableView(rec);
+            //                 PagetenderCard.Close();
+            //             end;
 
-                    end;
-                end;
-            end;
+            // end;
+            //end;
+            // end;
         }
 
     }

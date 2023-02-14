@@ -20,9 +20,19 @@ table 50308 "Staff Master"
         {
             DataClassification = ToBeClassified;
         }
-        field(5; "Phone No."; Integer)
+        field(5; "Phone No."; Text[30])
         {
             DataClassification = ToBeClassified;
+            // trigger OnValidate()
+            // var
+            //     Char: DotNet Char;
+            //     i: Integer;
+            //     PhoneNoCannotContainLettersErr: Label 'must not contain letters';
+            // begin
+            //     for i := 1 to StrLen("Phone No.") do
+            //         if Char.IsLetter("Phone No."[i]) then
+            //             FieldError("Phone No.", PhoneNoCannotContainLettersErr);
+            // end;
         }
     }
 

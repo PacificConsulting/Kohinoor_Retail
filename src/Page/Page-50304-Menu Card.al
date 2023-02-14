@@ -30,7 +30,6 @@ page 50304 "Menu Card"
                     ToolTip = 'Specifies the value of the Creation ID field.';
                     Editable = false;
                 }
-
             }
             part(Lines; "Menu Line Subform")
             {
@@ -38,6 +37,7 @@ page 50304 "Menu Card"
                 SubPageLink = "Menu ID" = field("Menu ID");
 
             }
+
         }
     }
 

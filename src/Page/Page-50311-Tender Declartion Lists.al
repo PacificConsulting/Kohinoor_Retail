@@ -1,15 +1,19 @@
-page 50312 "Tender Declartion Card"
+page 50311 "Tender Declartion Lists"
 {
     ApplicationArea = All;
-    Caption = 'Tender Declartion Card';
-    PageType = Card;
+    Caption = 'Tendor Declartion Lists';
+    PageType = List;
     SourceTable = "Tender Declartion Header";
+    UsageCategory = Lists;
+    CardPageId = "Tender Declartion Card";
+    InsertAllowed = false;
+
 
     layout
     {
         area(content)
         {
-            group(General)
+            repeater(General)
             {
                 field("Staff ID"; Rec."Staff ID")
                 {
@@ -23,19 +27,28 @@ page 50312 "Tender Declartion Card"
                 {
                     ToolTip = 'Specifies the value of the Store Date field.';
                 }
-                field(SystemCreatedBy; Rec.SystemCreatedBy)
-                {
-                    ToolTip = 'Specifies the value of the SystemCreatedBy field.';
-                }
+
                 field(SystemCreatedAt; Rec.SystemCreatedAt)
                 {
                     ToolTip = 'Specifies the value of the SystemCreatedAt field.';
                 }
-                part(Lines; "Tender Declartion Subform")
-                {
-                    ApplicationArea = all;
-                    SubPageLink = "Staff ID" = field("Staff ID"), "Store No." = field("Store No."), "Store Date" = field("Store Date");
-                }
+            }
+        }
+    }
+    actions
+    {
+        area(Processing)
+        {
+            action("Tender Creation")
+            {
+                ApplicationArea = all;
+                trigger OnAction()
+                var
+                    TDC: page "Tender Declartion Creation";
+                begin
+                    TDC.Run();
+                end;
+
             }
         }
     }

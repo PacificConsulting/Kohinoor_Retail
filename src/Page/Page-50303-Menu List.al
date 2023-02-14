@@ -1,4 +1,4 @@
-page 50303 MyPage
+page 50303 "Menu List"
 {
     PageType = List;
     Caption = 'Menu List';
