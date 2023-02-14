@@ -42,6 +42,10 @@ page 50311 "Tender Declartion Lists"
             action("Tender Creation")
             {
                 ApplicationArea = all;
+                Promoted = true;
+                PromotedIsBig = true;
+                PromotedCategory = Process;
+                Image = Create;
                 trigger OnAction()
                 var
                     TDC: page "Tender Declartion Creation";
