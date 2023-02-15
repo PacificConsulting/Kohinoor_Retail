@@ -25,6 +25,7 @@ table 50301 "Payment Lines"
             var
                 PayMeth: Record "Payment Method";
             begin
+                TestField("Payment Method Code");
                 IF PayMeth.Get(Rec."Payment Method Code") then begin
                     Description := PayMeth.Description;
                 end;

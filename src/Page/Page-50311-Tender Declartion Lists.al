@@ -7,6 +7,7 @@ page 50311 "Tender Declartion Lists"
     UsageCategory = Lists;
     CardPageId = "Tender Declartion Card";
     InsertAllowed = false;
+    ModifyAllowed = false;
 
 
     layout
