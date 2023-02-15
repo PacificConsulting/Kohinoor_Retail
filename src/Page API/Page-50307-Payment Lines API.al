@@ -67,10 +67,10 @@ page 50307 "Payment Lines API"
                 {
                     Caption = 'Document Type';
                 }
-                field(lineNo; Rec."Line No.")
-                {
-                    Caption = 'Line No.';
-                }
+                // field(lineNo; Rec."Line No.")
+                // {
+                //     Caption = 'Line No.';
+                // }
                 field(mfrSubToBeBornByDealer; Rec."MFR Sub. to be born by Dealer")
                 {
                     Caption = 'MFR Subvention Borne to be born by Dealer';

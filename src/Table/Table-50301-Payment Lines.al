@@ -11,7 +11,7 @@ table 50301 "Payment Lines"
         field(2; "Document No."; Code[20])
         {
             Caption = 'Document No.';
-            TableRelation = "Sales Header"."No." WHERE("Document Type" = FIELD("Document Type"));
+            // TableRelation = "Sales Header"."No." WHERE("Document Type" = FIELD("Document Type"));
         }
         field(3; "Line No."; Integer)
         {
@@ -144,8 +144,15 @@ table 50301 "Payment Lines"
         myInt: Integer;
 
     trigger OnInsert()
+    var
+        PL: record "Payment Lines";
     begin
-
+        PL.reset;
+        PL.SETRANGE("Document No.", "Document No.");
+        IF PL.findlast then
+            "Line No." := PL."Line No." + 10000
+        else
+            "Line No." := 10000;
     end;
 
     trigger OnModify()
