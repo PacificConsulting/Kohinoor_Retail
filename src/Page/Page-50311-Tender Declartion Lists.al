@@ -10,6 +10,7 @@ page 50311 "Tender Declartion Lists"
     ModifyAllowed = false;
 
 
+
     layout
     {
         area(content)
