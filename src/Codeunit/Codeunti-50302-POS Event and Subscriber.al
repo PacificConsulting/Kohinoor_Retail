@@ -6,22 +6,22 @@ codeunit 50302 "POS Event and Subscriber"
 
     end;
 
-    procedure POSAction("Document No.": Code[20]; "Line No.": integer; POSAction: Text[10]; Parameter: text[10])
+    procedure POSAction(DocumentNo: Code[20]; LineNo: integer; POSAction: Text[10]; Parameter: text[10])
     var
         myInt: Integer;
         POSProcedure: Codeunit 50303;
     begin
         case POSAction of
             'VOIDL':
-                POSProcedure.SalesLineDeletion("Document No.", "Line No.");
+                POSProcedure.SalesLineDeletion(DocumentNo, LineNo);
             'VOIDT':
-                POSProcedure.SalesOrderDeletion("Document No.");
+                POSProcedure.SalesOrderDeletion(DocumentNo);
             'VOIDP':
-                POSProcedure.PaymentLineDeletion("Document No.", "Line No.");
+                POSProcedure.PaymentLineDeletion(DocumentNo, LineNo);
             'INVDISC':
                 POSProcedure.InvoiceLine();
             'LINEDISC':
-                POSProcedure.LineDiscount("Document No.", "Line No.", Parameter);
+                POSProcedure.LineDiscount(DocumentNo, LineNo, Parameter);
             'SHIPLINE':
                 POSProcedure.ShipLine();
             'INVLINE':
