@@ -19,17 +19,17 @@ codeunit 50302 "POS Event and Subscriber"
             'VOIDP':
                 POSProcedure."Payment Line Deletion"("Document No.", "Line No.");
             'INVDISC':
-                Message('Hi1');
+                Message('Apply Invoice Discount on Sales Order');
             'LINEDISC':
-                Message('Hi2');
+                POSProcedure."Apply Line Discount"("Document No.", "Line No.", Parameter);
             'SHIPLINE':
-                Message('Hi3');
+                Message('Post Shipment for a specific order Line / TO Line');
             'INVLINE':
-                Message('Hi3');
+                Message('Post ship & Invoice for a specific Order line');
             'RECEIPT':
-                Message('Hi3');
+                Message('Receive GRN or Transfer Receipt');
             'DELDET':
-                Message('Hi3');
+                Message('Adding delivery details like delivery method on Sales Order');
 
 
 

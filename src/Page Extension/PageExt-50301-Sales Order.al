@@ -9,7 +9,7 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                 ApplicationArea = Basic, Suite;
                 SubPageLink = "Document No." = FIELD("No.");
                 UpdatePropagation = Both;
-                Editable = IsPaymentLineeditable;
+                Editable = True;//IsPaymentLineeditable; Temp code comment after that we can remove 
             }
         }
         addafter(Status)
@@ -235,6 +235,7 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                 GenJourLine.Comment := 'Auto Post';
                 GenJourLine.Insert(true);
             Until PaymentLine.Next() = 0;
+
         // IF CODEUNIT.RUN(CODEUNIT::"Gen. Jnl.-Post", GenJourLine) then begin
         //     PaymentLine.Reset();
         //     PaymentLine.SetRange("Document Type", Rec."Document Type");
