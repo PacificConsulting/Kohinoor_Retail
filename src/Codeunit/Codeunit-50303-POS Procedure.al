@@ -5,7 +5,10 @@ codeunit 50303 "POS Procedure"
 
     end;
 
-    procedure "Sales Line Deletion"("Document No.": Code[20]; "Line No.": Integer)
+    /// <summary>
+    /// Sales Line Deletion
+    /// </summary>
+    procedure SalesLineDeletion("Document No.": Code[20]; "Line No.": Integer)
     var
 
         SalesLineDel: Record "Sales Line";
@@ -27,7 +30,11 @@ codeunit 50303 "POS Procedure"
 
     end;
 
-    procedure "Sales Order Deletion"(DocumentNo: Code[20])
+
+    /// <summary>
+    /// Sales Order Deletion with all its child table
+    /// </summary>
+    procedure SalesOrderDeletion(DocumentNo: Code[20])
     var
         SalesHeaderDelete: Record 36;
     begin
@@ -39,7 +46,11 @@ codeunit 50303 "POS Procedure"
         Message('Sales Order No. %1 delete Successfully...', DocumentNo);
     end;
 
-    procedure "Payment Line Deletion"(DocumentNo: Code[20]; LineNo: Integer)
+
+    /// <summary>
+    /// Delete payment line
+    /// </summary>
+    procedure PaymentLineDeletion(DocumentNo: Code[20]; LineNo: Integer)
     var
         PayLineDelete: Record "Payment Lines";
     begin
@@ -52,14 +63,18 @@ codeunit 50303 "POS Procedure"
         end;
     end;
 
-    procedure "Apply Line Discount"(DocumentNo: Code[20]; LineNo: Integer; LineDocuntpara: Text)
+
+    /// <summary>
+    /// Apply Line Discount
+    /// </summary>
+    procedure LineDiscount(DocumentNo: Code[20]; LineNo: Integer; LineDocumentpara: Text)
     var
         SaleHeaderDisc: Record "Sales Header";
         SalesLineDisc: Record "Sales Line";
         LineDicountDecimal: Decimal;
     begin
         Clear(LineDicountDecimal);
-        Evaluate(LineDicountDecimal, LineDocuntpara);
+        Evaluate(LineDicountDecimal, LineDocumentpara);
         SaleHeaderDisc.Reset();
         SaleHeaderDisc.SetRange("No.", DocumentNo);
         SaleHeaderDisc.SetRange(Status, SaleHeaderDisc.Status::Open);
@@ -73,6 +88,58 @@ codeunit 50303 "POS Procedure"
             end
         end else
             Error('Please repone sales order %1 status before apply discount.', SaleHeaderDisc."No.");
+    end;
+
+
+    /// <summary>
+    /// Apply Invoice Discount on Sales Order
+    /// </summary>
+    procedure InvoiceDiscount()
+    var
+
+    begin
+
+    end;
+
+
+    /// <summary>
+    /// Post Shipment for a specific order Line / TO Line
+    /// </summary>
+    procedure ShipLine()
+    var
+        myInt: Integer;
+    begin
+
+    end;
+
+
+    /// <summary>
+    /// Post ship and Invoice for a specific Order line
+    /// </summary>
+    procedure InvoiceLine()
+    var
+        myInt: Integer;
+    begin
+
+    end;
+
+    /// <summary>
+    /// Receive GRN or Transfer Receipt
+    /// </summary>
+    procedure ItemReceipt()
+    var
+        myInt: Integer;
+    begin
+
+    end;
+
+    /// <summary>
+    /// Adding delivery details like delivery method on Sales Order
+    /// </summary>
+    procedure DeliveryDetails()
+    var
+        myInt: Integer;
+    begin
 
     end;
 }

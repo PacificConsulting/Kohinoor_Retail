@@ -4,7 +4,7 @@ codeunit 50301 "Event and Subscribers"
     begin
 
     end;
-
+    //START**********************************Codeunit-80***************************************
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnAfterSalesInvLineInsert', '', false, false)]
     local procedure OnAfterSalesInvLineInsert(var SalesInvLine: Record "Sales Invoice Line"; SalesInvHeader: Record "Sales Invoice Header"; SalesLine: Record "Sales Line"; ItemLedgShptEntryNo: Integer; WhseShip: Boolean; WhseReceive: Boolean; CommitIsSuppressed: Boolean; var SalesHeader: Record "Sales Header"; var TempItemChargeAssgntSales: Record "Item Charge Assignment (Sales)" temporary; var TempWhseShptHeader: Record "Warehouse Shipment Header" temporary; var TempWhseRcptHeader: Record "Warehouse Receipt Header" temporary; PreviewMode: Boolean)
     var
@@ -24,7 +24,7 @@ codeunit 50301 "Event and Subscribers"
             DeletePayemntLines(SalesHeader, PaymentLine);
         end;
     end;
-
+    //END**********************************Codeunit-80***************************************
     local procedure DeletePayemntLines(salesHeaderRec: record "Sales Header"; RecPaymentLine: Record "Payment Lines")
     var
         myInt: Integer;
