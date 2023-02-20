@@ -24,7 +24,23 @@ codeunit 50301 "Event and Subscribers"
             DeletePayemntLines(SalesHeader, PaymentLine);
         end;
     end;
+    //********below given code for auto ship all order for POS**************
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnBeforePostSalesLines', '', false, false)]
+    local procedure OnBeforePostSalesLines(var SalesHeader: Record "Sales Header"; var TempSalesLineGlobal: Record "Sales Line" temporary; var TempVATAmountLine: Record "VAT Amount Line" temporary; var EverythingInvoiced: Boolean)
+    begin
+        IF SalesHeader."Store No." <> '' then
+            SalesHeader.Ship := true;
+    end;
     //END**********************************Codeunit-80***************************************
+
+
+    //START**********************************Codeunit-5704***************************************
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"TransferOrder-Post Shipment", 'OnBeforeTransferOrderPostShipment', '', false, false)]
+    local procedure OnBeforeTransferOrderPostShipment(var TransferHeader: Record "Transfer Header"; var CommitIsSuppressed: Boolean)
+    begin
+
+    end;
+    //END**********************************Codeunit-5704***************************************
     local procedure DeletePayemntLines(salesHeaderRec: record "Sales Header"; RecPaymentLine: Record "Payment Lines")
     var
     begin
@@ -34,6 +50,7 @@ codeunit 50301 "Event and Subscribers"
         if RecPaymentLine.FindFirst() then
             RecPaymentLine.DeleteAll();
     end;
+
 
     // [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnRunOnBeforeCheckTotalInvoiceAmount', '', false, false)]
     // local procedure OnRunOnBeforeCheckTotalInvoiceAmount(var SalesHeader: Record "Sales Header")

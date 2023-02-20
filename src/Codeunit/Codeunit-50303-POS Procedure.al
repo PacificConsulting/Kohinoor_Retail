@@ -117,7 +117,8 @@ codeunit 50303 "POS Procedure"
         SalesLineShip: Record "Sales Line";
         TransferHeaderShip: record "Transfer Header";
         TransferlineShip: Record "Transfer Line";
-        "Salespost(Y/N)": codeunit 50304;
+        Salespost: codeunit 80;
+        Transpostship: Codeunit "TransferOrder-Post Shipment";
     begin
         Clear(InputData);
         Evaluate(ShiptoQty, InputData);
@@ -137,7 +138,7 @@ codeunit 50303 "POS Procedure"
                 SalesLineShip.Modify(true);
                 SaleHeaderShip.Status := SaleHeaderShip.Status::Released;
                 SaleHeaderShip.Modify(true);
-                "Salespost(Y/N)".Run(SaleHeaderShip);
+                Salespost.Run(SaleHeaderShip);
             end
         end else begin
             TransferHeaderShip.Reset();
@@ -154,6 +155,9 @@ codeunit 50303 "POS Procedure"
                 IF TransferlineShip.FindFirst() then begin
                     TransferlineShip.Validate("Qty. to Ship", ShiptoQty);
                     TransferlineShip.Modify(true);
+                    TransferHeaderShip.Status := TransferHeaderShip.Status::Released;
+                    TransferHeaderShip.Modify(true);
+                    Transpostship.Run(TransferHeaderShip);
                 end;
             end;
 
