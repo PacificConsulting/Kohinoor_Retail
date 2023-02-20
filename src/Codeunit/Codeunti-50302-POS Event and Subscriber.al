@@ -6,7 +6,7 @@ codeunit 50302 "POS Event and Subscriber"
 
     end;
 
-    procedure POSAction(DocumentNo: Code[20]; LineNo: integer; POSAction: Text[10]; Parameter: text[10])
+    procedure POSAction(DocumentNo: Code[20]; LineNo: integer; POSAction: Text[10]; Parameter: text[10]; Input: Text[10])
     var
         myInt: Integer;
         POSProcedure: Codeunit 50303;
@@ -21,19 +21,15 @@ codeunit 50302 "POS Event and Subscriber"
             'INVDISC':
                 POSProcedure.InvoiceLine();
             'LINEDISC':
-                POSProcedure.LineDiscount(DocumentNo, LineNo, Parameter);
+                POSProcedure.LineDiscount(DocumentNo, LineNo, Input);
             'SHIPLINE':
-                POSProcedure.ShipLine();
+                POSProcedure.ShipLine(DocumentNo, LineNo, Input);
             'INVLINE':
                 POSProcedure.InvoiceLine();
             'RECEIPT':
                 POSProcedure.ItemReceipt();
             'DELDET':
-                POSProcedure.DeliveryDetails();
-
-
-
-
+                POSProcedure.DeliveryDetails(DocumentNo, Input);
         end;
     end;
 

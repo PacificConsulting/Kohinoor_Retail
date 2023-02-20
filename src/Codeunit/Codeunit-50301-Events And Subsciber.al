@@ -27,7 +27,6 @@ codeunit 50301 "Event and Subscribers"
     //END**********************************Codeunit-80***************************************
     local procedure DeletePayemntLines(salesHeaderRec: record "Sales Header"; RecPaymentLine: Record "Payment Lines")
     var
-        myInt: Integer;
     begin
         RecPaymentLine.Reset();
         RecPaymentLine.SetRange("Document Type", salesHeaderRec."Document Type");
