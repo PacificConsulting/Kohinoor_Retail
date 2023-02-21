@@ -288,8 +288,7 @@ codeunit 50303 "POS Procedure"
         SalesCalcDiscountByType: Codeunit "Sales - Calc Discount By Type";
         DocumentTotals: Codeunit "Document Totals";
     begin
-        // if SuppressTotals then
-        //     exit;
+
 
         SalesHeader.Get(DocumentType, DocumentNo);
         if SalesHeader.InvoicedLineExists() then

@@ -42,6 +42,21 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                 Rec.Modify();
             end;
         }
+        // addlast("&Order Confirmation")
+        // {
+        //     action(InvoiceDiscount)
+        //     {
+        //         ApplicationArea = all;
+        //         Image = PostedPayment;
+        //         Caption = 'Invoice Discount ALL SO';
+        //         Promoted = true;
+        //         PromotedIsBig = true;
+        //         trigger OnAction()
+        //         begin
+        //             InvoiceDiscountAmountSO(rec."Document Type", rec."No.", 1000);
+        //         end;
+        //     }
+        // }
         addafter(Post)
         {
             action("Payment Post")
@@ -248,6 +263,9 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
         //         Until PaymentLine.Next() = 0;
         // end;
     end;
+
+
+
 
     trigger OnAfterGetRecord()
     begin
