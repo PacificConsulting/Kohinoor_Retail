@@ -99,11 +99,21 @@ codeunit 50303 "POS Procedure"
     /// <summary>
     /// Apply Invoice Discount on Sales Order
     /// </summary>
-    procedure InvoiceDiscount()
+    procedure InvoiceDiscount(DocumentNo: Code[20]; InputData: Text)
     var
-
+        SalesHeaderDisc: Record "Sales Header";
+        SalesStatDisc: Page "Sales Order Statistics";
+        DiscAmt: Decimal;
+        SalesLineDisc: Record "Sales Line";
     begin
-
+        Clear(DiscAmt);
+        Evaluate(DiscAmt, InputData);
+        SalesHeaderDisc.Reset();
+        SalesHeaderDisc.SetRange("No.", DocumentNo);
+        SalesHeaderDisc.SetRange(Status, SalesHeaderDisc.Status::Open);
+        IF SalesHeaderDisc.FindFirst() then begin
+            InvoiceDiscountAmountSO(SalesHeaderDisc."Document Type", SalesHeaderDisc."No.", DiscAmt);
+        end;
     end;
 
 
@@ -169,20 +179,87 @@ codeunit 50303 "POS Procedure"
     /// <summary>
     /// Post ship and Invoice for a specific Order line
     /// </summary>
-    procedure InvoiceLine()
+    procedure InvoiceLine(DocumentNo: Code[20]; LineNo: Integer; InputData: Text)
     var
-        myInt: Integer;
+        SaleHeaderInv: Record "Sales Header";
+        SaleLinerInv: Record "Sales Line";
+        ShipInvtoQty: Decimal;
+        Salespost: codeunit 80;
     begin
-
+        Clear(InputData);
+        Evaluate(ShipInvtoQty, InputData);
+        SaleHeaderInv.Reset();
+        SaleHeaderInv.SetRange("No.", DocumentNo);
+        IF SaleHeaderInv.FindFirst() then begin
+            IF SaleHeaderInv.Status = SaleHeaderInv.Status::Released then begin
+                SaleHeaderInv.Status := SaleHeaderInv.Status::Open;
+                SaleHeaderInv.Modify(true);
+            end;
+            SaleLinerInv.Reset();
+            SaleLinerInv.SetRange("Document No.", SaleHeaderInv."No.");
+            SaleLinerInv.SetRange("Line No.", LineNo);
+            IF SaleLinerInv.FindFirst() then begin
+                SaleLinerInv.validate("Qty. to Ship", ShipInvtoQty);
+                SaleLinerInv.Modify(true);
+                SaleHeaderInv.Status := SaleHeaderInv.Status::Released;
+                SaleHeaderInv.Modify(true);
+                Salespost.Run(SaleHeaderInv);
+            end
+        end;
     end;
 
     /// <summary>
     /// Receive GRN or Transfer Receipt
     /// </summary>
-    procedure ItemReceipt()
+    procedure ItemReceipt(DocumentNo: Code[20]; LineNo: Integer; InputData: Text)
     var
-        myInt: Integer;
+        PurchHeader: Record 38;
+        PurchLine: Record 39;
+        QtyToReceive: Decimal;
+        TransferHeader: record "Transfer Header";
+        Transferline: Record "Transfer Line";
+
     begin
+        Clear(InputData);
+        Evaluate(QtyToReceive, InputData);
+        PurchHeader.Reset();
+        PurchHeader.SetRange("No.", DocumentNo);
+        IF PurchHeader.FindFirst() then begin
+            IF PurchHeader.Status = PurchHeader.Status::Released then begin
+                PurchHeader.Status := PurchHeader.Status::Open;
+                PurchHeader.Modify(true);
+            end;
+            PurchLine.Reset();
+            PurchLine.SetRange("Document No.", PurchHeader."No.");
+            PurchLine.SetRange("Line No.", LineNo);
+            IF PurchLine.FindFirst() then begin
+                PurchLine.validate("Qty. to Receive", QtyToReceive);
+                PurchLine.Modify(true);
+                PurchHeader.Status := PurchHeader.Status::Released;
+                PurchHeader.Modify(true);
+                // Salespost.Run(SaleHeaderShip);
+            end
+        end else begin
+            TransferHeader.Reset();
+            TransferHeader.SetRange("No.", DocumentNo);
+            IF TransferHeader.FindFirst() then begin
+                IF TransferHeader.Status = TransferHeader.Status::Released then begin
+                    TransferHeader.Status := TransferHeader.Status::Open;
+                    TransferHeader.Modify(true);
+                end;
+                Transferline.Reset();
+                Transferline.SetRange("Document No.", TransferHeader."No.");
+                Transferline.SetRange("Line No.", LineNo);
+                IF Transferline.FindFirst() then begin
+                    Transferline.Validate("Qty. to Receive", QtyToReceive);
+                    Transferline.Modify(true);
+                    TransferHeader.Status := TransferHeader.Status::Released;
+                    TransferHeader.Modify(true);
+                    // Transpostship.Run(TransferHeaderShip);
+                end;
+            end;
+
+        end;
 
     end;
 
@@ -200,6 +277,28 @@ codeunit 50303 "POS Procedure"
             SalesHeder.Validate("Transport Method", InputData);
             SalesHeder.Modify();
         end;
+    end;
+
+
+    Local procedure InvoiceDiscountAmountSO(DocumentType: enum "Sales Document Type"; DocumentNo: Code[20]; InvoiceDiscountAmount: decimal)
+    var
+        SalesHeader: Record "Sales Header";
+        ConfirmManagement: Codeunit "Confirm Management";
+        UpdateInvDiscountQst: Label 'One or more lines have been invoiced. The discount distributed to invoiced lines will not be taken into account.\\Do you want to update the invoice discount?';
+        SalesCalcDiscountByType: Codeunit "Sales - Calc Discount By Type";
+        DocumentTotals: Codeunit "Document Totals";
+    begin
+        // if SuppressTotals then
+        //     exit;
+
+        SalesHeader.Get(DocumentType, DocumentNo);
+        if SalesHeader.InvoicedLineExists() then
+            if not ConfirmManagement.GetResponseOrDefault(UpdateInvDiscountQst, true) then
+                exit;
+
+        SalesCalcDiscountByType.ApplyInvDiscBasedOnAmt(InvoiceDiscountAmount, SalesHeader);
+        DocumentTotals.SalesDocTotalsNotUpToDate();
+
     end;
 
 

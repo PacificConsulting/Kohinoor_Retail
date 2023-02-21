@@ -19,15 +19,15 @@ codeunit 50302 "POS Event and Subscriber"
             'VOIDP':
                 POSProcedure.PaymentLineDeletion(DocumentNo, LineNo);
             'INVDISC':
-                POSProcedure.InvoiceLine();
+                POSProcedure.InvoiceDiscount(DocumentNo, Input);
             'LINEDISC':
                 POSProcedure.LineDiscount(DocumentNo, LineNo, Input);
             'SHIPLINE':
                 POSProcedure.ShipLine(DocumentNo, LineNo, Input);
             'INVLINE':
-                POSProcedure.InvoiceLine();
+                POSProcedure.InvoiceLine(DocumentNo, LineNo, Input);
             'RECEIPT':
-                POSProcedure.ItemReceipt();
+                POSProcedure.ItemReceipt(DocumentNo, LineNo, Input);
             'DELDET':
                 POSProcedure.DeliveryDetails(DocumentNo, Input);
         end;
