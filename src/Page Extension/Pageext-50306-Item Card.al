@@ -69,7 +69,7 @@ pageextension 50306 "ItemCArdExtension" extends "Item Card"
         content: HttpContent;
     begin
         contentHeaders := client.DefaultRequestHeaders();
-        contentHeaders.Add('Authorization', 'Bearer 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');
+        contentHeaders.Add('Authorization', 'Bearer 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');
 
         content.WriteFrom(_queryObj);
         content.GetHeaders(ContentHeaders);

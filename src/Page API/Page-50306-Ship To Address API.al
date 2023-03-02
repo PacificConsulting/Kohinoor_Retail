@@ -11,6 +11,7 @@ page 50306 "Ship To Address API"
     PageType = API;
     SourceTable = "Ship-to Address";
     ODataKeyFields = systemId;
+    //
 
     layout
     {

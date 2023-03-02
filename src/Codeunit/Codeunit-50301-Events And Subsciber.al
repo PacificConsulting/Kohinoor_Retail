@@ -24,12 +24,14 @@ codeunit 50301 "Event and Subscribers"
             DeletePayemntLines(SalesHeader, PaymentLine);
         end;
     end;
-    //********below given code for auto ship all order for POS**************
+    //********below given code for auto ship all order for POS*****************************
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnBeforePostSalesLines', '', false, false)]
     local procedure OnBeforePostSalesLines(var SalesHeader: Record "Sales Header"; var TempSalesLineGlobal: Record "Sales Line" temporary; var TempVATAmountLine: Record "VAT Amount Line" temporary; var EverythingInvoiced: Boolean)
     begin
-        IF SalesHeader."Store No." <> '' then
+        IF SalesHeader."Store No." <> '' then begin
             SalesHeader.Ship := true;
+            SalesHeader.Invoice := false;
+        end
     end;
     //END**********************************Codeunit-80***************************************
 
