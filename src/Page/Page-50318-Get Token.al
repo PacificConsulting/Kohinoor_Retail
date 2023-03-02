@@ -193,11 +193,22 @@ page 50318 "Get Token"
                 var
                     Rediract: Text;
                     ResoURL: Text;
+                    Client: HttpClient;
+                    JsonTokenResult: Text;
+                    Response: HttpResponseMessage;
+                    content: HttpContent;
+                    ResponseTxt: Text;
+                    J: JsonObject;
+                    AccessTokenNew: Text;
                 begin
 
                     OAuth2.AcquireTokenWithClientCredentials(ClientId, ClientSecret, MicrosoftOAuth2Url, Rediract, 'https://api.businesscentral.dynamics.com', AccessToken);
                     //OAuth2.AcquireTokenWithClientCredentials(ClientId, ClientSecret, MicrosoftOAuth2Url, RedirectURL, ResourceURL, AccessToken);
-                    Message('Access %1', AccessToken);
+                    //Message('Access %1', AccessToken);
+
+                    AccessTokenNew := GetTokenFun('https://api.businesscentral.dynamics.com', ClientId, ClientSecret);
+                    Message('Access %1', AccessTokenNew);
+
                 end;
             }
         }
@@ -362,5 +373,30 @@ page 50318 "Get Token"
         AuthorityAfterTenant := CopyStr(Authority, TenantEndPos);
         if (TenantStartPos > 0) and (TenantEndPos > 0) then
             exit(CopyStr(Authority, 1, TenantStartPos - 1) + AadTenantId + AuthorityAfterTenant)
+    end;
+
+    local procedure GetTokenFun(Url: Text; client_id: Text; client_secret: Text) myToken: Text
+    var
+        MyHttpResponseMessage: HttpResponseMessage;
+        MyHttpClient: HttpClient;
+        myHttpHeaders: HttpHeaders;
+        myContent: Text;
+        myResponse: Text;
+        MyhttpContent: HttpContent;
+    begin
+        Url += strsubstno('?client_id=%1&client_secret=%2&response_type=code&state=%3', client_id, client_secret, CreateGuid());
+
+        myHttpHeaders := MyHttpClient.DefaultRequestHeaders();
+        myHttpHeaders.Add('accept', 'application/json');
+        myHttpHeaders.Add('charset', 'UTF-8');
+        MyhttpContent.WriteFrom(myContent);
+        MyhttpContent.GetHeaders(myHttpHeaders);
+        if myHttpHeaders.Contains('Content-Type') then
+            myHttpHeaders.Remove('Content-Type');
+        myHttpHeaders.Add('Content-Type', 'application/x-www-form-urlencoded');
+
+        MyHttpClient.Get(Url, MyHttpResponseMessage);
+        myHttpResponseMessage.Content().ReadAs(myResponse);
+        // you have to read myResponse as Json and obtain de token from it and save to myToken
     end;
 }
