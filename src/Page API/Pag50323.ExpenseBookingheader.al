@@ -1,15 +1,15 @@
-page 50308 "Tender Declartion API Hdr"
+page 50323 "Expense Booking header"
 {
-    APIGroup = 'TenderGroupHdr';
+    APIGroup = 'ExpBookGroup';
     APIPublisher = 'Pacific';
-    APIVersion = 'v5.0';
+    APIVersion = 'v13.0';
     ApplicationArea = All;
-    Caption = 'TenderDeclartionAPIHdr';
+    Caption = 'expenseBookingHeader';
     DelayedInsert = true;
-    EntityName = 'TenderDeclartionHdr';
-    EntitySetName = 'TenderDeclartionHdrs';
+    EntityName = 'ExpenseBookingHeader';
+    EntitySetName = 'ExpenseBookingHeaders';
     PageType = API;
-    SourceTable = "Tender Declartion Header";
+    SourceTable = "Expense Booking Header";
     ODataKeyFields = SystemId;
 
     layout
@@ -22,15 +22,22 @@ page 50308 "Tender Declartion API Hdr"
                 {
                     Caption = 'SystemId';
                 }
+                field(staffID; Rec."Staff ID")
+                {
+                    Caption = 'Staff ID';
+                }
                 field(storeNo; Rec."Store No.")
                 {
                     Caption = 'Store No.';
                 }
-                field(storeDate; Rec."Store Date")
+                field("date"; Rec."Date")
                 {
                     Caption = 'Store Date';
                 }
-
+                field(status; Rec.Status)
+                {
+                    Caption = 'Status';
+                }
             }
         }
     }
