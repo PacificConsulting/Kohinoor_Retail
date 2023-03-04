@@ -205,7 +205,7 @@ page 50319 "Test OAuth2"
         SetResultStyle1();
     end;
 
-    local procedure GetAccessTokenForBC()
+    procedure GetAccessTokenForBC()
     var
         PromptInteraction: Enum "Prompt Interaction";
         AuthCodeError: Text;

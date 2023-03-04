@@ -8,7 +8,7 @@ codeunit 50303 "POS Procedure"
     /// <summary>
     /// Sales Line Deletion
     /// </summary>
-    procedure SalesLineDeletion("Document No.": Code[20]; "Line No.": Integer)
+    procedure SalesLineDeletion("Document No.": Code[20]; "Line No.": Integer): Text
     var
 
         SalesLineDel: Record "Sales Line";
@@ -28,6 +28,7 @@ codeunit 50303 "POS Procedure"
         end else
             Error('Please repone sales order %1 status before the delete the Line.', SalesHeder."No.");
 
+        exit('Success');
     end;
 
 

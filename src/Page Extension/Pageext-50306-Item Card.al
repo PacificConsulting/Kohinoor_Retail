@@ -17,17 +17,23 @@ pageextension 50306 "ItemCArdExtension" extends "Item Card"
                     ApplicationArea = All;
 
                     trigger OnAction();
+                    var
+                        POSProcedure: Codeunit 50302;
+                        Result: text;
                     begin
+                        result := POSProcedure.POSAction('123', 1000, 'VOIDL', 'Test', 'API');
+                        Message(Result);
+
                         //Clear(APIManagment);
-                        Base64text := CreateImgOpenAI(Rec.Description);
+                        // Base64text := CreateImgOpenAI(Rec.Description);
 
-                        TempBlob.CreateOutStream(outstream);
-                        base64convert.FromBase64(Base64text, outstream);
-                        TempBlob.CreateInStream(InStream);
+                        // TempBlob.CreateOutStream(outstream);
+                        // base64convert.FromBase64(Base64text, outstream);
+                        // TempBlob.CreateInStream(InStream);
 
-                        Clear(rec.Picture);
-                        Rec.Picture.ImportStream(instream, '');
-                        Rec.Modify()
+                        // Clear(rec.Picture);
+                        // Rec.Picture.ImportStream(instream, '');
+                        // Rec.Modify()
 
                     end;
                 }
