@@ -6,85 +6,27 @@ codeunit 50302 "POS Event and Subscriber"
 
     end;
 
-    procedure POSActionEx(DocumentNo: Text; LineNo: integer; POSAction: Text; Parameter: Text; Input: Text): Text
-    var
-        POSProcedure: Codeunit 50303;
-    begin
-        case POSAction of
-            'VOIDL':
-                exit('Request received for document No' + DocumentNo);
-            //POSProcedure.SalesLineDeletion(DocumentNo, LineNo);
-            'VOIDT':
-                POSProcedure.SalesOrderDeletion(DocumentNo);
-            'VOIDP':
-                POSProcedure.PaymentLineDeletion(DocumentNo, LineNo);
-            'INVDISC':
-                POSProcedure.InvoiceDiscount(DocumentNo, Input);
-            'LINEDISC':
-                POSProcedure.LineDiscount(DocumentNo, LineNo, Input);
-            'SHIPLINE':
-                POSProcedure.ShipLine(DocumentNo, LineNo, Input);
-            'INVLINE':
-                POSProcedure.InvoiceLine(DocumentNo, LineNo, Input);
-            'RECEIPT':
-                POSProcedure.ItemReceipt(DocumentNo, LineNo, Input);
-            'DELDET':
-                POSProcedure.DeliveryDetails(DocumentNo, Input);
-        end;
-        exit('Request received for document No' + DocumentNo);
-    end;
-
-    // procedure Ping(): Text
-    // begin
-    //     exit('Pong');
-    // end;
-
-    // procedure Addition(number1: Integer; number2: Integer): Integer
-    // begin
-    //     exit(number1 + number2);
-    // end;
-
-    // procedure GetJsonData(A: Integer; B: Integer) ReturnValue: Text
-    // var
-    //     Jobj: JsonObject;
-    // begin
-
-    //     JObj.Add('A', A);
-    //     JObj.Add('B', B);
-    //     Jobj.Add('Sum', A + B);
-    //     Jobj.WriteTo(ReturnValue);
-    //     exit(ReturnValue);
-    // end;
-
-    // procedure Capitalize(input: Text): Text
-    // begin
-    //     exit(input.ToUpper);
-    // end;
-
-    procedure POSEvent(documentno: text; linno: Integer; posaction: text; parameter: Text; input: Text): Text
-    begin
-        exit('Request received for document No' + documentno);
-    end;
 
     procedure POSAction(documentno: text; lineno: Integer; posaction: text; parameter: Text; input: Text): Text
     var
         POSProcedure: Codeunit 50303;
-        PageVar: Page 50319;
+        IsResult: Text;
     begin
         case posaction of
             'VOIDL':
                 begin
-                    ClientId := Constants.GetClientId();
-                    ClientSecret := Constants.GetClientSecret();
-                    RedirectURL := Constants.GetRedirectURL();
-                    AadTenantId := Constants.GetAadTenantId();
-                    ApiGraph := Constants.GetApiGraphMe();
-                    ApiListCompanies := Constants.GetApiListCompanies();
-                    OAuthAuthorityUrl := Constants.GetOAuthAuthorityUrl();
-                    GetAccessTokenForBC();
+                    AccessToken();
+                    /*
+                    IsResult := POSProcedure.SalesLineDeletion(documentno, lineno);
+                    IF IsResult = 'Success' then
+                        exit('Success')
+                    Else
+                        if IsResult = 'Failed' then
+                            exit('Failed');
+                            */
+
                     exit('Request received for document No:-' + documentno);
                 end;
-            //POSProcedure.SalesLineDeletion(DocumentNo, LineNo);
             'VOIDT':
                 POSProcedure.SalesOrderDeletion(documentno);
             'VOIDP':
@@ -104,6 +46,56 @@ codeunit 50302 "POS Event and Subscriber"
         end;
     end;
 
+    // procedure POSActionEx(DocumentNo: Text; LineNo: integer; POSAction: Text; Parameter: Text; Input: Text): Text
+    // var
+    //     POSProcedure: Codeunit 50303;
+    // begin
+    //     case POSAction of
+    //         'VOIDL':
+    //             exit('Request received for document No' + DocumentNo);
+    //         //POSProcedure.SalesLineDeletion(DocumentNo, LineNo);
+    //         'VOIDT':
+    //             POSProcedure.SalesOrderDeletion(DocumentNo);
+    //         'VOIDP':
+    //             POSProcedure.PaymentLineDeletion(DocumentNo, LineNo);
+    //         'INVDISC':
+    //             POSProcedure.InvoiceDiscount(DocumentNo, Input);
+    //         'LINEDISC':
+    //             POSProcedure.LineDiscount(DocumentNo, LineNo, Input);
+    //         'SHIPLINE':
+    //             POSProcedure.ShipLine(DocumentNo, LineNo, Input);
+    //         'INVLINE':
+    //             POSProcedure.InvoiceLine(DocumentNo, LineNo, Input);
+    //         'RECEIPT':
+    //             POSProcedure.ItemReceipt(DocumentNo, LineNo, Input);
+    //         'DELDET':
+    //             POSProcedure.DeliveryDetails(DocumentNo, Input);
+    //     end;
+    //     exit('Request received for document No' + DocumentNo);
+    // end;
+
+    // procedure Ping(): Text
+    // begin
+    //     exit('Pong');
+    // end;
+
+    // procedure Addition(number1: Integer; number2: Integer): Integer
+    // begin
+    //     exit(number1 + number2);
+    // end;
+
+
+    // procedure Capitalize(input: Text): Text
+    // begin
+    //     exit(input.ToUpper);
+    // end;
+
+    procedure POSEvent(documentno: text; linno: Integer; posaction: text; parameter: Text; input: Text): Text
+    begin
+        exit('Request received for document No' + documentno);
+    end;
+
+
     procedure GetAccessTokenForBC()
     var
         PromptInteraction: Enum "Prompt Interaction";
@@ -119,13 +111,13 @@ codeunit 50302 "POS Event and Subscriber"
         OAuthAuthorityUrl,
         Scopes,
         AccessTokenForBC);
-        //IF CompanyName = 'CRONUS IN' then begin
+
         GLSetup.get();
         IF AccessTokenForBC <> '' then begin
             GLSetup."Access Token" := AccessTokenForBC;
             GLSetup.Modify();
         end;
-        // end;
+
 
         if AccessTokenForBC = '' then
             OAuth2.AcquireTokenByAuthorizationCode(
@@ -140,9 +132,23 @@ codeunit 50302 "POS Event and Subscriber"
 
     end;
 
+    local procedure AccessToken()
     var
-        GenericApiCalls: Codeunit GenericApiCalls;
-        Constants: Codeunit Constants;
+        myInt: Integer;
+    begin
+        ClientId := Constants.GetClientId();
+        ClientSecret := Constants.GetClientSecret();
+        RedirectURL := Constants.GetRedirectURL();
+        AadTenantId := Constants.GetAadTenantId();
+        ApiGraph := Constants.GetApiGraphMe();
+        ApiListCompanies := Constants.GetApiListCompanies();
+        OAuthAuthorityUrl := Constants.GetOAuthAuthorityUrl();
+        GetAccessTokenForBC();
+    end;
+
+    var
+        //GenericApiCalls: Codeunit GenericApiCalls;
+        Constants: Codeunit "Access Token API";
         OAuth2: Codeunit Oauth2;
         AadTenantId, APICallResponse, ClientId, ClientSecret : Text;
         AccessTokenForBC, AccessTokenForGraph, AuthError, ErrorMessage, OAuthAuthorityUrl, RedirectURL : text;

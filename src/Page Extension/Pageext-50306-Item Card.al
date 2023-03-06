@@ -21,19 +21,19 @@ pageextension 50306 "ItemCArdExtension" extends "Item Card"
                         POSProcedure: Codeunit 50302;
                         Result: text;
                     begin
-                        result := POSProcedure.POSAction('123', 1000, 'VOIDL', 'Test', 'API');
-                        Message(Result);
+                        //   result := POSProcedure.POSAction('123', 1000, 'VOIDL', 'Test', 'API');
+                        // Message(Result);
 
-                        //Clear(APIManagment);
-                        // Base64text := CreateImgOpenAI(Rec.Description);
+                        //  Clear(APIManagment);
+                        Base64text := CreateImgOpenAI(Rec.Description);
 
-                        // TempBlob.CreateOutStream(outstream);
-                        // base64convert.FromBase64(Base64text, outstream);
-                        // TempBlob.CreateInStream(InStream);
+                        TempBlob.CreateOutStream(outstream);
+                        base64convert.FromBase64(Base64text, outstream);
+                        TempBlob.CreateInStream(InStream);
 
-                        // Clear(rec.Picture);
-                        // Rec.Picture.ImportStream(instream, '');
-                        // Rec.Modify()
+                        Clear(rec.Picture);
+                        Rec.Picture.ImportStream(instream, '');
+                        Rec.Modify()
 
                     end;
                 }
@@ -96,7 +96,7 @@ pageextension 50306 "ItemCArdExtension" extends "Item Card"
     end;
 
     var
-        //APIManagment: Codeunit APiMgtOpenAI;
+        //  APIManagment: Codeunit APiMgtOpenAI;
         FromText: Text;
         Base64text: Text;
         base64convert: codeunit "Base64 Convert";

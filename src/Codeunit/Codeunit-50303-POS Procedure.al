@@ -8,6 +8,8 @@ codeunit 50303 "POS Procedure"
     /// <summary>
     /// Sales Line Deletion
     /// </summary>
+    /// 
+
     procedure SalesLineDeletion("Document No.": Code[20]; "Line No.": Integer): Text
     var
 
@@ -24,18 +26,20 @@ codeunit 50303 "POS Procedure"
             IF SalesLineDel.FindFirst() then begin
                 SalesLineDel.Delete(true);
                 Message('Line deleted successfully......');
+                exit('Success');
             end
         end else
             Error('Please repone sales order %1 status before the delete the Line.', SalesHeder."No.");
+        exit('Failed');
 
-        exit('Success');
     end;
+
 
 
     /// <summary>
     /// Sales Order Deletion with all its child table
     /// </summary>
-    procedure SalesOrderDeletion(DocumentNo: Code[20])
+    procedure SalesOrderDeletion(DocumentNo: Code[20]): Text
     var
         SalesHeaderDelete: Record 36;
         PaymentLineDelete: record "Payment Lines";
@@ -46,17 +50,19 @@ codeunit 50303 "POS Procedure"
             SalesHeaderDelete.DeleteAll(true);
         PaymentLineDelete.reset();
         PaymentLineDelete.SetRange("Document No.", DocumentNo);
-        IF PaymentLineDelete.FindFirst() then
+        IF PaymentLineDelete.FindFirst() then begin
             PaymentLineDelete.DeleteAll();
+            Message('Sales Order No. %1 delete Successfully...', DocumentNo);
+        end;
+        exit('Failed');
 
-        Message('Sales Order No. %1 delete Successfully...', DocumentNo);
     end;
 
 
     /// <summary>
     /// Delete payment line
     /// </summary>
-    procedure PaymentLineDeletion(DocumentNo: Code[20]; LineNo: Integer)
+    procedure PaymentLineDeletion(DocumentNo: Code[20]; LineNo: Integer): Text
     var
         PayLineDelete: Record "Payment Lines";
     begin
@@ -66,14 +72,16 @@ codeunit 50303 "POS Procedure"
         if PayLineDelete.FindFirst() then begin
             PayLineDelete.Delete();
             Message('Given payment line deleted successfully...');
+            exit('Success');
         end;
+        exit('Failed');
     end;
 
 
     /// <summary>
     /// Apply Line Discount
     /// </summary>
-    procedure LineDiscount(DocumentNo: Code[20]; LineNo: Integer; LineDocumentpara: Text)
+    procedure LineDiscount(DocumentNo: Code[20]; LineNo: Integer; LineDocumentpara: Text): Text
     var
         SaleHeaderDisc: Record "Sales Header";
         SalesLineDisc: Record "Sales Line";
@@ -91,6 +99,7 @@ codeunit 50303 "POS Procedure"
             IF SalesLineDisc.FindFirst() then begin
                 SalesLineDisc.validate("Line Discount %", LineDicountDecimal);
                 SalesLineDisc.Modify(true);
+                exit('Success');
             end
         end else
             Error('Please repone sales order %1 status before apply the discount.', SaleHeaderDisc."No.");
@@ -100,7 +109,7 @@ codeunit 50303 "POS Procedure"
     /// <summary>
     /// Apply Invoice Discount on Sales Order
     /// </summary>
-    procedure InvoiceDiscount(DocumentNo: Code[20]; InputData: Text)
+    procedure InvoiceDiscount(DocumentNo: Code[20]; InputData: Text): Text
     var
         SalesHeaderDisc: Record "Sales Header";
         SalesStatDisc: Page "Sales Order Statistics";
@@ -114,14 +123,16 @@ codeunit 50303 "POS Procedure"
         SalesHeaderDisc.SetRange(Status, SalesHeaderDisc.Status::Open);
         IF SalesHeaderDisc.FindFirst() then begin
             InvoiceDiscountAmountSO(SalesHeaderDisc."Document Type", SalesHeaderDisc."No.", DiscAmt);
+            exit('Success');
         end;
+        exit('Failed');
     end;
 
 
     /// <summary>
     /// Post Shipment for a specific order Line / TO Line
     /// </summary>
-    procedure ShipLine(DocumentNo: Code[20]; LineNo: Integer; InputData: Text)
+    procedure ShipLine(DocumentNo: Code[20]; LineNo: Integer; InputData: Text): text
     var
         SaleHeaderShip: Record "Sales Header";
         ShiptoQty: Decimal;
@@ -150,6 +161,7 @@ codeunit 50303 "POS Procedure"
                 SaleHeaderShip.Status := SaleHeaderShip.Status::Released;
                 SaleHeaderShip.Modify(true);
                 Salespost.Run(SaleHeaderShip);
+                exit('Success');
             end
         end else begin
             TransferHeaderShip.Reset();
@@ -169,6 +181,7 @@ codeunit 50303 "POS Procedure"
                     TransferHeaderShip.Status := TransferHeaderShip.Status::Released;
                     TransferHeaderShip.Modify(true);
                     Transpostship.Run(TransferHeaderShip);
+                    exit('Success');
                 end;
             end;
 
@@ -180,7 +193,7 @@ codeunit 50303 "POS Procedure"
     /// <summary>
     /// Post ship and Invoice for a specific Order line
     /// </summary>
-    procedure InvoiceLine(DocumentNo: Code[20]; LineNo: Integer; InputData: Text)
+    procedure InvoiceLine(DocumentNo: Code[20]; LineNo: Integer; InputData: Text): text
     var
         SaleHeaderInv: Record "Sales Header";
         SaleLinerInv: Record "Sales Line";
@@ -205,6 +218,7 @@ codeunit 50303 "POS Procedure"
                 SaleHeaderInv.Status := SaleHeaderInv.Status::Released;
                 SaleHeaderInv.Modify(true);
                 Salespost.Run(SaleHeaderInv);
+                exit('Success');
             end
         end;
     end;
@@ -212,7 +226,7 @@ codeunit 50303 "POS Procedure"
     /// <summary>
     /// Receive GRN or Transfer Receipt
     /// </summary>
-    procedure ItemReceipt(DocumentNo: Code[20]; LineNo: Integer; InputData: Text)
+    procedure ItemReceipt(DocumentNo: Code[20]; LineNo: Integer; InputData: Text): text
     var
         PurchHeader: Record 38;
         PurchLine: Record 39;
@@ -239,6 +253,7 @@ codeunit 50303 "POS Procedure"
                 PurchHeader.Status := PurchHeader.Status::Released;
                 PurchHeader.Modify(true);
                 // Salespost.Run(SaleHeaderShip);
+                exit('Success');
             end
         end else begin
             TransferHeader.Reset();
@@ -257,6 +272,7 @@ codeunit 50303 "POS Procedure"
                     TransferHeader.Status := TransferHeader.Status::Released;
                     TransferHeader.Modify(true);
                     // Transpostship.Run(TransferHeaderShip);
+                    exit('Success');
                 end;
             end;
 
@@ -267,7 +283,7 @@ codeunit 50303 "POS Procedure"
     /// <summary>
     /// Adding delivery details like delivery method on Sales Order
     /// </summary>
-    procedure DeliveryDetails(DocumentNo: Code[20]; InputData: Text)
+    procedure DeliveryDetails(DocumentNo: Code[20]; InputData: Text): text
     var
         SalesHeder: Record "Sales Header";
     begin
@@ -277,6 +293,7 @@ codeunit 50303 "POS Procedure"
         IF SalesHeder.FindFirst() then begin
             SalesHeder.Validate("Transport Method", InputData);
             SalesHeder.Modify();
+            exit('Success');
         end;
     end;
 
@@ -300,6 +317,7 @@ codeunit 50303 "POS Procedure"
         DocumentTotals.SalesDocTotalsNotUpToDate();
 
     end;
+
 
 
 }

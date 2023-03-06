@@ -289,7 +289,7 @@ page 50319 "Test OAuth2"
 
     var
         GenericApiCalls: Codeunit GenericApiCalls;
-        Constants: Codeunit Constants;
+        Constants: Codeunit "Access Token API";
         OAuth2: Codeunit Oauth2;
         AadTenantId, APICallResponse, ClientId, ClientSecret : Text;
         AccessTokenForBC, AccessTokenForGraph, AuthError, ErrorMessage, OAuthAuthorityUrl, RedirectURL : text;

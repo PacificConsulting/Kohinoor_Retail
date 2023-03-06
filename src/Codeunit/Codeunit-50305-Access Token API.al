@@ -1,4 +1,4 @@
-codeunit 50305 Constants
+codeunit 50305 "Access Token API"
 {
     trigger OnRun()
     begin
