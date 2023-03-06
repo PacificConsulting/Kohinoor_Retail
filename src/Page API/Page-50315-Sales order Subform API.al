@@ -11,6 +11,7 @@ page 50315 "Sales Order Subform API"
     PageType = API;
     SourceTable = "Sales Line";
     ODataKeyFields = SystemId;
+    SourceTableView = WHERE(Type = FILTER(Item | "G/L Account"));
 
     layout
     {
@@ -63,6 +64,10 @@ page 50315 "Sales Order Subform API"
                 field(gstGroupCode; Rec."GST Group Code")
                 {
                     Caption = 'GST Group Code';
+                }
+                field(StoreNo; Rec."Store No.")
+                {
+                    Caption = 'Store No.';
                 }
                 field(systemId; Rec.SystemId)
                 {

@@ -91,8 +91,11 @@ codeunit 50303 "POS Procedure"
         Evaluate(LineDicountDecimal, LineDocumentpara);
         SaleHeaderDisc.Reset();
         SaleHeaderDisc.SetRange("No.", DocumentNo);
-        SaleHeaderDisc.SetRange(Status, SaleHeaderDisc.Status::Open);
         IF SaleHeaderDisc.FindFirst() then begin
+            IF SaleHeaderDisc.Status = SaleHeaderDisc.Status::Released then begin
+                SaleHeaderDisc.Status := SaleHeaderDisc.Status::Open;
+                SaleHeaderDisc.Modify(true);
+            end;
             SalesLineDisc.Reset();
             SalesLineDisc.SetRange("Document No.", SaleHeaderDisc."No.");
             SalesLineDisc.SetRange("Line No.", LineNo);
@@ -100,9 +103,9 @@ codeunit 50303 "POS Procedure"
                 SalesLineDisc.validate("Line Discount %", LineDicountDecimal);
                 SalesLineDisc.Modify(true);
                 exit('Success');
-            end
-        end else
-            Error('Please repone sales order %1 status before apply the discount.', SaleHeaderDisc."No.");
+            end;
+
+        end;
     end;
 
 
@@ -294,6 +297,38 @@ codeunit 50303 "POS Procedure"
             SalesHeder.Validate("Transport Method", InputData);
             SalesHeder.Modify();
             exit('Success');
+        end;
+    end;
+
+    /// <summary>
+    /// Update the Unit Price Sales Line
+    /// </summary>
+    procedure ChangeUnitPrice(DocumentNo: Code[20]; LineNo: Integer; LineDocumentpara: Text): Text
+    var
+        SaleHeaderUnitPrice: Record 36;
+        SalesLineunitPrice: Record 37;
+        NewUnitPrice: Decimal;
+
+    begin
+        Clear(NewUnitPrice);
+        Evaluate(NewUnitPrice, LineDocumentpara);
+        SaleHeaderUnitPrice.Reset();
+        SaleHeaderUnitPrice.SetRange("No.", DocumentNo);
+        IF SaleHeaderUnitPrice.FindFirst() then begin
+            IF SaleHeaderUnitPrice.Status = SaleHeaderUnitPrice.Status::Released then begin
+                SaleHeaderUnitPrice.Status := SaleHeaderUnitPrice.Status::Open;
+                SaleHeaderUnitPrice.Modify(true);
+            end;
+            SalesLineunitPrice.Reset();
+            SalesLineunitPrice.SetRange("Document No.", SaleHeaderUnitPrice."No.");
+            SalesLineunitPrice.SetRange("Line No.", LineNo);
+            IF SalesLineunitPrice.FindFirst() then begin
+                //<< New Condtion add after with kunal Discussion to Send for Approval befor Modification Unit Price
+                SalesLineunitPrice.validate("Unit Price", NewUnitPrice);
+                SalesLineunitPrice.Modify(true);
+                exit('Success');
+            end;
+
         end;
     end;
 

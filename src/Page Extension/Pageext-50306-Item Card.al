@@ -20,11 +20,48 @@ pageextension 50306 "ItemCArdExtension" extends "Item Card"
                     var
                         POSProcedure: Codeunit 50302;
                         Result: text;
+                        Recref: RecordRef;
+                        recCust: Record 18;
+                        TempBlob: Codeunit "Temp Blob";
+                        OutStr: OutStream;
+                        Instr: InStream;
+                        VResult: text;
+                        FileManagement_lCdu: Codeunit "File Management";
+                        B64: Codeunit "Base64 Convert";
                     begin
+                        Recref.GetTable(recCust);
+                        TempBlob.CreateOutStream(OutStr);
+                        Report.SaveAs(Report::"Customer - List", '', ReportFormat::Pdf, OutStr, Recref);
+                        TempBlob.CreateInStream(InStr);
+                        // FileManagement_lCdu.BLOBExport(TempBlob, STRSUBSTNO('Proforma_%1.Pdf', recCust."No."), TRUE);
+                        VResult := B64.ToBase64(Instr);
+                        SendToFlow('Test.PDF', VResult);
+                        // recCust.get(10000);
+                        // //CustReport.Run();
+                        // // Report.Run(101, false, false, recCust);
+                        // // VResult := 'F:\txtfile\';
+                        // // UploadIntoStream('Upload Data', '', '', VResult, Instr);
+                        // VResult := 'All Files (*.*)|*.*';
+                        // UploadIntoStream(VResult, Instr);
+                        //DownloadFromCloud();
+
+
+                        // Result := 'C:\temp\test.pdf';
+                        Recref.GetTable(recCust);
+                        TempBlob.CreateOutStream(OutStr);
+                        Report.SaveAs(Report::"Customer - List", '', ReportFormat::Pdf, OutStr, Recref);
+                        TempBlob.CreateInStream(InStr);
+                        FileManagement_lCdu.BLOBExport(TempBlob, STRSUBSTNO('Proforma_%1.Pdf', recCust."No."), TRUE);
+
+
+                        // //DownloadFromStream(Instr, '', '', '', Vresult);
+
+
                         //   result := POSProcedure.POSAction('123', 1000, 'VOIDL', 'Test', 'API');
                         // Message(Result);
 
                         //  Clear(APIManagment);
+                        /*
                         Base64text := CreateImgOpenAI(Rec.Description);
 
                         TempBlob.CreateOutStream(outstream);
@@ -34,7 +71,7 @@ pageextension 50306 "ItemCArdExtension" extends "Item Card"
                         Clear(rec.Picture);
                         Rec.Picture.ImportStream(instream, '');
                         Rec.Modify()
-
+                        */
                     end;
                 }
             }
@@ -95,13 +132,69 @@ pageextension 50306 "ItemCArdExtension" extends "Item Card"
 
     end;
 
+    procedure DownloadFromCloud()
+    var
+        Data: BigText;
+        ins: InStream;
+        outs: OutStream;
+        // TempBLOB: codeunit "Temp Blob";
+        filename: Text;
+        PDFStream: OutStream;
+        FileManagement: Codeunit "File Management"; // Set the report ID
+    begin
+        // Recref.GetTable(recCust);
+        // TempBlob.CreateOutStream(OutStr);
+        // Report.SaveAs(Report::"Customer - List", '', ReportFormat::Pdf, OutStr, Recref);
+        // OutStr.WriteText('F:\txtfile\', 1024);
+        // Data.AddText('Hello World');
+        // TempBLOB.CreateOutStream(outs);
+        // Data.Write(outs);
+        // TempBLOB.CreateInStream(ins);
+        // filename := 'F:\txtfile\helloworld.txt';
+        // DownloadFromStream(
+        // ins,  // InStream to save
+        //            '',   // Not used in cloud
+        //            '',   // Not used in cloud
+        //            '',   // Not used in cloud
+        //            filename); // Filename is browser download folder
+
+
+    end;
+
+    procedure SendToFlow(FileName: Text; Base64: Text)
+
+    Var
+        client: HttpClient;
+        cont: HttpContent;
+        header: HttpHeaders;
+        response: HttpResponseMessage;
+        Jobject: JsonObject;
+        tmpString: Text;
+        token: Text;
+        URL: text;
+    Begin
+        URL := 'https://prod-10.centralindia.logic.azure.com:443/workflows/61d67d3d2bad418da1ec35829b069cc9/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2IZf8emoLdAqkFGTiP0GnQoxVJty9MKGdstex5v7dqs';
+        Jobject.Add('ApiToken', 'testapi');
+        Jobject.Add('Document', Base64);
+        Jobject.Add('FileName', FileName);
+        Jobject.WriteTo(tmpString);
+        cont.WriteFrom(tmpString);
+        cont.ReadAs(tmpString);
+        cont.GetHeaders(header);
+        header.Remove('Content-Type');
+        header.Add('Content-Type', 'application/json');
+
+        client.Post(URL, cont, response);
+
+    end;
+
     var
         //  APIManagment: Codeunit APiMgtOpenAI;
         FromText: Text;
         Base64text: Text;
-        base64convert: codeunit "Base64 Convert";
+        //       base64convert: codeunit "Base64 Convert";
         newItem: Record Item;
-        TempBlob: Codeunit "Temp Blob";
+        //     TempBlob: Codeunit "Temp Blob";
         outstream: OutStream;
         instream: InStream;
 }

@@ -24,8 +24,13 @@ codeunit 50302 "POS Event and Subscriber"
                         if IsResult = 'Failed' then
                             exit('Failed');
                             */
+                    //Recref.GetTable(recCust);
+                    // TempBlob.CreateOutStream(OutStr);
+                    // Report.SaveAs(Report::"Customer - List", '', ReportFormat::Pdf, OutStr, Recref);
+                    // OutStr.WriteText('F:\txtfile\', 1024);
+                     exit('Request received for document No:-' + documentno);
 
-                    exit('Request received for document No:-' + documentno);
+
                 end;
             'VOIDT':
                 POSProcedure.SalesOrderDeletion(documentno);
@@ -43,6 +48,8 @@ codeunit 50302 "POS Event and Subscriber"
                 POSProcedure.ItemReceipt(documentno, lineno, input);
             'DELDET':
                 POSProcedure.DeliveryDetails(documentno, input);
+            'CUPSL':
+                POSProcedure.ChangeUnitPrice(documentno, lineno, input);
         end;
     end;
 
@@ -91,9 +98,30 @@ codeunit 50302 "POS Event and Subscriber"
     // end;
 
     procedure POSEvent(documentno: text; linno: Integer; posaction: text; parameter: Text; input: Text): Text
+    var
+        Recref: RecordRef;
+        recCust: Record 18;
+        TempBlob: Codeunit "Temp Blob";
+        OutStr: OutStream;
+        Instr: InStream;
+        FileManagement_lCdu: Codeunit "File Management";
+        NewStr: text;
     begin
-        exit('Request received for document No' + documentno);
+        // Recref.GetTable(recCust);
+        // TempBlob.CreateOutStream(OutStr);
+        // Report.SaveAs(Report::"Customer - List", '', ReportFormat::Pdf, OutStr, Recref);
+        // TempBlob.CreateInStream(InStr);
+        // FileManagement_lCdu.BLOBExport(TempBlob, STRSUBSTNO('Proforma_%1.Pdf', recCust."No."), TRUE);
+        // // exit('PC Request received for document No' + documentno);
+        // Evaluate(NewStr, FORMAT(OutStr));
+
+        // exit(NewStr);
+        recCust.get(10000);
+        //CustReport.Run();
+        Report.Run(101, false, false, recCust);
+
     end;
+
 
 
     procedure GetAccessTokenForBC()
@@ -163,6 +191,14 @@ codeunit 50302 "POS Event and Subscriber"
         ClientSecretTxt: Label 'gOr8Q~UysVp6fIKqdedP4i1k1gnoDGGhKV-5TcAR', Locked = true;
         OAuthAuthorityUrlLabel: Label 'https://login.microsoftonline.com/', Locked = true;
         RedirectURLText: Label 'https://businesscentral.dynamics.com/OAuthLanding.htm', Locked = true;
+
+        Recref: RecordRef;
+        recCust: Record 18;
+        TempBlob: Codeunit "Temp Blob";
+        OutStr: OutStream;
+        Instr: InStream;
+        CustReport: Report "Customer - List";
+
 
 
 
