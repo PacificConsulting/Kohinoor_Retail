@@ -34,6 +34,11 @@ page 50328 "Menu Line API"
                 {
                     Caption = 'Name';
                 }
+                field(MenuName; Rec."Menu Name")
+                {
+                    Caption = 'Menu Name';
+                }
+
                 field(description; Rec.Description)
                 {
                     Caption = 'Description';
@@ -45,6 +50,10 @@ page 50328 "Menu Line API"
                 field(parameter; Rec.Parameter)
                 {
                     Caption = 'Parameter';
+                }
+                field(IsVisible; Rec."Is Visible")
+                {
+                    Caption = 'Is Visible';
                 }
             }
         }

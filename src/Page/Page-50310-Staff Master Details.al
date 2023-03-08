@@ -32,6 +32,10 @@ page 50310 "Staff Master Details"
                 {
                     ToolTip = 'Specifies the value of the Store No. field.';
                 }
+                field("POS User ID"; Rec."POS User ID")
+                {
+                    ToolTip = 'Specifies the value of the POS User ID field.';
+                }
                 field(SystemCreatedAt; Rec.SystemCreatedAt)
                 {
                     ToolTip = 'Specifies the value of the SystemCreatedAt field.';

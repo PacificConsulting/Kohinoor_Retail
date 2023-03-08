@@ -28,7 +28,7 @@ codeunit 50302 "POS Event and Subscriber"
                     // TempBlob.CreateOutStream(OutStr);
                     // Report.SaveAs(Report::"Customer - List", '', ReportFormat::Pdf, OutStr, Recref);
                     // OutStr.WriteText('F:\txtfile\', 1024);
-                     exit('Request received for document No:-' + documentno);
+                    exit('Request received for document No:-' + documentno);
 
 
                 end;

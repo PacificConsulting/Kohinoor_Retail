@@ -28,6 +28,16 @@ page 50305 "Menu Line Subform"
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Name field.';
                 }
+
+                field("Menu Name 1"; Rec."Menu Name")
+                {
+                    ApplicationArea = all;
+                }
+                field(IsVisible; Rec."Is Visible")
+                {
+                    Caption = 'Is Visible';
+                    ApplicationArea = all;
+                }
                 field(Description; Rec.Description)
                 {
                     ApplicationArea = All;

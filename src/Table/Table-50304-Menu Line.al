@@ -17,10 +17,21 @@ table 50304 "Menu Line"
         field(3; Name; Text[30])
         {
             DataClassification = ToBeClassified;
+            trigger OnValidate()
+            var
+                MH: Record "Menu Header";
+            begin
+                MH.Reset();
+                MH.SetRange("Menu ID", "Menu ID");
+                IF MH.FindFirst() then begin
+                    "Menu Name" := MH."Menu Name";
+                end;
+            end;
         }
         field(4; Description; Text[100])
         {
             DataClassification = ToBeClassified;
+
         }
         field(5; Action; Code[20])
         {
@@ -31,6 +42,16 @@ table 50304 "Menu Line"
         {
             DataClassification = ToBeClassified;
         }
+        field(7; "Menu Name"; Text[50])
+        {
+            DataClassification = ToBeClassified;
+        }
+        field(8; "Is Visible"; Boolean)
+        {
+            DataClassification = ToBeClassified;
+
+        }
+
     }
 
     keys
