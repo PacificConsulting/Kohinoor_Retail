@@ -16,13 +16,13 @@ codeunit 50302 "POS Event and Subscriber"
             'VOIDL':
                 begin
                     // AccessToken();
-
+                    Clear(IsResult);
                     IsResult := POSProcedure.SalesLineDeletion(documentno, lineno);
                     IF IsResult = 'Success' then
                         exit('Success')
                     Else
                         if IsResult = 'Failed' then
-                            exit('Failed');
+                            exit('Given order No. does not exist.');
 
 
                     //Recref.GetTable(recCust);
@@ -34,23 +34,88 @@ codeunit 50302 "POS Event and Subscriber"
 
                 end;
             'VOIDT':
-                POSProcedure.SalesOrderDeletion(documentno);
+                begin
+                    Clear(IsResult);
+                    IsResult := POSProcedure.SalesOrderDeletion(documentno);
+                    IF IsResult = 'Success' then
+                        exit('Success')
+                    Else
+                        if IsResult = 'Failed' then
+                            exit('Failed');
+                end;
             'VOIDP':
-                POSProcedure.PaymentLineDeletion(documentno, lineno);
+                begin
+                    Clear(IsResult);
+                    IsResult := POSProcedure.PaymentLineDeletion(documentno, lineno);
+                    IF IsResult = 'Success' then
+                        exit('Success')
+                    Else
+                        if IsResult = 'Failed' then
+                            exit('Failed');
+                end;
             'INVDISC':
-                POSProcedure.InvoiceDiscount(documentno, input);
+                begin
+                    IsResult := POSProcedure.InvoiceDiscount(documentno, input);
+                    IF IsResult = 'Success' then
+                        exit('Success')
+                    Else
+                        if IsResult = 'Failed' then
+                            exit('Failed');
+                end;
             'LINEDISC':
-                POSProcedure.LineDiscount(documentno, lineno, input);
+                begin
+                    IsResult := POSProcedure.LineDiscount(documentno, lineno, input);
+                    IF IsResult = 'Success' then
+                        exit('Success')
+                    Else
+                        if IsResult = 'Failed' then
+                            exit('Failed');
+                end;
             'SHIPLINE':
-                POSProcedure.ShipLine(documentno, lineno, input);
+                begin
+                    IsResult := POSProcedure.ShipLine(documentno, lineno, input);
+                    IF IsResult = 'Success' then
+                        exit('Success')
+                    Else
+                        if IsResult = 'Failed' then
+                            exit('Failed');
+                end;
             'INVLINE':
-                POSProcedure.InvoiceLine(documentno, lineno, input);
+                begin
+                    IsResult := POSProcedure.InvoiceLine(documentno, lineno, input);
+                    IF IsResult = 'Success' then
+                        exit('Success')
+                    Else
+                        if IsResult = 'Failed' then
+                            exit('Failed');
+                end;
             'RECEIPT':
-                POSProcedure.ItemReceipt(documentno, lineno, input);
+                begin
+                    IsResult := POSProcedure.ItemReceipt(documentno, lineno, input);
+                    IF IsResult = 'Success' then
+                        exit('Success')
+                    Else
+                        if IsResult = 'Failed' then
+                            exit('Failed');
+                end;
             'DELDET':
-                POSProcedure.DeliveryDetails(documentno, input);
+                begin
+                    IsResult := POSProcedure.DeliveryDetails(documentno, input);
+                    IF IsResult = 'Success' then
+                        exit('Success')
+                    Else
+                        if IsResult = 'Failed' then
+                            exit('Failed');
+                end;
             'CUPSL':
-                POSProcedure.ChangeUnitPrice(documentno, lineno, input);
+                begin
+                    IsResult := POSProcedure.ChangeUnitPrice(documentno, lineno, input);
+                    IF IsResult = 'Success' then
+                        exit('Success')
+                    Else
+                        if IsResult = 'Failed' then
+                            exit('Failed');
+                end;
         end;
     end;
 

@@ -107,6 +107,18 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     end;
                 end;
             }
+            action("Call Function")
+            {
+                ApplicationArea = all;
+                Image = PostedPayment;
+                //Caption = 'Payment Post';
+                Promoted = true;
+                PromotedIsBig = true;
+                trigger OnAction()
+                begin
+                    POS.SalesLineDeletion('1010045', 10000);
+                end;
+            }
         }
     }
 
@@ -279,4 +291,5 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
         TotalAmt: Decimal;
         TotalTCSAmt: Decimal;
         IsPaymentLineeditable: Boolean;
+        POS: Codeunit "POS Procedure";
 }

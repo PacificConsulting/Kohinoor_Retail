@@ -15,11 +15,15 @@ codeunit 50303 "POS Procedure"
 
         SalesLineDel: Record "Sales Line";
         SalesHeder: Record "Sales Header";
+        ResultError: text;
     begin
         SalesHeder.Reset();
         SalesHeder.SetRange("No.", "Document No.");
-        SalesHeder.SetRange(Status, SalesHeder.Status::Open);
         IF SalesHeder.FindFirst() then begin
+            IF SalesHeder.Status = SalesHeder.Status::Released then begin
+                SalesHeder.Status := SalesHeder.Status::Open;
+                SalesHeder.Modify(true);
+            end;
             SalesLineDel.Reset();
             SalesLineDel.SetRange("Document No.", SalesHeder."No.");
             SalesLineDel.SetRange("Line No.", "Line No.");
@@ -29,8 +33,10 @@ codeunit 50303 "POS Procedure"
                 exit('Success');
             end
         end else
-            Error('Please repone sales order %1 status before the delete the Line.', SalesHeder."No.");
-        exit('Failed');
+            exit('Failed');
+
+
+        // ResultError := GetLastErrorText();
 
 
     end;
@@ -54,6 +60,7 @@ codeunit 50303 "POS Procedure"
         IF PaymentLineDelete.FindFirst() then begin
             PaymentLineDelete.DeleteAll();
             Message('Sales Order No. %1 delete Successfully...', DocumentNo);
+            exit('Success');
         end;
         exit('Failed');
 
@@ -221,8 +228,8 @@ codeunit 50303 "POS Procedure"
                 SaleLinerInv.Modify(true);
                 SaleHeaderInv.Status := SaleHeaderInv.Status::Released;
                 SaleHeaderInv.Modify(true);
-                Salespost.Run(SaleHeaderInv);
-                exit('Success');
+                IF Salespost.Run(SaleHeaderInv) then
+                    exit('Success');
             end
         end;
     end;
