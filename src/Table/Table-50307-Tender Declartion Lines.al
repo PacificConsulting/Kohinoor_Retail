@@ -36,7 +36,12 @@ table 50307 "Tender Declartion Line "
         {
             DataClassification = ToBeClassified;
             Caption = 'Amount';
-        }  // Add changes to table fields here
+        }
+        field(7; "Entry No."; Integer)
+        {
+            DataClassification = ToBeClassified;
+            AutoIncrement = true;
+        }
     }
     keys
     {

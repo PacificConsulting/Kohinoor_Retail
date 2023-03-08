@@ -29,6 +29,10 @@ page 50312 "Tender Declartion Card"
                 {
                     ToolTip = 'Specifies the value of the SystemCreatedAt field.';
                 }
+                field(Status; Rec.Status)
+                {
+                    Caption = 'Status';
+                }
 
             }
             part(Lines; "Tender Declartion Subform")

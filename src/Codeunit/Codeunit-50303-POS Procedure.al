@@ -32,6 +32,7 @@ codeunit 50303 "POS Procedure"
             Error('Please repone sales order %1 status before the delete the Line.', SalesHeder."No.");
         exit('Failed');
 
+
     end;
 
 

@@ -17,4 +17,17 @@ tableextension 50301 Sales_Header_AmttoCust extends "Sales Header"
 
     var
         myInt: Integer;
+
+    trigger OnDelete()
+    var
+        PayLine: Record "Payment Lines";
+    begin
+        PayLine.Reset();
+        PayLine.SetRange("Document No.", "No.");
+        PayLine.SetRange("Document Type", "Document Type");
+        IF PayLine.FindSet() then
+            repeat
+                PayLine.Delete();
+            until PayLine.Next() = 0;
+    end;
 }

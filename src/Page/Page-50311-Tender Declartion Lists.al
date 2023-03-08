@@ -1,7 +1,7 @@
 page 50311 "Tender Declartion Lists"
 {
     ApplicationArea = All;
-    Caption = 'Tendor Declartion Lists';
+    Caption = 'Tender Declartion Lists';
     PageType = List;
     SourceTable = "Tender Declartion Header";
     UsageCategory = Lists;
@@ -51,8 +51,29 @@ page 50311 "Tender Declartion Lists"
                 trigger OnAction()
                 var
                     TDC: page "Tender Declartion Creation";
+                    TDL: Record "Tender Declartion Line ";
                 begin
                     TDC.Run();
+
+                end;
+
+            }
+            action("Tender Creation Line Delete")
+            {
+                ApplicationArea = all;
+                Promoted = true;
+                PromotedIsBig = true;
+                PromotedCategory = Process;
+                Image = Create;
+                trigger OnAction()
+                var
+                    TDC: page "Tender Declartion Creation";
+                    TDL: Record "Tender Declartion Line ";
+                begin
+
+                    TDL.FindSet();
+                    TDL.DeleteAll();
+                    Message('Line Deleted Now...');
                 end;
 
             }

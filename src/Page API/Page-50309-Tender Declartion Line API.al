@@ -18,7 +18,10 @@ page 50309 "Tender Declartion API Line "
         {
             group(GroupName)
             {
-
+                field(EntryNo; Rec."Entry No.")
+                {
+                    Caption = 'Entry No.';
+                }
                 field(storeNo; Rec."Store No.")
                 {
                     Caption = 'Store No.';

@@ -38,7 +38,7 @@ page 50331 "Staff Master"
                 {
                     Caption = 'Store No.';
                 }
-                field(posUserID; Rec."POS User ID")
+                field(PosUserID; Rec."POS User ID")
                 {
                     Caption = 'POS User ID';
                 }

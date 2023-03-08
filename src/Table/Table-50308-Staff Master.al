@@ -34,7 +34,7 @@ table 50308 "Staff Master"
             //             FieldError("Phone No.", PhoneNoCannotContainLettersErr);
             // end;
         }
-        field(6; "POS User ID"; Text[20])
+        field(6; "POS User ID"; Text[100])
         {
             DataClassification = ToBeClassified;
         }

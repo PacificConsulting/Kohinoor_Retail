@@ -4,7 +4,7 @@ page 50328 "Menu Line API"
     APIPublisher = 'Pacific';
     APIVersion = 'v17.0';
     ApplicationArea = All;
-    Caption = 'menuLineAPI';
+    Caption = 'MenuLineAPI';
     DelayedInsert = true;
     EntityName = 'MenuLineAPI';
     EntitySetName = 'MenuLineAPIs';

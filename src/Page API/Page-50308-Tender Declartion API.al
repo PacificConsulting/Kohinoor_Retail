@@ -22,6 +22,10 @@ page 50308 "Tender Declartion API Hdr"
                 {
                     Caption = 'SystemId';
                 }
+                field(StaffID; Rec."Staff ID")
+                {
+                    Caption = 'Staff ID';
+                }
                 field(storeNo; Rec."Store No.")
                 {
                     Caption = 'Store No.';
@@ -29,6 +33,10 @@ page 50308 "Tender Declartion API Hdr"
                 field(storeDate; Rec."Store Date")
                 {
                     Caption = 'Store Date';
+                }
+                field(Status; Rec.Status)
+                {
+                    Caption = 'Status';
                 }
 
             }
