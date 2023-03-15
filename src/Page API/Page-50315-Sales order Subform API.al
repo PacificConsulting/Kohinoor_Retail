@@ -69,6 +69,10 @@ page 50315 "Sales Order Subform API"
                 {
                     Caption = 'Store No.';
                 }
+                field(ApprovalStatus; Rec."Approval Status")
+                {
+                    Caption = 'Approval Status';
+                }
                 field(systemId; Rec.SystemId)
                 {
                     Caption = 'SystemId';

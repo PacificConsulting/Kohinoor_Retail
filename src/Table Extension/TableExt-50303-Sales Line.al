@@ -7,6 +7,13 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
             Caption = 'Store No.';
             DataClassification = ToBeClassified;
         }
+        field(50302; "Approval Status"; Option)
+        {
+            DataClassification = ToBeClassified;
+            // OptionCaption = 'Open','Release';
+            OptionMembers = Open,Relase;
+
+        }
 
     }
 }
