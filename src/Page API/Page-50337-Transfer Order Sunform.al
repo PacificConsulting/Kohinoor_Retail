@@ -1,15 +1,15 @@
-page 50334 "Purchase Order Subform API"
+page 50337 "Transfer Order Sunform"
 {
-    APIGroup = 'PurchasGroup';
+    APIGroup = 'TransferGroup';
     APIPublisher = 'Pacific';
-    APIVersion = 'v1.0';
+    APIVersion = 'v3.0';
     ApplicationArea = All;
-    Caption = 'purchaseOrderSubform';
+    Caption = 'transferOrderSunform';
     DelayedInsert = true;
-    EntityName = 'PurchaseOrderSubform';
-    EntitySetName = 'PurchaseOrderSubforms';
+    EntityName = 'TransferOrderSunform';
+    EntitySetName = 'TransferOrderSunforms';
     PageType = API;
-    SourceTable = "Purchase Line";
+    SourceTable = "Transfer Line";
     ODataKeyFields = SystemId;
 
     layout
@@ -22,61 +22,61 @@ page 50334 "Purchase Order Subform API"
                 {
                     Caption = 'SystemId';
                 }
-                field("type"; Rec."Type")
+                field(itemNo; Rec."Item No.")
                 {
-                    Caption = 'Type';
-                }
-                field(no; Rec."No.")
-                {
-                    Caption = 'No.';
+                    Caption = 'Item No.';
                 }
                 field(description; Rec.Description)
                 {
                     Caption = 'Description';
                 }
-                field(locationCode; Rec."Location Code")
+                field(description2; Rec."Description 2")
                 {
-                    Caption = 'Location Code';
+                    Caption = 'Description 2';
                 }
                 field(quantity; Rec.Quantity)
                 {
                     Caption = 'Quantity';
                 }
-                field(unitCost; Rec."Unit Cost")
+                field(amount; Rec.Amount)
                 {
-                    Caption = 'Unit Cost';
+                    Caption = 'Amount';
                 }
-                field(unitOfMeasure; Rec."Unit of Measure")
+                field(transferPrice; Rec."Transfer Price")
                 {
-                    Caption = 'Unit of Measure';
+                    Caption = 'Transfer Price';
                 }
                 field(unitOfMeasureCode; Rec."Unit of Measure Code")
                 {
                     Caption = 'Unit of Measure Code';
                 }
-                field(lineAmount; Rec."Line Amount")
+                field(lineNo; Rec."Line No.")
                 {
-                    Caption = 'Line Amount';
+                    Caption = 'Line No.';
                 }
-                field(tdsSectionCode; Rec."TDS Section Code")
+                field(qtyToShip; Rec."Qty. to Ship")
                 {
-                    Caption = 'TDS Section Code';
+                    Caption = 'Qty. to Ship';
                 }
                 field(qtyToReceive; Rec."Qty. to Receive")
                 {
                     Caption = 'Qty. to Receive';
                 }
-                field(qtyReceivedBase; Rec."Qty. Received (Base)")
+                field(quantityReceived; Rec."Quantity Received")
                 {
-                    Caption = 'Qty. Received (Base)';
+                    Caption = 'Quantity Received';
                 }
-                field(qtyToInvoice; Rec."Qty. to Invoice")
+                field(quantityShipped; Rec."Quantity Shipped")
                 {
-                    Caption = 'Qty. to Invoice';
+                    Caption = 'Quantity Shipped';
                 }
-                field(qtyInvoicedBase; Rec."Qty. Invoiced (Base)")
+                field(shipmentDate; Rec."Shipment Date")
                 {
-                    Caption = 'Qty. Invoiced (Base)';
+                    Caption = 'Shipment Date';
+                }
+                field(receiptDate; Rec."Receipt Date")
+                {
+                    Caption = 'Receipt Date';
                 }
                 field(gstGroupCode; Rec."GST Group Code")
                 {
