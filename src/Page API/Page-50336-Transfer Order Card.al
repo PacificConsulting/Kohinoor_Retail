@@ -1,6 +1,6 @@
 page 50336 "Transfer Order Card"
 {
-    APIGroup = 'TransferGroup';
+    APIGroup = 'TransferCard';
     APIPublisher = 'Pacific';
     APIVersion = 'v2.0';
     ApplicationArea = All;

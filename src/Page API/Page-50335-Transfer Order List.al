@@ -1,6 +1,6 @@
 page 50335 "Transfer Order List"
 {
-    APIGroup = 'TransferGroup';
+    APIGroup = 'Transfer';
     APIPublisher = 'Pacific';
     APIVersion = 'v1.0';
     ApplicationArea = All;
