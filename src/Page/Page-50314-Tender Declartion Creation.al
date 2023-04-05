@@ -4,9 +4,6 @@ page 50314 "Tender Declartion Creation"
     ApplicationArea = All;
     UsageCategory = Documents;
     Caption = 'Tender Declartion Creation';
-
-
-
     layout
     {
         area(Content)
