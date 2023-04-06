@@ -26,7 +26,7 @@ page 50320 "Bank Drop Entry"
                 {
                     Caption = 'Store No.';
                 }
-                field("date"; Rec."Date")
+                field("date"; Rec."Store Date")
                 {
                     Caption = 'Store Date';
                 }

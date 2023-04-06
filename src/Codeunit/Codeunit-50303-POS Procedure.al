@@ -360,9 +360,17 @@ codeunit 50303 "POS Procedure"
             IF SalesLineunitPrice.FindFirst() then begin
                 //<< New Condtion add after with kunal Discussion to Send for Approval befor Modification Unit Price before price line level new field Add and Update first
                 SalesLineunitPrice."Approval Status" := SalesLineunitPrice."Approval Status"::"Pending for Approval";
-                SalesLineunitPrice.validate("Unit Price", NewUnitPrice);
+                SalesLineunitPrice."Approval Sent By" := UserId;
+                SalesLineunitPrice."Approval Sent On" := Today;
+                IF SalesLineunitPrice."Approval Status" = SalesLineunitPrice."Approval Status"::" " then begin
+                    SalesLineunitPrice."Old Unit Price" := SalesLineunitPrice."Unit Price";
+                    SalesLineunitPrice.validate("Unit Price", NewUnitPrice);
+                end;
                 SalesLineunitPrice.Modify(true);
-                exit('Success');
+                IF SalesLineunitPrice."Unit Price" = NewUnitPrice then
+                    exit('Success')
+                else
+                    exit('Failed');
             end;
 
         end;

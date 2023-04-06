@@ -8,6 +8,35 @@ pageextension 50304 "Sales Line Subform" extends "Sales Order Subform"
             {
                 ApplicationArea = all;
             }
+            field("Approval Status"; Rec."Approval Status")
+            {
+                ApplicationArea = all;
+            }
+            field("Approval Sent By"; Rec."Approval Sent By")
+            {
+                ApplicationArea = All;
+                ToolTip = 'Specifies the value of the Approval Sent By field.';
+            }
+            field("Approval Sent On"; Rec."Approval Sent On")
+            {
+                ApplicationArea = all;
+                ToolTip = 'Specifies the value of the Approval Sent On field.';
+            }
+            field("Approved By"; Rec."Approved By")
+            {
+                ApplicationArea = All;
+                ToolTip = 'Specifies the value of the Approved By field.';
+            }
+            field("Approved On"; Rec."Approved On")
+            {
+                ApplicationArea = All;
+                ToolTip = 'Specifies the value of the Approved On field.';
+            }
+            field("Old Unit Price"; Rec."Old Unit Price")
+            {
+                ApplicationArea = all;
+            }
+
         }
     }
 

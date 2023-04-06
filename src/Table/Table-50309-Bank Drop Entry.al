@@ -11,12 +11,13 @@ table 50309 "Bank Drop Entry"
             Caption = 'Store No.';
             Editable = false;
 
+
         }
-        field(2; Date; Date)
+        field(2; "Store Date"; Date)
         {
             DataClassification = ToBeClassified;
-            Caption = 'Store Date';
-            Editable = false;
+            Caption = 'Date';
+            //Editable = false;
 
         }
         field(3; "Staff ID"; code[10])
@@ -24,7 +25,14 @@ table 50309 "Bank Drop Entry"
             DataClassification = ToBeClassified;
             Caption = 'Staff ID';
             TableRelation = "Staff Master".ID;
-
+            trigger OnValidate()
+            var
+                STFM: Record "Staff Master";
+            begin
+                IF STFM.Get("Staff ID") then begin
+                    "Store No." := STFM."Store No.";
+                end;
+            end;
         }
         field(4; Amount; Decimal)
         {
@@ -46,7 +54,7 @@ table 50309 "Bank Drop Entry"
 
     keys
     {
-        key(Key1; "Store No.", "Staff ID", Date)
+        key(Key1; "Store No.", "Staff ID", "Store Date")
         {
             Clustered = true;
         }

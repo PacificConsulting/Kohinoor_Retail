@@ -13,6 +13,26 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
             DataClassification = ToBeClassified;
 
         }
+        field(50303; "Approval Sent By"; Text[50])
+        {
+            DataClassification = ToBeClassified;
+        }
+        field(50304; "Approval Sent On"; Date)
+        {
+            DataClassification = ToBeClassified;
+        }
+        field(50305; "Approved By"; Text[50])
+        {
+            DataClassification = ToBeClassified;
+        }
+        field(50306; "Approved On"; Date)
+        {
+            DataClassification = ToBeClassified;
+        }
+        field(50307; "Old Unit Price"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+        }
 
     }
     // trigger OnBeforeModify()
