@@ -36,11 +36,11 @@ page 50338 "Request Tranfer Ord. Subform"
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Quantity field.';
                 }
-                field("Unit of Measure Code"; Rec."Unit of Measure Code")
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'Specifies the value of the Unit of Measure Code field.';
-                }
+                // field("Unit of Measure Code"; Rec."Unit of Measure Code")
+                // {
+                //     ApplicationArea = All;
+                //     ToolTip = 'Specifies the value of the Unit of Measure Code field.';
+                // }
                 field(SystemModifiedBy; Rec.SystemModifiedBy)
                 {
                     ApplicationArea = All;

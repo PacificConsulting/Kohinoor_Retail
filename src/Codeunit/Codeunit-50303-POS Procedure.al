@@ -64,9 +64,9 @@ codeunit 50303 "POS Procedure"
             PaymentLineDelete.SetRange("Document No.", DocumentNo);
             IF PaymentLineDelete.FindFirst() then begin
                 PaymentLineDelete.DeleteAll();
-                exit('Success');
+                //exit('Success');
             end;
-            // exit('Success');
+            exit('Success');
         end;
         exit('Success');
         // exit('Failed');
@@ -216,6 +216,7 @@ codeunit 50303 "POS Procedure"
         SaleLinerInv: Record "Sales Line";
         ShipInvtoQty: Decimal;
         Salespost: codeunit 80;
+        SalesCommLine: Record 44;
     begin
         Clear(InputData);
         Evaluate(ShipInvtoQty, InputData);
@@ -232,6 +233,20 @@ codeunit 50303 "POS Procedure"
             IF SaleLinerInv.FindFirst() then begin
                 SaleLinerInv.validate("Qty. to Ship", ShipInvtoQty);
                 SaleLinerInv.Modify(true);
+                //<< Comment Mandetory so We have to pass Order Comment
+                SalesCommLine.Reset();
+                SalesCommLine.SetRange("No.", SaleHeaderInv."No.");
+                IF Not SalesCommLine.FindFirst() then begin
+                    SalesCommLine.Init();
+                    SalesCommLine."Document Type" := SalesCommLine."Document Type"::Order;
+                    SalesCommLine."No." := SaleHeaderInv."No.";
+                    SalesCommLine."Line No." := 10000;
+                    SalesCommLine."Document Line No." := 10000;
+                    SalesCommLine.Insert();
+                    SalesCommLine.Comment := 'Document Processed from POS';
+                    SalesCommLine.Modify();
+                end;
+                //>> Comment Mandetory so We have to pass Order Comment
                 SaleHeaderInv.Status := SaleHeaderInv.Status::Released;
                 SaleHeaderInv.Modify(true);
                 IF Salespost.Run(SaleHeaderInv) then
@@ -343,7 +358,8 @@ codeunit 50303 "POS Procedure"
             SalesLineunitPrice.SetRange("Document No.", SaleHeaderUnitPrice."No.");
             SalesLineunitPrice.SetRange("Line No.", LineNo);
             IF SalesLineunitPrice.FindFirst() then begin
-                //<< New Condtion add after with kunal Discussion to Send for Approval befor Modification Unit Price
+                //<< New Condtion add after with kunal Discussion to Send for Approval befor Modification Unit Price before price line level new field Add and Update first
+                SalesLineunitPrice."Approval Status" := SalesLineunitPrice."Approval Status"::"Pending for Approval";
                 SalesLineunitPrice.validate("Unit Price", NewUnitPrice);
                 SalesLineunitPrice.Modify(true);
                 exit('Success');

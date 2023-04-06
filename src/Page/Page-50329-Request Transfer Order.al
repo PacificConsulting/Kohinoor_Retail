@@ -38,14 +38,17 @@ page 50329 "Request Transfer Order"
                 field("Transfer-from Name"; Rec."Transfer-from Name")
                 {
                     ToolTip = 'Specifies the value of the Transfer-from Name field.';
+                    Editable = false;
                 }
                 field("Transfer-to Code"; Rec."Transfer-to Code")
                 {
                     ToolTip = 'Specifies the value of the Transfer-to Code field.';
+                    Editable = false;
                 }
                 field("Transfer-to Name"; Rec."Transfer-to Name")
                 {
                     ToolTip = 'Specifies the value of the Transfer-to Name field.';
+                    Editable = false;
                 }
                 field(Status; Rec.Status)
                 {
@@ -82,15 +85,21 @@ page 50329 "Request Transfer Order"
                     TransferHeader: Record "Transfer Header";
                     TransferLine: Record "Transfer Line";
                     RrqTransferLine: Record "Request Transfer Line";
+                    RLocation: Record Location;
                 begin
 
                     TransferHeader.Init();
                     TransferHeader."No." := Noseries.GetNextNo('T-ORD', Today, true);
                     TransferHeader.Insert(true);
                     TransferHeader."Transfer-from Code" := Rec."Transfer-from Code";
-                    // TransferHeader."Transfer-to Code" := ;
+                    TransferHeader."Transfer-to Code" := rec."Transfer-to Code";
                     TransferHeader."Posting Date" := Rec."Posting Date";
-                    // TransferHeader."In-Transit Code" := 'OWN LOG.';
+                    RLocation.Reset();
+                    RLocation.SetRange("Use As In-Transit", true);
+                    IF RLocation.FindFirst() then begin
+                        TransferHeader."In-Transit Code" := RLocation.Code;
+                    end;
+                    //TransferHeader."In-Transit Code" := 'OWN LOG.';
                     TransferHeader.Modify(true);
 
                     RrqTransferLine.Reset();

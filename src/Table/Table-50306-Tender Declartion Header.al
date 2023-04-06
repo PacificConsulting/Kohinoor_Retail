@@ -15,7 +15,7 @@ table 50306 "Tender Declartion Header"
         field(2; "Store Date"; Date)
         {
             DataClassification = ToBeClassified;
-            Caption = 'Store Date';
+            Caption = 'Date';
             Editable = false;
 
         }

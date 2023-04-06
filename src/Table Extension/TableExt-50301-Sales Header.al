@@ -35,7 +35,17 @@ tableextension 50301 Sales_Header_AmttoCust extends "Sales Header"
     trigger OnDelete()
     var
         PayLine: Record "Payment Lines";
+        SalesLine: Record "Sales Line";
     begin
+        SalesLine.Reset();
+        SalesLine.SetRange("Document No.", "No.");
+        SalesLine.SetRange("Document Type", "Document Type");
+        IF SalesLine.FindSet() then
+            repeat
+                IF SalesLine."Approval Status" = SalesLine."Approval Status"::"Pending for Approval" then begin
+                    Error('You can not modify Header if Approval Status of Line is Pending for Approval ');
+                end;
+            until SalesLine.Next() = 0;
         PayLine.Reset();
         PayLine.SetRange("Document No.", "No.");
         PayLine.SetRange("Document Type", "Document Type");
