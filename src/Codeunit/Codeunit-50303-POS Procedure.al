@@ -28,8 +28,8 @@ codeunit 50303 "POS Procedure"
             SalesLineDel.SetRange("Document No.", SalesHeder."No.");
             SalesLineDel.SetRange("Line No.", "Line No.");
             IF SalesLineDel.FindFirst() then begin
-                SalesLineDel.Delete(true);
-                Message('Line deleted successfully......');
+                SalesLineDel.Delete();
+                //Message('Line deleted successfully......');
                 exit('Success');
             end
         end else
@@ -50,20 +50,26 @@ codeunit 50303 "POS Procedure"
     var
         SalesHeaderDelete: Record 36;
         PaymentLineDelete: record "Payment Lines";
+        SalesLineDelete: Record 37;
     begin
         SalesHeaderDelete.Reset();
         SalesHeaderDelete.SetRange("No.", DocumentNo);
-        if SalesHeaderDelete.FindFirst() then
-            SalesHeaderDelete.DeleteAll(true);
-        PaymentLineDelete.reset();
-        PaymentLineDelete.SetRange("Document No.", DocumentNo);
-        IF PaymentLineDelete.FindFirst() then begin
-            PaymentLineDelete.DeleteAll();
-            Message('Sales Order No. %1 delete Successfully...', DocumentNo);
-            exit('Success');
+        if SalesHeaderDelete.FindFirst() then begin
+            SalesHeaderDelete.Delete();
+            SalesLineDelete.Reset();
+            SalesLineDelete.SetRange("Document No.", DocumentNo);
+            IF SalesLineDelete.FindFirst() then
+                SalesLineDelete.DeleteAll();
+            PaymentLineDelete.reset();
+            PaymentLineDelete.SetRange("Document No.", DocumentNo);
+            IF PaymentLineDelete.FindFirst() then begin
+                PaymentLineDelete.DeleteAll();
+                exit('Success');
+            end;
+            // exit('Success');
         end;
-        exit('Failed');
-
+        exit('Success');
+        // exit('Failed');
     end;
 
 
@@ -153,50 +159,50 @@ codeunit 50303 "POS Procedure"
         Salespost: codeunit 80;
         Transpostship: Codeunit "TransferOrder-Post Shipment";
     begin
-        Clear(InputData);
+        // Clear(InputData);
         Evaluate(ShiptoQty, InputData);
-        SaleHeaderShip.Reset();
-        SaleHeaderShip.SetRange("No.", DocumentNo);
-        //SaleHeaderShip.SetRange(Status, SaleHeaderShip.Status::Open);
-        IF SaleHeaderShip.FindFirst() then begin
-            IF SaleHeaderShip.Status = SaleHeaderShip.Status::Released then begin
-                SaleHeaderShip.Status := SaleHeaderShip.Status::Open;
-                SalesLineShip.Modify(true);
+        // SaleHeaderShip.Reset();
+        // SaleHeaderShip.SetRange("No.", DocumentNo);
+        // //SaleHeaderShip.SetRange(Status, SaleHeaderShip.Status::Open);
+        // IF SaleHeaderShip.FindFirst() then begin
+        //     IF SaleHeaderShip.Status = SaleHeaderShip.Status::Released then begin
+        //         SaleHeaderShip.Status := SaleHeaderShip.Status::Open;
+        //         SalesLineShip.Modify(true);
+        //     end;
+        //     SalesLineShip.Reset();
+        //     SalesLineShip.SetRange("Document No.", SaleHeaderShip."No.");
+        //     SalesLineShip.SetRange("Line No.", LineNo);
+        //     IF SalesLineShip.FindFirst() then begin
+        //         SalesLineShip.validate("Qty. to Ship", ShiptoQty);
+        //         SalesLineShip.Modify(true);
+        //         SaleHeaderShip.Status := SaleHeaderShip.Status::Released;
+        //         SaleHeaderShip."Store No." := 'POS';
+        //         SaleHeaderShip.Modify(true);
+        //         Salespost.Run(SaleHeaderShip);
+        //         exit('Success');
+        //     end
+        // end else begin
+        TransferHeaderShip.Reset();
+        TransferHeaderShip.SetRange("No.", DocumentNo);
+        IF TransferHeaderShip.FindFirst() then begin
+            IF TransferHeaderShip.Status = TransferHeaderShip.Status::Released then begin
+                TransferHeaderShip.Status := TransferHeaderShip.Status::Open;
+                TransferHeaderShip.Modify(true);
             end;
-            SalesLineShip.Reset();
-            SalesLineShip.SetRange("Document No.", SaleHeaderShip."No.");
-            SalesLineShip.SetRange("Line No.", LineNo);
-            IF SalesLineShip.FindFirst() then begin
-                SalesLineShip.validate("Qty. to Ship", ShiptoQty);
-                SalesLineShip.Modify(true);
-                SaleHeaderShip.Status := SaleHeaderShip.Status::Released;
-                SaleHeaderShip.Modify(true);
-                Salespost.Run(SaleHeaderShip);
+            TransferlineShip.Reset();
+            TransferlineShip.SetRange("Document No.", TransferHeaderShip."No.");
+            TransferlineShip.SetRange("Line No.", LineNo);
+            IF TransferlineShip.FindFirst() then begin
+                TransferlineShip.Validate("Qty. to Ship", ShiptoQty);
+                TransferlineShip.Modify(true);
+                TransferHeaderShip.Status := TransferHeaderShip.Status::Released;
+                TransferHeaderShip.Modify(true);
+                Transpostship.Run(TransferHeaderShip);
                 exit('Success');
-            end
-        end else begin
-            TransferHeaderShip.Reset();
-            TransferHeaderShip.SetRange("No.", DocumentNo);
-            //TransferHeaderShip.SetRange(Status, TransferHeaderShip.Status::Open);
-            IF TransferHeaderShip.FindFirst() then begin
-                IF TransferHeaderShip.Status = TransferHeaderShip.Status::Released then begin
-                    TransferHeaderShip.Status := TransferHeaderShip.Status::Open;
-                    TransferHeaderShip.Modify(true);
-                end;
-                TransferlineShip.Reset();
-                TransferlineShip.SetRange("Document No.", TransferHeaderShip."No.");
-                TransferlineShip.SetRange("Line No.", LineNo);
-                IF TransferlineShip.FindFirst() then begin
-                    TransferlineShip.Validate("Qty. to Ship", ShiptoQty);
-                    TransferlineShip.Modify(true);
-                    TransferHeaderShip.Status := TransferHeaderShip.Status::Released;
-                    TransferHeaderShip.Modify(true);
-                    Transpostship.Run(TransferHeaderShip);
-                    exit('Success');
-                end;
             end;
-
         end;
+
+        //end;
 
     end;
 
@@ -204,7 +210,7 @@ codeunit 50303 "POS Procedure"
     /// <summary>
     /// Post ship and Invoice for a specific Order line
     /// </summary>
-    procedure InvoiceLine(DocumentNo: Code[20]; LineNo: Integer; InputData: Text): text
+    procedure InvoiceLine(DocumentNo: Code[20]; LineNo: Integer; parameter: Text; InputData: Text): text
     var
         SaleHeaderInv: Record "Sales Header";
         SaleLinerInv: Record "Sales Line";
@@ -244,6 +250,8 @@ codeunit 50303 "POS Procedure"
         QtyToReceive: Decimal;
         TransferHeader: record "Transfer Header";
         Transferline: Record "Transfer Line";
+        Purchpost: Codeunit "Purch.-Post";
+        TranspostReceived: Codeunit "TransferOrder-Post Receipt";
 
     begin
         Clear(InputData);
@@ -263,7 +271,7 @@ codeunit 50303 "POS Procedure"
                 PurchLine.Modify(true);
                 PurchHeader.Status := PurchHeader.Status::Released;
                 PurchHeader.Modify(true);
-                // Salespost.Run(SaleHeaderShip);
+                Purchpost.Run(PurchHeader);
                 exit('Success');
             end
         end else begin
@@ -282,7 +290,7 @@ codeunit 50303 "POS Procedure"
                     Transferline.Modify(true);
                     TransferHeader.Status := TransferHeader.Status::Released;
                     TransferHeader.Modify(true);
-                    // Transpostship.Run(TransferHeaderShip);
+                    TranspostReceived.Run(TransferHeader);
                     exit('Success');
                 end;
             end;
@@ -300,8 +308,12 @@ codeunit 50303 "POS Procedure"
     begin
         SalesHeder.Reset();
         SalesHeder.SetRange("No.", DocumentNo);
-        SalesHeder.SetRange(Status, SalesHeder.Status::Open);
+        //SalesHeder.SetRange(Status, SalesHeder.Status::Open);
         IF SalesHeder.FindFirst() then begin
+            IF SalesHeder.Status = SalesHeder.Status::Released then begin
+                SalesHeder.Status := SalesHeder.Status::Open;
+                SalesHeder.Modify(true);
+            end;
             SalesHeder.Validate("Transport Method", InputData);
             SalesHeder.Modify();
             exit('Success');

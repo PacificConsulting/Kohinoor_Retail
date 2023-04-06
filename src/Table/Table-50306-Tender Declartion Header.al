@@ -59,7 +59,6 @@ table 50306 "Tender Declartion Header"
                             TenderInitLine."Payment Method code" := Paymethod.Code;
                             TenderInitLine.Modify();
                         until Paymethod.Next() = 0;
-
                 end;
             end;
         }

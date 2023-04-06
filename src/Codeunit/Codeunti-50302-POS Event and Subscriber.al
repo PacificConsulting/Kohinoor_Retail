@@ -6,12 +6,17 @@ codeunit 50302 "POS Event and Subscriber"
 
     end;
 
+    procedure Ping(): Text
+    begin
+        exit('Pong');
+    end;
 
     procedure POSAction(documentno: text; lineno: Integer; posaction: text; parameter: Text; input: Text): Text
     var
         POSProcedure: Codeunit 50303;
         IsResult: Text;
     begin
+
         case posaction of
             'VOIDL':
                 begin
@@ -82,7 +87,7 @@ codeunit 50302 "POS Event and Subscriber"
                 end;
             'INVLINE':
                 begin
-                    IsResult := POSProcedure.InvoiceLine(documentno, lineno, input);
+                    IsResult := POSProcedure.InvoiceLine(documentno, lineno, parameter, input);
                     IF IsResult = 'Success' then
                         exit('Success')
                     Else
@@ -117,6 +122,7 @@ codeunit 50302 "POS Event and Subscriber"
                             exit('Failed');
                 end;
         end;
+
     end;
 
     // procedure POSActionEx(DocumentNo: Text; LineNo: integer; POSAction: Text; Parameter: Text; Input: Text): Text
@@ -172,7 +178,10 @@ codeunit 50302 "POS Event and Subscriber"
         Instr: InStream;
         FileManagement_lCdu: Codeunit "File Management";
         NewStr: text;
+        POSProcedure: Codeunit 50303;
+        IsResult: Text;
     begin
+
         // Recref.GetTable(recCust);
         // TempBlob.CreateOutStream(OutStr);
         // Report.SaveAs(Report::"Customer - List", '', ReportFormat::Pdf, OutStr, Recref);
@@ -185,6 +194,7 @@ codeunit 50302 "POS Event and Subscriber"
         recCust.get(10000);
         //CustReport.Run();
         Report.Run(101, false, false, recCust);
+
 
     end;
 
@@ -208,7 +218,7 @@ codeunit 50302 "POS Event and Subscriber"
 
         GLSetup.get();
         IF AccessTokenForBC <> '' then begin
-            GLSetup."Access Token" := AccessTokenForBC;
+            //GLSetup."Access Token" := AccessTokenForBC;
             GLSetup.Modify();
         end;
 

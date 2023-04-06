@@ -19,6 +19,7 @@ table 50308 "Staff Master"
         field(4; "Store No."; Code[20])
         {
             DataClassification = ToBeClassified;
+            TableRelation = Location.Code;
         }
         field(5; "Phone No."; Text[30])
         {

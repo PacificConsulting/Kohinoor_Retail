@@ -8,13 +8,14 @@
             "environmentType": "Sandbox",
             "environmentName": "KohinoorSandbox",
             "tenant": "abc87ed0-4014-486f-afd8-1577c92442a6",
-            "startupObjectId": 22,
+            "startupObjectId": 30,
             "startupObjectType": "Page",
             "breakOnError": "All",
             "launchBrowser": true,
             "enableLongRunningSqlStatements": true,
             "enableSqlInformationDebugger": true,
-            "schemaUpdateMode": "ForceSync"
+            "schemaUpdateMode": "ForceSync",
+            
         },
         {
             "name": "snapshotInitialize: Microsoft production cloud",

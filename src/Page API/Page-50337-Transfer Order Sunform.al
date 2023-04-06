@@ -1,13 +1,13 @@
-page 50337 "Transfer Order Sunform"
+page 50337 "Transfer Order Subform API"
 {
     APIGroup = 'TransferGroup';
     APIPublisher = 'Pacific';
     APIVersion = 'v3.0';
     ApplicationArea = All;
-    Caption = 'transferOrderSunform';
+    Caption = 'transferOrderSubform';
     DelayedInsert = true;
-    EntityName = 'TransferOrderSunform';
-    EntitySetName = 'TransferOrderSunforms';
+    EntityName = 'TransferOrderSubform';
+    EntitySetName = 'TransferOrderSubforms';
     PageType = API;
     SourceTable = "Transfer Line";
     ODataKeyFields = SystemId;

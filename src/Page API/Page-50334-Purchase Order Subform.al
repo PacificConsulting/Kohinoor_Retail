@@ -22,6 +22,10 @@ page 50334 "Purchase Order Subform API"
                 {
                     Caption = 'SystemId';
                 }
+                field(lineno; Rec."Line No.")
+                {
+                    Caption = 'Line No.';
+                }
                 field("type"; Rec."Type")
                 {
                     Caption = 'Type';

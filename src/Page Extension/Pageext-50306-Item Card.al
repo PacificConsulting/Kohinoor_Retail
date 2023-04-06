@@ -28,7 +28,9 @@ pageextension 50306 "ItemCArdExtension" extends "Item Card"
                         VResult: text;
                         FileManagement_lCdu: Codeunit "File Management";
                         B64: Codeunit "Base64 Convert";
+                        base64convert: Codeunit "Base64 Convert";
                     begin
+                        /*
                         Recref.GetTable(recCust);
                         TempBlob.CreateOutStream(OutStr);
                         Report.SaveAs(Report::"Customer - List", '', ReportFormat::Pdf, OutStr, Recref);
@@ -61,7 +63,7 @@ pageextension 50306 "ItemCArdExtension" extends "Item Card"
                         // Message(Result);
 
                         //  Clear(APIManagment);
-                        /*
+                        */
                         Base64text := CreateImgOpenAI(Rec.Description);
 
                         TempBlob.CreateOutStream(outstream);
@@ -71,7 +73,34 @@ pageextension 50306 "ItemCArdExtension" extends "Item Card"
                         Clear(rec.Picture);
                         Rec.Picture.ImportStream(instream, '');
                         Rec.Modify()
-                        */
+
+                    end;
+                }
+                action("POS Call")
+                {
+                    Promoted = true;
+                    PromotedCategory = Process;
+                    PromotedIsBig = true;
+                    PromotedOnly = true;
+                    Image = Picture;
+                    ApplicationArea = All;
+                    trigger OnAction()
+                    var
+                        CU: Codeunit 50303;
+                        CUN: codeunit 50302;
+                        Result: Text;
+                        SH: Record 36;
+                        NewResult: Text;
+                        Qty: Decimal;
+                        Vtest: Text;
+                    begin
+                        IF SH.FindFirst() then
+                            // Message(SH."No.");
+                            //Result := cu.SalesOrderDeletion(SH."No.");
+                            //Message(Result);
+                            Vtest := '2';
+                        //Evaluate(Qty, Vtest);
+                        NewResult := CUN.POSAction('101016', 10000, 'SHIPLINE', '', '2');
                     end;
                 }
             }
