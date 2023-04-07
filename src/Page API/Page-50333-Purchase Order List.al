@@ -2,7 +2,7 @@ page 50333 "Purchase Order List API"
 {
     APIGroup = 'PurchasGroup';
     APIPublisher = 'Pacific';
-    APIVersion = 'v1.0';
+    APIVersion = 'v3.0';
     ApplicationArea = All;
     Caption = 'PurchaseOrderList';
     DelayedInsert = true;

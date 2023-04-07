@@ -72,6 +72,25 @@ page 50329 "Request Transfer Order"
     {
         area(Processing)
         {
+            action("Send for Approval")
+            {
+                ApplicationArea = All;
+                PromotedCategory = Process;
+                Promoted = true;
+                Caption = 'Submit Transfer Order';
+                Image = SendApprovalRequest;
+                trigger OnAction()
+                var
+                    RTH: Record "Request Transfer Header";
+                begin
+                    RTH.Reset();
+                    RTH.SetRange("No.", rec."No.");
+                    IF RTH.FindFirst() then begin
+                        RTH.Status := RTH.Status::"Pending for Approval";
+                        RTH.Modify();
+                    end;
+                end;
+            }
             action("Submit Transfer Order")
             {
                 ApplicationArea = All;

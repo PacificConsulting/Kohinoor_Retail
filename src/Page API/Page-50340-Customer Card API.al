@@ -310,7 +310,7 @@ page 50340 "Customer Card API"
                 {
                     Caption = 'IC Partner Code';
                 }
-                field(id; Rec.Id)
+                field(id; Rec.SystemId)
                 {
                     Caption = 'Id';
                 }

@@ -38,6 +38,7 @@ page 50314 "Tender Declartion Creation"
                                 TenderInit.Insert();
 
                                 Paymethod.Reset();
+                                Paymethod.SetRange(Tender, true);
                                 IF Paymethod.FindSet() then
                                     repeat
                                         TenderInitLine.Init();

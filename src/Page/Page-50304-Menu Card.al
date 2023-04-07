@@ -10,7 +10,7 @@ page 50304 "Menu Card"
     {
         area(Content)
         {
-            group(GroupName)
+            group("Menu Header")
             {
                 field("Menu ID"; Rec."Menu ID")
                 {

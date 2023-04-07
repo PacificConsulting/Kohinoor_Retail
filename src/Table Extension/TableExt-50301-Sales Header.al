@@ -10,7 +10,7 @@ tableextension 50301 Sales_Header_AmttoCust extends "Sales Header"
             begin
                 IF RecLoc.Get("Location Code") then begin
                     "Store No." := "Location Code";
-                    //Validate("Shortcut Dimension 1 Code",RecLoc.glo);
+
                 end;
 
 
@@ -27,6 +27,17 @@ tableextension 50301 Sales_Header_AmttoCust extends "Sales Header"
             DataClassification = ToBeClassified;
             Caption = 'Store No.';
         }
+        field(50303; "Staff Id"; Code[10])
+        {
+            DataClassification = ToBeClassified;
+            TableRelation = "Staff Master".ID;
+        }
+        field(50304; "POS Released Date"; Date)
+        {
+            DataClassification = ToBeClassified;
+
+        }
+
     }
 
     var

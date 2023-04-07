@@ -19,9 +19,23 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                 ApplicationArea = all;
                 Editable = false;
             }
-            field("Store No."; Rec."Store No.")
+            group(POS)
             {
-                ApplicationArea = all;
+                field("Store No."; Rec."Store No.")
+                {
+                    ApplicationArea = all;
+                }
+                field("Staff Id"; Rec."Staff Id")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the value of the Staff Id field.';
+                }
+                field("POS Released Date"; Rec."POS Released Date")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the value of the POS Released Date field.';
+                }
+
             }
         }
     }

@@ -59,8 +59,8 @@ table 50314 "Request Transfer Header"
         {
             Caption = 'Status';
             Editable = false;
-            OptionCaption = 'Open,Released';
-            OptionMembers = Open,Released;
+            OptionCaption = 'Open,Pending for Approval,Released';
+            OptionMembers = Open,"Pending for Approval",Released;
         }
         field(9; "Staff ID"; Code[10])
         {

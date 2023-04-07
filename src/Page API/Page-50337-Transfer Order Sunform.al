@@ -1,6 +1,6 @@
 page 50337 "Transfer Order Subform API"
 {
-    APIGroup = 'TransferGroup';
+    APIGroup = 'Transfer';
     APIPublisher = 'Pacific';
     APIVersion = 'v3.0';
     ApplicationArea = All;

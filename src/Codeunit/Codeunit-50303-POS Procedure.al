@@ -377,6 +377,101 @@ codeunit 50303 "POS Procedure"
     end;
 
 
+    /// <summary>
+    /// Update Tender Status Update to released as Submited
+    /// </summary>
+    procedure TenderSubmit(storeno: Code[20]; staffid: Code[20]; sdate: Date): Text
+    var
+        TenderHdr: Record "Tender Declartion Header";
+    begin
+        TenderHdr.Reset();
+        TenderHdr.SetRange("Store No.", storeno);
+        TenderHdr.SetRange("Staff ID", staffid);
+        TenderHdr.SetRange("Store Date", sdate);
+        IF TenderHdr.FindFirst() then begin
+            TenderHdr.Status := TenderHdr.Status::Released;
+            TenderHdr.Modify();
+            exit('Sucess');
+        end else
+            exit('Failed, Tender does not exist');
+    end;
+
+
+    /// <summary>
+    /// Order Confirmation for WareHouse function POS.
+    /// </summary>
+
+    procedure OrderConfirmationforWH("Document No.": Code[20]): Text
+    var
+        PaymentLine: Record "Payment Lines";
+        TotalPayemtamt: Decimal;
+        SalesHdr: Record "Sales Header";
+        AmountToCust: decimal;
+        TotalGSTAmount1: Decimal;
+        TotalAmt: Decimal;
+        TotalTCSAmt: Decimal;
+        SalesRec: record "Sales & Receivables Setup";
+    begin
+        clear(TotalGSTAmount1);
+        Clear(TotalTCSAmt);
+        Clear(TotalAmt);
+        SalesRec.get();
+
+        SalesHdr.Reset();
+        SalesHdr.SetRange("No.", "Document No.");
+        if SalesHdr.FindFirst() then begin
+            GetGSTAmountTotal(SalesHdr, TotalGSTAmount1);
+            GetTCSAmountTotal(SalesHdr, TotalTCSAmt);
+            GetSalesorderStatisticsAmount(SalesHdr, TotalAmt);
+            SalesHdr."Amount To Customer" := TotalAmt + TotalGSTAmount1 + TotalTCSAmt;
+            SalesHdr.Modify();
+
+            Clear(TotalPayemtamt);
+            PaymentLine.Reset();
+            PaymentLine.SetRange("Document No.", SalesHdr."No.");
+            if PaymentLine.FindSet() then
+                repeat
+                    TotalPayemtamt := PaymentLine.Amount;
+                until PaymentLine.Next() = 0;
+
+            IF TotalPayemtamt <> SalesHdr."Amount To Customer" then
+                Error('Sales Order amount is not match with Payment amount')
+            else begin
+                BankPayentReceiptAutoPost(SalesHdr);
+                SalesHdr.Reset();
+                SalesHdr.SetRange("No.", SalesHdr."No.");
+                If SalesHdr.FindFirst() then begin
+                    SalesHdr.Validate("Location Code", SalesRec."Default Warehouse");
+                    //SalesHdr."Staff Id" :=
+                    SalesHdr."POS Released Date" := Today;
+                    SalesHdr.Status := SalesHdr.Status::Released;
+                    SalesHdr.Modify();
+                    Exit('Success');
+                end;
+            end;
+        end else
+            exit('Failed');
+    end;
+
+
+    /// <summary>
+    /// Request Transfer Header Status Update Function
+    /// </summary>
+    procedure RequestTransferStatusUpdate(no: code[20]): text
+    var
+        RequestTranHdr: Record "Request Transfer Header";
+    begin
+        RequestTranHdr.Reset();
+        RequestTranHdr.SetRange("No.", no);
+        IF RequestTranHdr.FindFirst() then begin
+            RequestTranHdr.Status := RequestTranHdr.Status::"Pending for Approval";
+            RequestTranHdr.Modify();
+            Exit('Success')
+        end else
+            exit('Failed');
+    end;
+
+    //<<<<<******************************** Local function created depending on original function*************
     Local procedure InvoiceDiscountAmountSO(DocumentType: enum "Sales Document Type"; DocumentNo: Code[20]; InvoiceDiscountAmount: decimal)
     var
         SalesHeader: Record "Sales Header";
@@ -396,6 +491,159 @@ codeunit 50303 "POS Procedure"
         DocumentTotals.SalesDocTotalsNotUpToDate();
 
     end;
+
+    procedure GetGSTAmountTotal(
+      SalesHeader: Record 36;
+      var GSTAmount: Decimal)
+    var
+        SalesLine: Record 37;
+    begin
+        Clear(GSTAmount);
+        SalesLine.SetRange("Document no.", SalesHeader."No.");
+        if SalesLine.FindSet() then
+            repeat
+                GSTAmount += GetGSTAmount11(SalesLine.RecordId());
+            until SalesLine.Next() = 0;
+    end;
+
+    local procedure GetGSTAmount11(RecID: RecordID): Decimal
+    var
+        TaxTransactionValue: Record "Tax Transaction Value";
+        GSTSetup: Record "GST Setup";
+    begin
+        if not GSTSetup.Get() then
+            exit;
+
+        TaxTransactionValue.SetRange("Tax Record ID", RecID);
+        TaxTransactionValue.SetRange("Value Type", TaxTransactionValue."Value Type"::COMPONENT);
+        if GSTSetup."Cess Tax Type" <> '' then
+            TaxTransactionValue.SetRange("Tax Type", GSTSetup."GST Tax Type", GSTSetup."Cess Tax Type")
+        else
+            TaxTransactionValue.SetRange("Tax Type", GSTSetup."GST Tax Type");
+        TaxTransactionValue.SetFilter(Percent, '<>%1', 0);
+        if not TaxTransactionValue.IsEmpty() then begin
+            TaxTransactionValue.CalcSums(Amount);
+            TaxTransactionValue.CalcSums(Percent);
+
+        end;
+        exit(TaxTransactionValue.Amount);
+    end;
+
+    procedure GetTCSAmountTotal(
+           SalesHeader: Record 36;
+           var TCSAmount: Decimal)
+    var
+        SalesLine: Record 37;
+        TCSManagement: Codeunit "TCS Management";
+        i: Integer;
+        RecordIDList: List of [RecordID];
+    begin
+        Clear(TCSAmount);
+        // Clear(TCSPercent);
+
+        SalesLine.SetRange("Document Type", SalesHeader."Document Type");
+        SalesLine.SetRange("Document no.", SalesHeader."No.");
+        if SalesLine.FindSet() then
+            repeat
+                RecordIDList.Add(SalesLine.RecordId());
+            until SalesLine.Next() = 0;
+
+        for i := 1 to RecordIDList.Count() do begin
+            TCSAmount += GetTCSAmount(RecordIDList.Get(i));
+        end;
+
+        TCSAmount := TCSManagement.RoundTCSAmount(TCSAmount);
+    end;
+
+    local procedure GetTCSAmount(RecID: RecordID): Decimal
+    var
+        TaxTransactionValue: Record "Tax Transaction Value";
+        TCSSetup: Record "TCS Setup";
+    begin
+        if not TCSSetup.Get() then
+            exit;
+
+        TaxTransactionValue.SetRange("Tax Record ID", RecID);
+        TaxTransactionValue.SetRange("Value Type", TaxTransactionValue."Value Type"::COMPONENT);
+        TaxTransactionValue.SetRange("Tax Type", TCSSetup."Tax Type");
+        TaxTransactionValue.SetFilter(Percent, '<>%1', 0);
+        if not TaxTransactionValue.IsEmpty() then
+            TaxTransactionValue.CalcSums(Amount);
+
+        exit(TaxTransactionValue.Amount);
+    end;
+
+    procedure GetSalesorderStatisticsAmount(
+            SalesHeader: Record 36;
+            var TotalInclTaxAmount: Decimal)
+    var
+        SalesLine: Record 37;
+        RecordIDList: List of [RecordID];
+        GSTAmount: Decimal;
+        TCSAmount: Decimal;
+    begin
+        Clear(TotalInclTaxAmount);
+
+        SalesLine.SetRange("Document No.", SalesHeader."No.");
+        if SalesLine.FindSet() then
+            repeat
+                RecordIDList.Add(SalesLine.RecordId());
+                TotalInclTaxAmount += SalesLine.Amount;
+            until SalesLine.Next() = 0;
+
+
+        TotalInclTaxAmount := TotalInclTaxAmount + GSTAmount + TCSAmount;
+    end;
+
+    local procedure BankPayentReceiptAutoPost(Salesheader: Record "Sales Header")
+    var
+        GenJourLine: Record 81;
+        NoSeriesMgt: Codeunit 396;
+        BankAcc: Record 270;
+        PaymentLine: Record 50301;
+    begin
+        PaymentLine.Reset();
+        PaymentLine.SetRange("Document Type", Salesheader."Document Type");
+        PaymentLine.SetRange("Document No.", Salesheader."No.");
+        if PaymentLine.FindSet() then
+            repeat
+                GenJourLine.Reset();
+                GenJourLine.SetRange("Journal Template Name", 'BANKRCPTY');
+                GenJourLine.SetRange("Journal Batch Name", 'USER-A');
+                GenJourLine.Init();
+                GenJourLine."Document No." := NoSeriesMgt.GetNextNo('BANKRCPTV', Salesheader."Posting Date", false);
+                GenJourLine."Posting Date" := Today;
+                IF GenJourLine.FindLast() then
+                    GenJourLine."Line No." := GenJourLine."Line No." + 10000
+                else
+                    GenJourLine."Line No." := 10000;
+
+                GenJourLine."Journal Template Name" := 'BANKRCPTY';
+                GenJourLine."Journal Batch Name" := 'USER-A';
+                GenJourLine."Account Type" := GenJourLine."Account Type"::"Bank Account";
+                GenJourLine."Bal. Account Type" := GenJourLine."Bal. Account Type"::Customer;
+                GenJourLine.Validate("Bal. Account No.", Salesheader."Sell-to Customer No.");
+                GenJourLine.validate("Account No.", 'GIRO');
+                GenJourLine."GST Group Code" := 'Goods';
+                GenJourLine.validate(Amount, PaymentLine.Amount);
+                GenJourLine.Comment := 'Auto Post';
+                GenJourLine.Insert(true);
+            Until PaymentLine.Next() = 0;
+
+        // IF CODEUNIT.RUN(CODEUNIT::"Gen. Jnl.-Post", GenJourLine) then begin
+        //     PaymentLine.Reset();
+        //     PaymentLine.SetRange("Document Type", Rec."Document Type");
+        //     PaymentLine.SetRange("Document No.", Rec."No.");
+        //     if PaymentLine.FindSet() then
+        //         repeat
+        //             PaymentLine.Posted := True;
+        //             PaymentLine.Modify();
+        //             IsPaymentLineeditable := PaymentLine.PaymentLinesEditable()
+        //         Until PaymentLine.Next() = 0;
+        // end;
+    end;
+
+
 
 
 
