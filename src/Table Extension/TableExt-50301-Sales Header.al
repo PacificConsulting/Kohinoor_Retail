@@ -26,6 +26,7 @@ tableextension 50301 Sales_Header_AmttoCust extends "Sales Header"
         {
             DataClassification = ToBeClassified;
             Caption = 'Store No.';
+            TableRelation = Location.Code;
         }
         field(50303; "Staff Id"; Code[10])
         {

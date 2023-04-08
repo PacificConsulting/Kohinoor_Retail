@@ -41,14 +41,11 @@ page 50334 "Purchase Order Subform API"
                 field(buyFromVendorNo; Rec."Buy-from Vendor No.")
                 {
                     Caption = 'Buy-from Vendor No.';
-
                 }
                 field(VendorName; VendorName)
                 {
                     Caption = 'Vendor Name';
                 }
-
-
                 field(quantity; Rec.Quantity)
                 {
                     Caption = 'Quantity';
@@ -64,6 +61,10 @@ page 50334 "Purchase Order Subform API"
                 field(postingDate; Rec."Posting Date")
                 {
                     Caption = 'Posting Date';
+                }
+                field(LocationCode; Rec."Location Code")
+                {
+                    Caption = 'Location Code';
                 }
 
             }

@@ -208,6 +208,53 @@ codeunit 50303 "POS Procedure"
 
 
     /// <summary>
+    /// Post ship and Invoice for a Complete order with Auto updare Qty Ship from Sales Line Qty
+    /// </summary>
+    procedure InvoiceComplete(DocumentNo: Code[20]): text
+    var
+        SalesHdr: Record 36;
+        SalesLine: Record 37;
+        SalesCommLine: Record 44;
+        Salespost: codeunit 80;
+    Begin
+        SalesHdr.Reset();
+        SalesHdr.SetRange("No.", DocumentNo);
+        IF SalesHdr.FindFirst() then begin
+            IF SalesHdr.Status = SalesHdr.Status::Released then begin
+                SalesHdr.Status := SalesHdr.Status::Open;
+                SalesHdr.Modify();
+            end;
+            SalesLine.Reset();
+            SalesLine.SetRange("Document No.", SalesHdr."No.");
+            IF SalesLine.FindSet() then
+                repeat
+                    SalesLine.Validate("Qty. to Ship", SalesLine.Quantity);
+                    SalesLine.Modify();
+                until SalesLine.Next() = 0;
+            //<< Comment Mandetory so We have to pass Order Comment
+            SalesCommLine.Reset();
+            SalesCommLine.SetRange("No.", SalesHdr."No.");
+            IF Not SalesCommLine.FindFirst() then begin
+                SalesCommLine.Init();
+                SalesCommLine."Document Type" := SalesCommLine."Document Type"::Order;
+                SalesCommLine."No." := SalesHdr."No.";
+                SalesCommLine."Line No." := 10000;
+                SalesCommLine."Document Line No." := 10000;
+                SalesCommLine.Insert();
+                SalesCommLine.Comment := 'Document Processed from POS';
+                SalesCommLine.Modify();
+            end;
+            //>> Comment Mandetory so We have to pass Order Comment
+            SalesHdr.Status := SalesHdr.Status::Released;
+            SalesHdr.Modify();
+            IF Salespost.Run(SalesHdr) then
+                exit('Success')
+            else
+                exit('Failed');
+        end;
+    End;
+
+    /// <summary>
     /// Post ship and Invoice for a specific Order line
     /// </summary>
     procedure InvoiceLine(DocumentNo: Code[20]; LineNo: Integer; parameter: Text; InputData: Text): text
@@ -323,7 +370,6 @@ codeunit 50303 "POS Procedure"
     begin
         SalesHeder.Reset();
         SalesHeder.SetRange("No.", DocumentNo);
-        //SalesHeder.SetRange(Status, SalesHeder.Status::Open);
         IF SalesHeder.FindFirst() then begin
             IF SalesHeder.Status = SalesHeder.Status::Released then begin
                 SalesHeder.Status := SalesHeder.Status::Open;
@@ -377,6 +423,7 @@ codeunit 50303 "POS Procedure"
     end;
 
 
+    /*
     /// <summary>
     /// Update Tender Status Update to released as Submited
     /// </summary>
@@ -398,10 +445,82 @@ codeunit 50303 "POS Procedure"
 
 
     /// <summary>
+    /// Bank Drop Submit Function
+    /// </summary>
+    procedure Bankdropsubmit(storeno: Code[20]; staffid: Code[20]; sdate: Date; amount: text): Text
+    var
+    begin
+        exit('Success')
+    end;
+
+
+    /// <summary>
     /// Order Confirmation for WareHouse function POS.
     /// </summary>
+    procedure OrderConfirmationforDelivery(DocumentNo: Code[20]): Text
+    var
+        PaymentLine: Record "Payment Lines";
+        TotalPayemtamt: Decimal;
+        SalesHeader: Record "Sales Header";
+        AmountToCust: decimal;
+        TotalGSTAmount1: Decimal;
+        TotalAmt: Decimal;
+        TotalTCSAmt: Decimal;
+        SalesRec11: record "Sales & Receivables Setup";
+    begin
+        clear(TotalGSTAmount1);
+        Clear(TotalTCSAmt);
+        Clear(TotalAmt);
+        SalesRec11.get();
 
-    procedure OrderConfirmationforWH("Document No.": Code[20]): Text
+        SalesHeader.Reset();
+        SalesHeader.SetRange("No.", DocumentNo);
+        if SalesHeader.FindFirst() then begin
+            GetGSTAmountTotal(SalesHeader, TotalGSTAmount1);
+            GetTCSAmountTotal(SalesHeader, TotalTCSAmt);
+            GetSalesorderStatisticsAmount(SalesHeader, TotalAmt);
+            SalesHeader."Amount To Customer" := TotalAmt + TotalGSTAmount1 + TotalTCSAmt;
+            SalesHeader.Modify();
+
+            Clear(TotalPayemtamt);
+            PaymentLine.Reset();
+            PaymentLine.SetRange("Document No.", SalesHeader."No.");
+            if PaymentLine.FindSet() then
+                repeat
+                    TotalPayemtamt := PaymentLine.Amount;
+                until PaymentLine.Next() = 0;
+
+            IF TotalPayemtamt <> SalesHeader."Amount To Customer" then
+                Error('Sales Order amount is not match with Payment amount')
+            else begin
+                BankPayentReceiptAutoPost(SalesHeader);
+                SalesHeader.Reset();
+                SalesHeader.SetRange("No.", SalesHeader."No.");
+                If SalesHeader.FindFirst() then begin
+                    SalesHeader.Validate("Location Code", SalesRec11."Default Warehouse");
+                    //SalesHdr."Staff Id" :=
+                    SalesHeader."POS Released Date" := Today;
+                    SalesHeader.Status := SalesHeader.Status::Released;
+                    SalesHeader.Modify();
+                    Exit('Success');
+                end;
+            end;
+        end else
+            exit('Failed');
+    end;
+
+    /// <summary>
+    /// Serial No Item tracking for SO
+    /// </summary>
+    procedure SerialItemTracking(documentno: code[20]; lineno: integer; input: text[20]): text
+    begin
+        exit('Success')
+    end;
+
+    /// <summary>
+    /// Order Confirmation for WareHouse function POS.
+    /// </summary>
+    procedure OrderConfirmationforWH(DocumentNo: Code[20]): Text
     var
         PaymentLine: Record "Payment Lines";
         TotalPayemtamt: Decimal;
@@ -418,7 +537,7 @@ codeunit 50303 "POS Procedure"
         SalesRec.get();
 
         SalesHdr.Reset();
-        SalesHdr.SetRange("No.", "Document No.");
+        SalesHdr.SetRange("No.", DocumentNo);
         if SalesHdr.FindFirst() then begin
             GetGSTAmountTotal(SalesHdr, TotalGSTAmount1);
             GetTCSAmountTotal(SalesHdr, TotalTCSAmt);
@@ -470,7 +589,7 @@ codeunit 50303 "POS Procedure"
         end else
             exit('Failed');
     end;
-
+    */
     //<<<<<******************************** Local function created depending on original function*************
     Local procedure InvoiceDiscountAmountSO(DocumentType: enum "Sales Document Type"; DocumentNo: Code[20]; InvoiceDiscountAmount: decimal)
     var

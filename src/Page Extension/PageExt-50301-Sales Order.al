@@ -129,8 +129,27 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                 Promoted = true;
                 PromotedIsBig = true;
                 trigger OnAction()
+                var
+                    SH: Record 36;
+                    SL: Record 37;
+                    SL1: Record 37;
+                    NoSer: Codeunit NoSeriesManagement;
+                    result: Text;
                 begin
-                    POS.SalesLineDeletion('1010045', 10000);
+                    //POS.SalesLineDeletion('1010045', 10000);
+                    result := POS.InvoiceComplete('KTPLSO23240003');
+                    // SH.Init();
+                    // SH.TransferFields(Rec);
+                    // SH."No." := NoSer.GetNextNo('SO', Today, true);
+                    // SH.Status := SH.Status::Open;
+                    // SH.Insert(true);
+                    // SL1.reset();
+                    // SL1.SetRange("Document No.", Rec."No.");
+                    // IF SL1.FindFirst() then;
+                    // SL.Init();
+                    // SL.TransferFields(SL1);
+                    // SL.Insert(true);
+                    // Message('Copy Order');
                 end;
             }
         }

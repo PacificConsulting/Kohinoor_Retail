@@ -100,7 +100,8 @@ pageextension 50306 "ItemCArdExtension" extends "Item Card"
                             //Message(Result);
                             Vtest := '2';
                         //Evaluate(Qty, Vtest);
-                        NewResult := CUN.POSAction('101016', 10000, 'SHIPLINE', '', '2');
+                        //NewResult := CUN.POSAction('101016', 10000, 'SHIPLINE', '', '2');
+                        NewResult := CUN.SerialItemTracking('KTPLSO23240001', 10000, '016179OD03');
                     end;
                 }
             }

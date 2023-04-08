@@ -4,7 +4,7 @@ pageextension 50302 "Posted Sales invoice Retail" extends "Posted Sales Invoice"
     {
         addafter(SalesInvLines)
         {
-            part(PaymentLine; "Posted Payment Lines Subform")
+            part(PostedPaymentLine; "Posted Payment Lines Subform")
             {
                 ApplicationArea = Basic, Suite;
                 SubPageLink = "Document No." = FIELD("No.");
