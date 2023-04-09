@@ -226,10 +226,7 @@ page 50349 "Sales order API"
                 {
                     Caption = 'E-Commerce Customer';
                 }
-                field(eCommerceMerchantId; Rec."E-Commerce Merchant Id")
-                {
-                    Caption = 'E-Commerce Merchant Id';
-                }
+               
                 field(eWayBillNo; Rec."E-Way Bill No.")
                 {
                     Caption = 'E-Way Bill No.';
@@ -354,18 +351,7 @@ page 50349 "Sales order API"
                 {
                     Caption = 'Language Code';
                 }
-                field(lastEmailNotifCleared; Rec."Last Email Notif Cleared")
-                {
-                    Caption = 'Last Email Notif Cleared';
-                }
-                field(lastEmailSentStatus; Rec."Last Email Sent Status")
-                {
-                    Caption = 'Last Email Sent Status';
-                }
-                field(lastEmailSentTime; Rec."Last Email Sent Time")
-                {
-                    Caption = 'Last Email Sent Time';
-                }
+                
                 field(lastPostingNo; Rec."Last Posting No.")
                 {
                     Caption = 'Last Posting No.';
@@ -698,10 +684,7 @@ page 50349 "Sales order API"
                 {
                     Caption = 'Send IC Document';
                 }
-                field(sentAsEmail; Rec."Sent as Email")
-                {
-                    Caption = 'Sent as Email';
-                }
+               
                 field(ship; Rec.Ship)
                 {
                     Caption = 'Ship';

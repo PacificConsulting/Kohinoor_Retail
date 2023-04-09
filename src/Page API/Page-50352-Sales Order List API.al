@@ -11,6 +11,7 @@ page 50352 "Sales Order List API"
     PageType = API;
     SourceTable = "Sales Header";
     ODataKeyFields = SystemId;
+    // SourceTableView = where("Document Type" = filter(Order));
 
     layout
     {
@@ -18,13 +19,46 @@ page 50352 "Sales Order List API"
         {
             repeater(General)
             {
+                // field(CustSystemID; ID)
+                // {
+                //     Caption = 'Customer System ID';
+                // }
                 field(no; Rec."No.")
                 {
                     Caption = 'No.';
+                    trigger OnLookup(var Text: Text): Boolean
+                    var
+                        NoSeries: Codeunit NoSeriesManagement;
+                    begin
+                        //Rec."No." := NoSeries.GetNextNo('SO', rec."Posting Date", true);
+                    end;
+                }
+                field(DocumentType; Rec."Document Type")
+                {
+                    Caption = 'Document Type';
                 }
                 field(sellToCustomerNo; Rec."Sell-to Customer No.")
                 {
                     Caption = 'Sell-to Customer No.';
+                    trigger OnValidate()
+                    var
+                        SH: Record 36;
+                        NoSeries: Codeunit NoSeriesManagement;
+                        NewCust: Record 18;
+                        NewID: Guid;
+                    begin
+                        //     IF Cust.get(rec."Sell-to Customer No.") then begin
+                        //         ID := Cust.SystemId;
+                        //         SH.Init();
+                        //         SH."Document Type" := SH."Document Type"::Order;
+                        //         SH."No." := NoSeries.GetNextNo('SO', SH."Posting Date", true);
+                        //         NewCust.Reset();
+                        //         NewCust.SetRange(SystemId, NewID);
+                        //         IF NewCust.FindFirst() then
+                        //             SH."Sell-to Customer No." := NewCust."No.";
+                        //         SH.Insert(true);
+                        //     end;
+                    end;
                 }
                 field(sellToCustomerName; Rec."Sell-to Customer Name")
                 {
@@ -77,8 +111,41 @@ page 50352 "Sales Order List API"
                 field(SelltoPhoneNo; Rec."Sell-to Phone No.")
                 {
                     Caption = 'Sell to Phone No.';
+
                 }
             }
         }
     }
+    var
+        Cust: Record 18;
+        ID: Text[100];
+
+    trigger OnAfterGetRecord()
+    begin
+        IF Cust.get(rec."Sell-to Customer No.") then begin
+            ID := Cust.SystemId;
+        end;
+    end;
+
+    // trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    // var
+    //     SH: Record 36;
+    //     NoSeries: Codeunit NoSeriesManagement;
+    //     NewCust: Record 18;
+    //     NewID: Guid;
+    // begin
+    //     IF Cust.get(rec."Sell-to Customer No.") then begin
+    //         ID := Cust.SystemId;
+    //         SH.Init();
+    //         SH."Document Type" := SH."Document Type"::Order;
+    //         SH."No." := NoSeries.GetNextNo('SO', SH."Posting Date", true);
+    //         NewCust.Reset();
+    //         NewCust.SetRange(SystemId, NewID);
+    //         IF NewCust.FindFirst() then
+    //             SH."Sell-to Customer No." := NewCust."No.";
+    //         SH.Insert(true);
+    //     end;
+    // end;
+
+
 }

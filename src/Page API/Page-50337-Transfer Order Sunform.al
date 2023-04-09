@@ -22,6 +22,10 @@ page 50337 "Transfer Order Subform API"
                 {
                     Caption = 'SystemId';
                 }
+                field(documentNo; Rec."Document No.")
+                {
+                    Caption = 'Document No.';
+                }
                 field(itemNo; Rec."Item No.")
                 {
                     Caption = 'Item No.';

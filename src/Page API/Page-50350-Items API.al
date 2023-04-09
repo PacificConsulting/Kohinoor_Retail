@@ -10,8 +10,8 @@ page 50350 "Items API"
     EntitySetName = 'Items';
     PageType = API;
     SourceTable = Item;
-    ODataKeyFields=SystemId;
-    
+    ODataKeyFields = SystemId;
+
     layout
     {
         area(content)
@@ -698,10 +698,7 @@ page 50350 "Items API"
                 {
                     Caption = 'Sales Unit of Measure';
                 }
-                field(scheduledNeedQty; Rec."Scheduled Need (Qty.)")
-                {
-                    Caption = 'Scheduled Need (Qty.)';
-                }
+
                 field(scheduledReceiptQty; Rec."Scheduled Receipt (Qty.)")
                 {
                     Caption = 'Scheduled Receipt (Qty.)';
