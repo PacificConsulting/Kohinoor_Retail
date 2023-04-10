@@ -37,6 +37,7 @@ pageextension 50304 "Sales Line Subform" extends "Sales Order Subform"
                 ApplicationArea = all;
             }
 
+
         }
     }
 

@@ -33,6 +33,15 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
         {
             DataClassification = ToBeClassified;
         }
+        field(50308; "Exchange Item No."; Code[20])
+        {
+            DataClassification = ToBeClassified;
+            TableRelation = Item."No.";
+        }
+        field(50309; "Serial No."; Code[50])
+        {
+            DataClassification = ToBeClassified;
+        }
 
     }
     // trigger OnBeforeModify()

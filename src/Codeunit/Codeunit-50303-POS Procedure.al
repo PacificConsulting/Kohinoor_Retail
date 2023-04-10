@@ -333,8 +333,10 @@ codeunit 50303 "POS Procedure"
                 PurchLine.Modify(true);
                 PurchHeader.Status := PurchHeader.Status::Released;
                 PurchHeader.Modify(true);
-                Purchpost.Run(PurchHeader);
-                exit('Success');
+                IF Purchpost.Run(PurchHeader) then
+                    exit('Success')
+                else
+                    exit('Failed');
             end
         end else begin
             TransferHeader.Reset();
@@ -352,10 +354,13 @@ codeunit 50303 "POS Procedure"
                     Transferline.Modify(true);
                     TransferHeader.Status := TransferHeader.Status::Released;
                     TransferHeader.Modify(true);
-                    TranspostReceived.Run(TransferHeader);
-                    exit('Success');
+                    IF TranspostReceived.Run(TransferHeader) then
+                        exit('Success')
+                    else
+                        exit('Failed');
                 end;
-            end;
+            end else
+                exit('Failed');
 
         end;
 

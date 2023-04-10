@@ -120,49 +120,7 @@ codeunit 50302 "POS Event and Subscriber"
 
     end;
 
-    // procedure POSActionEx(DocumentNo: Text; LineNo: integer; POSAction: Text; Parameter: Text; Input: Text): Text
-    // var
-    //     POSProcedure: Codeunit 50303;
-    // begin
-    //     case POSAction of
-    //         'VOIDL':
-    //             exit('Request received for document No' + DocumentNo);
-    //         //POSProcedure.SalesLineDeletion(DocumentNo, LineNo);
-    //         'VOIDT':
-    //             POSProcedure.SalesOrderDeletion(DocumentNo);
-    //         'VOIDP':
-    //             POSProcedure.PaymentLineDeletion(DocumentNo, LineNo);
-    //         'INVDISC':
-    //             POSProcedure.InvoiceDiscount(DocumentNo, Input);
-    //         'LINEDISC':
-    //             POSProcedure.LineDiscount(DocumentNo, LineNo, Input);
-    //         'SHIPLINE':
-    //             POSProcedure.ShipLine(DocumentNo, LineNo, Input);
-    //         'INVLINE':
-    //             POSProcedure.InvoiceLine(DocumentNo, LineNo, Input);
-    //         'RECEIPT':
-    //             POSProcedure.ItemReceipt(DocumentNo, LineNo, Input);
-    //         'DELDET':
-    //             POSProcedure.DeliveryDetails(DocumentNo, Input);
-    //     end;
-    //     exit('Request received for document No' + DocumentNo);
-    // end;
 
-    // procedure Ping(): Text
-    // begin
-    //     exit('Pong');
-    // end;
-
-    // procedure Addition(number1: Integer; number2: Integer): Integer
-    // begin
-    //     exit(number1 + number2);
-    // end;
-
-
-    // procedure Capitalize(input: Text): Text
-    // begin
-    //     exit(input.ToUpper);
-    // end;
 
     procedure POSEvent(documentno: text; linno: Integer; posaction: text; parameter: Text; input: Text): Text
     var
@@ -189,61 +147,9 @@ codeunit 50302 "POS Event and Subscriber"
         recCust.get(10000);
         //CustReport.Run();
         Report.Run(101, false, false, recCust);
-
-
     end;
 
 
-
-    procedure GetAccessTokenForBC()
-    var
-        PromptInteraction: Enum "Prompt Interaction";
-        AuthCodeError: Text;
-        Scopes: List of [Text];
-    begin
-        Scopes.Add(Constants.GetResourceURLForApiBC() + '.default');
-
-        OAuth2.AcquireAuthorizationCodeTokenFromCache(
-        ClientId,
-        ClientSecret,
-        RedirectURL,
-        OAuthAuthorityUrl,
-        Scopes,
-        AccessTokenForBC);
-
-        GLSetup.get();
-        IF AccessTokenForBC <> '' then begin
-            //GLSetup."Access Token" := AccessTokenForBC;
-            GLSetup.Modify();
-        end;
-
-
-        if AccessTokenForBC = '' then
-            OAuth2.AcquireTokenByAuthorizationCode(
-                      ClientId,
-                      ClientSecret,
-                      OAuthAuthorityUrl,
-                      RedirectURL,
-                      Scopes,
-                      PromptInteraction::Consent,
-                      AccessTokenForBC,
-                      AuthCodeError);
-
-    end;
-
-    local procedure AccessToken()
-    var
-        myInt: Integer;
-    begin
-        ClientId := Constants.GetClientId();
-        ClientSecret := Constants.GetClientSecret();
-        RedirectURL := Constants.GetRedirectURL();
-        AadTenantId := Constants.GetAadTenantId();
-        ApiGraph := Constants.GetApiGraphMe();
-        ApiListCompanies := Constants.GetApiListCompanies();
-        OAuthAuthorityUrl := Constants.GetOAuthAuthorityUrl();
-        GetAccessTokenForBC();
-    end;
 
     /// <summary>
     /// Update Tender Status Update to released as Submited
@@ -405,7 +311,7 @@ codeunit 50302 "POS Event and Subscriber"
         clear(TotalGSTAmount1);
         Clear(TotalTCSAmt);
         Clear(TotalAmt);
-        SalesRec.get();
+        SalesRec.Get();
 
         SalesHdr.Reset();
         SalesHdr.SetRange("No.", DocumentNo);
@@ -460,6 +366,83 @@ codeunit 50302 "POS Event and Subscriber"
         end else
             exit('Failed');
     end;
+
+    /// <summary>
+    /// Tranfer Order Ship Function
+    /// </summary>
+    procedure TransferOrderShipment(no: code[20]): Text
+    var
+        TranHdr: Record "Transfer Header";
+        TransShip: Codeunit "TransferOrder-Post Shipment";
+    begin
+        TranHdr.Reset();
+        TranHdr.SetRange("No.", no);
+        IF TranHdr.FindFirst() then begin
+            IF TranHdr.Status = TranHdr.Status::Open then begin
+                TranHdr.Status := TranHdr.Status::Released;
+                TranHdr.Modify(true);
+            end;
+            IF TransShip.Run(TranHdr) then
+                exit('Success')
+            else
+                exit('Failed');
+
+        end;
+    end;
+
+    /// <summary>
+    /// Tranfer Order Ship Item Tracking
+    /// </summary>
+    procedure TranferShipItemTracking(no: code[20]; lineno: Integer; input: text[50]): text
+    var
+        myInt: Integer;
+    begin
+        exit('Success');
+    end;
+
+    // procedure POSActionEx(DocumentNo: Text; LineNo: integer; POSAction: Text; Parameter: Text; Input: Text): Text
+    // var
+    //     POSProcedure: Codeunit 50303;
+    // begin
+    //     case POSAction of
+    //         'VOIDL':
+    //             exit('Request received for document No' + DocumentNo);
+    //         //POSProcedure.SalesLineDeletion(DocumentNo, LineNo);
+    //         'VOIDT':
+    //             POSProcedure.SalesOrderDeletion(DocumentNo);
+    //         'VOIDP':
+    //             POSProcedure.PaymentLineDeletion(DocumentNo, LineNo);
+    //         'INVDISC':
+    //             POSProcedure.InvoiceDiscount(DocumentNo, Input);
+    //         'LINEDISC':
+    //             POSProcedure.LineDiscount(DocumentNo, LineNo, Input);
+    //         'SHIPLINE':
+    //             POSProcedure.ShipLine(DocumentNo, LineNo, Input);
+    //         'INVLINE':
+    //             POSProcedure.InvoiceLine(DocumentNo, LineNo, Input);
+    //         'RECEIPT':
+    //             POSProcedure.ItemReceipt(DocumentNo, LineNo, Input);
+    //         'DELDET':
+    //             POSProcedure.DeliveryDetails(DocumentNo, Input);
+    //     end;
+    //     exit('Request received for document No' + DocumentNo);
+    // end;
+
+    // procedure Ping(): Text
+    // begin
+    //     exit('Pong');
+    // end;
+
+    // procedure Addition(number1: Integer; number2: Integer): Integer
+    // begin
+    //     exit(number1 + number2);
+    // end;
+
+
+    // procedure Capitalize(input: Text): Text
+    // begin
+    //     exit(input.ToUpper);
+    // end;
 
     //<<<<<******************************** Local function created depending on original function*************
     procedure GetGSTAmountTotal(
@@ -611,6 +594,57 @@ codeunit 50302 "POS Event and Subscriber"
         //             IsPaymentLineeditable := PaymentLine.PaymentLinesEditable()
         //         Until PaymentLine.Next() = 0;
         // end;
+    end;
+
+
+    procedure GetAccessTokenForBC()
+    var
+        PromptInteraction: Enum "Prompt Interaction";
+        AuthCodeError: Text;
+        Scopes: List of [Text];
+    begin
+        Scopes.Add(Constants.GetResourceURLForApiBC() + '.default');
+
+        OAuth2.AcquireAuthorizationCodeTokenFromCache(
+        ClientId,
+        ClientSecret,
+        RedirectURL,
+        OAuthAuthorityUrl,
+        Scopes,
+        AccessTokenForBC);
+
+        GLSetup.get();
+        IF AccessTokenForBC <> '' then begin
+            //GLSetup."Access Token" := AccessTokenForBC;
+            GLSetup.Modify();
+        end;
+
+
+        if AccessTokenForBC = '' then
+            OAuth2.AcquireTokenByAuthorizationCode(
+                      ClientId,
+                      ClientSecret,
+                      OAuthAuthorityUrl,
+                      RedirectURL,
+                      Scopes,
+                      PromptInteraction::Consent,
+                      AccessTokenForBC,
+                      AuthCodeError);
+
+    end;
+
+    local procedure AccessToken()
+    var
+        myInt: Integer;
+    begin
+        ClientId := Constants.GetClientId();
+        ClientSecret := Constants.GetClientSecret();
+        RedirectURL := Constants.GetRedirectURL();
+        AadTenantId := Constants.GetAadTenantId();
+        ApiGraph := Constants.GetApiGraphMe();
+        ApiListCompanies := Constants.GetApiListCompanies();
+        OAuthAuthorityUrl := Constants.GetOAuthAuthorityUrl();
+        GetAccessTokenForBC();
     end;
     //>>>>>>******************************** Local function created depending on original function*************
 

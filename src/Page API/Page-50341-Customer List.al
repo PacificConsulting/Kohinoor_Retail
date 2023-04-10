@@ -22,46 +22,52 @@ page 50341 "Customer List API"
                 {
                     Caption = 'SystemID';
                 }
-                field(no; Rec."No.")
+                field(No; Rec."No.")
                 {
                     Caption = 'No.';
                 }
-                field(name; Rec.Name)
+                field(Name; Rec.Name)
                 {
                     Caption = 'Name';
                 }
-                field(locationCode; Rec."Location Code")
+                field(Address1; Rec.Address)
                 {
-                    Caption = 'Location Code';
+                    Caption = 'Address 1';
+                }
+                field(Address2; Rec."Address 2")
+                {
+                    Caption = 'Address 2';
+                }
+                field(City; Rec.City)
+                {
+                    Caption = 'City';
+                }
+                field(State; Rec."State Code")
+                {
+                    Caption = 'State Code';
+                }
+                field(Country; Rec."Country/Region Code")
+                {
+                    Caption = 'Country/Region Code';
+                }
+                field(ZipCode; Rec."Post Code")
+                {
+                    Caption = 'Post Code';
+                }
+                field(GSTINNumber; Rec."GST Registration No.")
+                {
+                    Caption = 'GST Registration No.';
                 }
                 field(phoneNo; Rec."Phone No.")
                 {
                     Caption = 'Phone No.';
                 }
-                field(contact; Rec.Contact)
+                field(eMail; Rec."E-Mail")
                 {
-                    Caption = 'Contact';
+                    Caption = 'Email';
                 }
-                field(balanceLCY; Rec."Balance (LCY)")
-                {
-                    Caption = 'Balance (LCY)';
-                }
-                field(balanceDueLCY; Rec."Balance Due (LCY)")
-                {
-                    Caption = 'Balance Due (LCY)';
-                }
-                field(salesLCY; Rec."Sales (LCY)")
-                {
-                    Caption = 'Sales (LCY)';
-                }
-                field(paymentsLCY; Rec."Payments (LCY)")
-                {
-                    Caption = 'Payments (LCY)';
-                }
-                field(address; Rec.Address)
-                {
-                    Caption = 'Address';
-                }
+
+
             }
         }
     }
