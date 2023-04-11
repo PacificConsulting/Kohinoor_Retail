@@ -104,6 +104,7 @@ pageextension 50306 "ItemCArdExtension" extends "Item Card"
                         NewResult := CUN.SerialItemTracking('KTPLSO23240001', 10000, '016179OD03');
                     end;
                 }
+
             }
         }
     }

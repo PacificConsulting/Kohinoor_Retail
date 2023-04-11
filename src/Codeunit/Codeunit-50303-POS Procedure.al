@@ -229,6 +229,7 @@ codeunit 50303 "POS Procedure"
             IF SalesLine.FindSet() then
                 repeat
                     SalesLine.Validate("Qty. to Ship", SalesLine.Quantity);
+                    SalesLine.Validate("Qty. to Invoice", SalesLine.Quantity);
                     SalesLine.Modify();
                 until SalesLine.Next() = 0;
             //<< Comment Mandetory so We have to pass Order Comment

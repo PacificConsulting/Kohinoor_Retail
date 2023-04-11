@@ -29,8 +29,12 @@ page 50352 "Sales Order List API"
                     trigger OnLookup(var Text: Text): Boolean
                     var
                         NoSeries: Codeunit NoSeriesManagement;
+                        SR: Record "Sales & Receivables Setup";
                     begin
-                        //Rec."No." := NoSeries.GetNextNo('SO', rec."Posting Date", true);
+                        SR.Get();
+                        SR.TestField("Order Nos.");
+                        Rec."No." := NoSeries.GetNextNo(SR."Order Nos.", rec."Posting Date", true);
+                        Rec.Modify();
                     end;
                 }
                 field(DocumentType; Rec."Document Type")

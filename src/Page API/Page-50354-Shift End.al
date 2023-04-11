@@ -44,10 +44,7 @@ page 50354 "Shift End"
                 {
                     Caption = 'SystemId';
                 }
-                field(timestamp; Rec.Timestamp)
-                {
-                    Caption = 'Timestamp';
-                }
+
             }
         }
     }

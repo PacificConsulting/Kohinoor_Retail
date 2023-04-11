@@ -9,6 +9,7 @@ table 50316 "Shift Details"
         {
             Caption = 'Entry No.';
             DataClassification = ToBeClassified;
+            Editable = false;
 
         }
         field(2; "Shift Type"; Option)
@@ -35,9 +36,9 @@ table 50316 "Shift Details"
             Caption = 'Date';
             DataClassification = ToBeClassified;
         }
-        field(6; Timestamp; DateTime)
+        field(6; "Entry Details"; DateTime)
         {
-            Caption = 'Timestamp';
+            Caption = 'Entry Details';
             DataClassification = ToBeClassified;
         }
     }

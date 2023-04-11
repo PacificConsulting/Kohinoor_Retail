@@ -11,7 +11,7 @@ page 50315 "Sales Order Subform API"
     PageType = API;
     SourceTable = "Sales Line";
     ODataKeyFields = SystemId;
-    SourceTableView = WHERE(Type = FILTER(Item | "G/L Account"));
+    //SourceTableView = WHERE(Type = FILTER(Item | "G/L Account"));
 
 
     layout
@@ -27,10 +27,41 @@ page 50315 "Sales Order Subform API"
                 field(documentNo; Rec."Document No.")
                 {
                     Caption = 'Document ID';
+                    // trigger OnValidate()
+                    // var
+                    //     SalesLine: record 37;
+                    // begin
+                    //     SalesLine.reset;
+                    //     SalesLine.SETRANGE("Document No.", Rec."Document No.");
+                    //     IF SalesLine.findlast then begin
+                    //         Rec."Line No." := SalesLine."Line No." + 10000;
+                    //         Rec.modify;
+                    //     end
+                    //     else begin
+                    //         Rec."Line No." := 10000;
+                    //         Rec.modify;
+                    //     end;
+                    // end;
                 }
                 field(documentType; Rec."Document Type")
                 {
                     Caption = 'Document Type';
+                    // trigger OnValidate()
+                    // var
+                    //     SalesLine: record 37;
+                    // begin
+                    //     SalesLine.reset;
+                    //     SalesLine.SETRANGE("Document No.", Rec."Document No.");
+                    //     IF SalesLine.findlast then begin
+
+                    //         Rec."Line No." := SalesLine."Line No." + 10000;
+                    //         Rec.modify;
+                    //     end
+                    //     else begin
+                    //         Rec."Line No." := 10000;
+                    //         Rec.modify;
+                    //     end;
+                    // end;
                 }
                 field("type"; Rec."Type")
                 {
@@ -888,4 +919,25 @@ page 50315 "Sales Order Subform API"
             }
         }
     }
+    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    var
+        SalesLine: record 37;
+    begin
+        SalesLine.reset;
+        SalesLine.SETRANGE("Document No.", Rec."Document No.");
+        IF SalesLine.findlast then begin
+            Rec."Document Type" := Rec."Document Type"::Order;
+            Rec."Document No." := SalesLine."Document No.";
+            Rec."Line No." := SalesLine."Line No." + 10000;
+            rec.Insert();
+            //Rec.modify;
+        end
+        else begin
+            Rec."Document Type" := Rec."Document Type"::Order;
+            Rec."Document No." := rec."Document No.";
+            Rec."Line No." := 10000;
+            rec.Insert();
+            //Rec.modify;
+        end;
+    end;
 }

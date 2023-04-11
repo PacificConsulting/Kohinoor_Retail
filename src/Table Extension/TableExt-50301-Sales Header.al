@@ -9,7 +9,8 @@ tableextension 50301 Sales_Header_AmttoCust extends "Sales Header"
                 RecLoc: Record Location;
             begin
                 IF RecLoc.Get("Location Code") then begin
-                    "Store No." := "Location Code";
+                    IF RecLoc.Store then
+                        "Store No." := "Location Code";
 
                 end;
 
@@ -36,7 +37,7 @@ tableextension 50301 Sales_Header_AmttoCust extends "Sales Header"
         field(50304; "POS Released Date"; Date)
         {
             DataClassification = ToBeClassified;
-
+            Editable = false;
         }
 
     }

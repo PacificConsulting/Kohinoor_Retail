@@ -43,10 +43,7 @@ page 50353 "Shift Start"
                 {
                     Caption = 'SystemId';
                 }
-                field(timestamp; Rec.Timestamp)
-                {
-                    Caption = 'Timestamp';
-                }
+
             }
         }
     }

@@ -8,6 +8,10 @@ pageextension 50308 Location_Card extends "Location Card"
             {
                 ApplicationArea = all;
             }
+            field("Cash Account No."; Rec."Cash Account No.")
+            {
+                ApplicationArea = all;
+            }
         }
     }
 

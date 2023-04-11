@@ -1,4 +1,4 @@
-tableextension 50305 "Location_Ext" extends Location
+tableextension 50305 "Location_Ext_retail" extends Location
 {
     fields
     {
@@ -6,6 +6,11 @@ tableextension 50305 "Location_Ext" extends Location
         {
             DataClassification = ToBeClassified;
             Caption = 'Store';
+        }
+        field(50302; "Cash Account No."; Code[20])
+        {
+            DataClassification = ToBeClassified;
+            TableRelation = "G/L Account"."No.";
         }
     }
 

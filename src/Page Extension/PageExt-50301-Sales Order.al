@@ -80,23 +80,34 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                 Caption = 'Payment Post';
                 Promoted = true;
                 PromotedIsBig = true;
+                PromotedCategory = Process;
 
                 trigger OnAction()
                 var
                     PaymentLine: Record "Payment Lines";
                     TotalPayemtamt: Decimal;
                     SalesHdr: Record 36;
+                    SaleLine: Record 37;
                 begin
-                    if not Confirm('Do you want to post payment receipt', true) then begin
+                    if Confirm('Do you want to post payment receipt', true) then begin
+                        rec.TestField("Store No.");
+                        rec.TestField("Staff Id");
                         clear(TotalGSTAmount1);
                         Clear(TotalTCSAmt);
                         Clear(TotalAmt);
+
+                        SaleLine.Reset();
+                        SaleLine.SetRange("Document No.", rec."No.");
+                        SaleLine.SetRange("Approval Status", SaleLine."Approval Status"::"Pending for Approval");
+                        IF Saleline.FindFirst() then
+                            error('You can not post when line is under approval');
 
                         GetGSTAmountTotal(Rec, TotalGSTAmount1);
                         GetTCSAmountTotal(Rec, TotalTCSAmt);
                         GetSalesorderStatisticsAmount(Rec, TotalAmt);
                         Rec."Amount To Customer" := TotalAmt + TotalGSTAmount1 + TotalTCSAmt;
                         Rec.Modify();
+
 
                         Clear(TotalPayemtamt);
                         PaymentLine.Reset();
@@ -113,8 +124,9 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                             SalesHdr.Reset();
                             SalesHdr.SetRange("No.", rec."No.");
                             If SalesHdr.FindFirst() then begin
-                                SalesHdr.Status := SalesHdr.Status::Released;
-                                SalesHdr.Modify();
+                                /// SalesHdr.Status := SalesHdr.Status::Released;
+                            //    SalesHdr."POS Released Date" := today;
+                                //SalesHdr.Modify();
                             end;
                         end;
 
@@ -135,25 +147,75 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     SL1: Record 37;
                     NoSer: Codeunit NoSeriesManagement;
                     result: Text;
+                    No: code[20];
+
                 begin
                     //POS.SalesLineDeletion('1010045', 10000);
-                    result := POS.InvoiceComplete('KTPLSO23240003');
-                    // SH.Init();
-                    // SH.TransferFields(Rec);
-                    // SH."No." := NoSer.GetNextNo('SO', Today, true);
-                    // SH.Status := SH.Status::Open;
-                    // SH.Insert(true);
-                    // SL1.reset();
-                    // SL1.SetRange("Document No.", Rec."No.");
-                    // IF SL1.FindFirst() then;
-                    // SL.Init();
-                    // SL.TransferFields(SL1);
-                    // SL.Insert(true);
-                    // Message('Copy Order');
+                    //result := POS.InvoiceComplete('KTPLSO23240003');
+                    SL.Reset();
+                    sl.SetRange("Approval Status", sl."Approval Status"::"Pending for Approval");
+                    IF SL.FindFirst() then;
+                    Hyperlink(GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List", SL));
+
+                end;
+            }
+            action("Send PAGE Mail")
+            {
+                Caption = 'Send Mail';
+                ApplicationArea = all;
+                PromotedCategory = Process;
+                Promoted = true;
+                PromotedOnly = true;
+                Image = Email;
+                trigger OnAction()
+                var
+                    txtFile: Text[100];
+                    Window: Dialog;
+                    txtFileName: Text[100];
+                    Char: Char;
+                    recSalesInvHdr: Record 112;
+                    Recref: RecordRef;
+                    recCust: Record 18;
+                    TempBlob: Codeunit "Temp Blob";
+                    OutStr: OutStream;
+                    Instr: InStream;
+                    EMail: Codeunit Email;
+                    Emailmessage: Codeunit "Email Message";
+                    DecryptedValue: Text;
+                begin
+                    DecryptedValue := GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List");
+                    Window.OPEN(
+                     'Sending Mail              #1######\');
+
+                    Emailmessage.Create(recCust."E-Mail", 'Approval Slab', '', true);
+                    Emailmessage.AppendToBody('<p><font face="Georgia">Dear <B>Sir,</B></font></p>');
+                    Char := 13;
+                    Emailmessage.AppendToBody(FORMAT(Char));
+                    Emailmessage.AppendToBody('<p><font face="Georgia"> <B>!!!Greetings!!!</B></font></p>');
+                    Emailmessage.AppendToBody(FORMAT(Char));
+                    Emailmessage.AppendToBody(FORMAT(Char));
+                    Emailmessage.AppendToBody('<p><font face="Georgia"><BR>Please find below Approval Link Approve Date</BR></font></p>');
+                    Emailmessage.AppendToBody(FORMAT(Char));
+                    Emailmessage.AppendToBody(FORMAT(Char));
+                    Emailmessage.AppendToBody('<a href=' + DecryptedValue + '/">Web Link!</a>');
+                    Emailmessage.AppendToBody(FORMAT(Char));
+                    Emailmessage.AppendToBody(FORMAT(Char));
+                    Emailmessage.AppendToBody('<p><font face="Georgia"><BR>Thanking you,</BR></font></p>');
+                    Emailmessage.AppendToBody('<p><font face="Georgia"><BR>Warm Regards,</BR></font></p>');
+                    Emailmessage.AppendToBody('<p><font face="Georgia"><BR><B>For K-TECH (INDIA) LIMITED</B></BR></font></p>');
+
+                    Window.UPDATE(1, STRSUBSTNO('%1', 'Mail Sent'));
+                    EMail.Send(Emailmessage, Enum::"Email Scenario"::Default);
+                    Window.CLOSE;
+
+                    //Hyperlink(GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List"));
+
                 end;
             }
         }
+
     }
+
 
 
 
@@ -267,6 +329,8 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
         NoSeriesMgt: Codeunit 396;
         BankAcc: Record 270;
         PaymentLine: Record 50301;
+        GenJourLineInit: Record 81;
+
     begin
         PaymentLine.Reset();
         PaymentLine.SetRange("Document Type", Rec."Document Type");
@@ -274,26 +338,26 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
         if PaymentLine.FindSet() then
             repeat
                 GenJourLine.Reset();
-                GenJourLine.SetRange("Journal Template Name", 'BANKRCPTY');
-                GenJourLine.SetRange("Journal Batch Name", 'USER-A');
-                GenJourLine.Init();
-                GenJourLine."Document No." := NoSeriesMgt.GetNextNo('BANKRCPTV', Rec."Posting Date", false);
-                GenJourLine."Posting Date" := Today;
+                GenJourLine.SetRange("Journal Template Name", 'BANK RECE');
+                GenJourLine.SetRange("Journal Batch Name", 'DEFAULT');
+                GenJourLineInit.Init();
+                GenJourLineInit."Journal Template Name" := 'BANK RECE';
+                GenJourLineInit."Journal Batch Name" := 'DEFAULT';
+                GenJourLineInit."Document No." := Salesheader."No.";
+                GenJourLineInit.Validate("Posting Date", Today);
                 IF GenJourLine.FindLast() then
                     GenJourLine."Line No." := GenJourLine."Line No." + 10000
                 else
                     GenJourLine."Line No." := 10000;
 
-                GenJourLine."Journal Template Name" := 'BANKRCPTY';
-                GenJourLine."Journal Batch Name" := 'USER-A';
-                GenJourLine."Account Type" := GenJourLine."Account Type"::"Bank Account";
-                GenJourLine."Bal. Account Type" := GenJourLine."Bal. Account Type"::Customer;
-                GenJourLine.Validate("Bal. Account No.", rec."Sell-to Customer No.");
-                GenJourLine.validate("Account No.", 'GIRO');
-                GenJourLine."GST Group Code" := 'Goods';
-                GenJourLine.validate(Amount, PaymentLine.Amount);
-                GenJourLine.Comment := 'Auto Post';
-                GenJourLine.Insert(true);
+                GenJourLineInit."Account Type" := GenJourLineInit."Account Type"::"Bank Account";
+                GenJourLineInit."Bal. Account Type" := GenJourLineInit."Bal. Account Type"::Customer;
+                GenJourLineInit.Validate("Bal. Account No.", rec."Sell-to Customer No.");
+                GenJourLineInit.validate("Account No.", 'BA000009');
+                GenJourLineInit."GST Group Code" := 'Goods';
+                GenJourLineInit.validate(Amount, PaymentLine.Amount);
+                GenJourLineInit.Comment := 'Auto Post';
+                GenJourLineInit.Insert(); //This Line Will Comment when auto post below codeunit Call
             Until PaymentLine.Next() = 0;
 
         // IF CODEUNIT.RUN(CODEUNIT::"Gen. Jnl.-Post", GenJourLine) then begin

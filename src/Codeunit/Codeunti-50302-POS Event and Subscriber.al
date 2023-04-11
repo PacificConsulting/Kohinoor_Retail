@@ -154,14 +154,16 @@ codeunit 50302 "POS Event and Subscriber"
     /// <summary>
     /// Update Tender Status Update to released as Submited
     /// </summary>
-    procedure TenderSubmit(storeno: Code[20]; staffid: Code[20]; sdate: Date): Text
+    procedure TenderSubmit(storeno: Code[20]; staffid: Code[20]; sdate: Text): Text
     var
         TenderHdr: Record "Tender Declartion Header";
+        Vdate: date;
     begin
+        Evaluate(Vdate, sdate);
         TenderHdr.Reset();
         TenderHdr.SetRange("Store No.", storeno);
         TenderHdr.SetRange("Staff ID", staffid);
-        TenderHdr.SetRange("Store Date", sdate);
+        TenderHdr.SetRange("Store Date", Vdate);
         IF TenderHdr.FindFirst() then begin
             TenderHdr.Status := TenderHdr.Status::Released;
             TenderHdr.Modify();
@@ -174,12 +176,21 @@ codeunit 50302 "POS Event and Subscriber"
     /// <summary>
     /// Bank Drop Submit Function
     /// </summary>
-    procedure Bankdropsubmit(storeno: Code[20]; staffid: Code[20]; sdate: Date; amount: text): Text
+    procedure Bankdropsubmit(storeno: Code[20]; staffid: Code[20]; sdate: text; amount: text): Text
     var
     begin
         exit('Success')
     end;
 
+    /// <summary>
+    /// Exchange Order Function
+    /// </summary>
+    procedure ExchangeItem(documentno: Code[20]; exchangeitem: code[20]; qty: text; serialno: code[50]; price: text): text
+    var
+        myInt: Integer;
+    begin
+
+    end;
 
     /// <summary>
     /// Order Confirmation for WareHouse function POS.

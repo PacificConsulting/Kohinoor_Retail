@@ -41,10 +41,35 @@ pageextension 50304 "Sales Line Subform" extends "Sales Order Subform"
         }
     }
 
+
     actions
     {
         // Add changes to page actions here
     }
+
+    // trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    // var
+    //     SalesLine: record 37;
+    // begin
+    //     SalesLine.reset;
+    //     SalesLine.SETRANGE("Document No.", 'PCORD2');
+    //     IF SalesLine.findlast then begin
+    //         SalesLine."Document Type" := SalesLine."Document Type"::Order;
+    //         SalesLine."Document No." := SalesLine."Document No.";
+    //         SalesLine."Line No." := SalesLine."Line No." + 10000;
+    //         SalesLine.Insert();
+    //         //Rec.modify;
+    //     end
+    //     else begin
+    //         SalesLine."Document Type" := SalesLine."Document Type"::Order;
+    //         SalesLine."Document No." := SalesLine."Document No.";
+    //         SalesLine."Line No." := 10000;
+    //         SalesLine.Insert();
+    //         //Rec.modify;
+    //     end;
+
+    // end;
+
 
     var
         myInt: Integer;
