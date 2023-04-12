@@ -83,7 +83,7 @@ codeunit 50301 "Event and Subscribers"
         if RecPaymentLine.FindFirst() then
             RecPaymentLine.DeleteAll();
     end;
-
+    //
 
     // [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnRunOnBeforeCheckTotalInvoiceAmount', '', false, false)]
     // local procedure OnRunOnBeforeCheckTotalInvoiceAmount(var SalesHeader: Record "Sales Header")
