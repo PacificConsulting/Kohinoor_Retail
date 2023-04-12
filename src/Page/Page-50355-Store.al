@@ -1,7 +1,7 @@
-page 50355 "Store Master"
+page 50355 "Store Card"
 {
     ApplicationArea = All;
-    Caption = 'Store Master';
+    Caption = 'Store Card';
     PageType = Card;
     SourceTable = Location;
     SourceTableView = where(Store = filter(True));

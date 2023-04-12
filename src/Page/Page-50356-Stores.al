@@ -1,11 +1,11 @@
-page 50356 "Store Master List"
+page 50356 Stores
 {
     ApplicationArea = All;
-    Caption = 'Store Master List';
+    Caption = 'Stores';
     PageType = List;
     SourceTable = Location;
     UsageCategory = Lists;
-    CardPageId = "Store Master";
+    CardPageId = "Store Card";
     SourceTableView = where(Store = filter(True));
 
     layout

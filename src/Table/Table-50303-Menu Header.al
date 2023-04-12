@@ -4,7 +4,7 @@ table 50303 "Menu Header"
 
     fields
     {
-        field(1; "Menu ID"; Integer)
+        field(1; "Menu ID"; Code[20])
         {
             DataClassification = ToBeClassified;
 
@@ -23,6 +23,10 @@ table 50303 "Menu Header"
             DataClassification = ToBeClassified;
             Editable = false;
         }
+        // field(5; "Menu Code"; Code[20];)
+        // {
+
+        // }
     }
 
     keys

@@ -188,9 +188,41 @@ codeunit 50302 "POS Event and Subscriber"
     /// </summary>
     procedure ExchangeItem(documentno: Code[20]; exchangeitem: code[20]; qty: text; serialno: code[50]; price: text): text
     var
+        SalesLineInit: Record 37;
         SalesLine: Record 37;
+        SR: Record "Sales & Receivables Setup";
+        Quantity: Decimal;
+        SalesHeader: Record 36;
+        UnitP: Decimal;
     begin
+        SalesHeader.Reset();
+        SalesHeader.SetRange("No.", documentno);
+        SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
+        IF SalesHeader.FindFirst() then begin
+            SR.Get();
+            SR.TestField("Exchange Item G/L");
+            Evaluate(Quantity, qty);
+            Evaluate(UnitP, price);
+            SalesLineInit.Init();
+            SalesLineInit."Document Type" := SalesLineInit."Document Type"::Order;
+            SalesLineInit."Document No." := documentno;
+            SalesLine.Reset();
+            SalesLine.SetRange("Document No.", documentno);
+            IF SalesLine.FindLast() then
+                SalesLineInit."Line No." := SalesLine."Line No." + 10000
+            else
+                SalesLineInit."Line No." := 10000;
 
+            SalesLineInit.Insert();
+            SalesLineInit.Type := SalesLineInit.Type::"G/L Account";
+            SalesLineInit.Validate("No.", SR."Exchange Item G/L");
+            SalesLineInit.Validate(Quantity, Quantity);
+            SalesLineInit.Validate("Unit of Measure Code", 'PCS');
+            SalesLineInit.Validate("Unit Price", UnitP * -1);
+            SalesLineInit."Serial No." := serialno;
+            SalesLineInit."Exchange Item No." := exchangeitem;
+            SalesLineInit.Modify();
+        end;
     end;
 
     /// <summary>

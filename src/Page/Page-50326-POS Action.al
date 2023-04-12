@@ -1,7 +1,7 @@
-page 50326 "POS Action Master"
+page 50326 "POS Action"
 {
     ApplicationArea = All;
-    Caption = 'POS Action Master';
+    Caption = 'POS Action';
     PageType = List;
     SourceTable = "POS Action Master";
     UsageCategory = Lists;

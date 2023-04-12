@@ -20,16 +20,6 @@ page 50304 "Menu Card"
                 {
                     ToolTip = 'Specifies the value of the Menu Name field.';
                 }
-                field("Creation Date"; Rec."Creation Date")
-                {
-                    ToolTip = 'Specifies the value of the Creation Date field.';
-                    Editable = false;
-                }
-                field("Creation ID"; Rec."Creation ID")
-                {
-                    ToolTip = 'Specifies the value of the Creation ID field.';
-                    Editable = false;
-                }
             }
             part(Lines; "Menu Line Subform")
             {
@@ -41,21 +31,7 @@ page 50304 "Menu Card"
         }
     }
 
-    actions
-    {
-        area(Processing)
-        {
-            action(ActionName)
-            {
-                ApplicationArea = All;
 
-                trigger OnAction()
-                begin
-
-                end;
-            }
-        }
-    }
 
     var
         myInt: Integer;

@@ -4,15 +4,13 @@ table 50304 "Menu Line"
 
     fields
     {
-        field(1; "Menu ID"; Integer)
+        field(1; "Menu ID"; Code[20])
         {
             DataClassification = ToBeClassified;
-
         }
         field(2; "Menu Line"; Integer)
         {
             DataClassification = ToBeClassified;
-
         }
         field(3; Name; Text[30])
         {

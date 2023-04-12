@@ -1,7 +1,7 @@
-page 50310 "Staff Master Details"
+page 50310 Staffs
 {
     ApplicationArea = All;
-    Caption = 'Staff Master Details';
+    Caption = 'Staffs';
     PageType = List;
     SourceTable = "Staff Master";
     UsageCategory = Lists;
