@@ -36,8 +36,15 @@ pageextension 50304 "Sales Line Subform" extends "Sales Order Subform"
             {
                 ApplicationArea = all;
             }
+        }
+        addafter("Unit Price Incl. of Tax")
+        {
+            field("GST Tax Amount"; Rec."GST Tax Amount")
+            {
+                ApplicationArea = all;
+                ToolTip = 'Specifies the value of the GST Tax Amount.';
 
-
+            }
         }
     }
 

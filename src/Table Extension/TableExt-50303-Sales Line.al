@@ -7,6 +7,7 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
             Caption = 'Store No.';
             DataClassification = ToBeClassified;
             TableRelation = Location.Code;
+
         }
         field(50302; "Approval Status"; Enum "Sales Line Approval Status")
         {
@@ -42,6 +43,11 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
         {
             DataClassification = ToBeClassified;
         }
+        field(50310; "GST Tax Amount"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+            Editable = false;
+        }
 
     }
     // trigger OnBeforeModify()
@@ -63,10 +69,28 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
     end;
 
     trigger OnInsert()
+    var
+        RecLoc: Record Location;
+        SalesHeader: Record 36;
     begin
+        SalesHeader.Reset();
+        SalesHeader.SetRange("No.", "Document No.");
+        IF SalesHeader.FindFirst() then begin
+            IF SalesHeader."Store No." <> '' then begin
+                RecLoc.Reset();
+                RecLoc.SetRange(Store, true);
+                RecLoc.SetRange(Code, SalesHeader."Store No.");
+                IF RecLoc.FindFirst() then begin
+                    Validate("Location Code", RecLoc.Code);
+                    "Store No." := RecLoc.Code;
+
+                end;
+            end;
+        end;
         IF "Approval Status" = "Approval Status"::"Pending for Approval" then
             Error('You can not modify Lines if Approval Status is Pending for Approval ');
     end;
+
 
     trigger OnDelete()
     begin

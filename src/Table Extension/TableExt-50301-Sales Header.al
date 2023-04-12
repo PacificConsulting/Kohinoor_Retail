@@ -11,7 +11,6 @@ tableextension 50301 Sales_Header_AmttoCust extends "Sales Header"
                 IF RecLoc.Get("Location Code") then begin
                     IF RecLoc.Store then
                         "Store No." := "Location Code";
-
                 end;
 
 
@@ -28,6 +27,19 @@ tableextension 50301 Sales_Header_AmttoCust extends "Sales Header"
             DataClassification = ToBeClassified;
             Caption = 'Store No.';
             TableRelation = Location.Code;
+            trigger OnValidate()
+            var
+                RecLoc: Record Location;
+            begin
+                IF "Store No." <> '' then begin
+                    RecLoc.Reset();
+                    RecLoc.SetRange(Store, true);
+                    RecLoc.SetRange(Code, "Store No.");
+                    IF RecLoc.FindFirst() then begin
+                        Validate("Location Code", RecLoc.Code);
+                    end;
+                end;
+            end;
         }
         field(50303; "Staff Id"; Code[10])
         {
@@ -44,6 +56,8 @@ tableextension 50301 Sales_Header_AmttoCust extends "Sales Header"
 
     var
         myInt: Integer;
+
+
 
     trigger OnDelete()
     var

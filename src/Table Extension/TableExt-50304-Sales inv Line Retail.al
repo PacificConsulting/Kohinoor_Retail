@@ -42,6 +42,11 @@ tableextension 50304 "Sales inv. Line Retail" extends "Sales Invoice Line"
         {
             DataClassification = ToBeClassified;
         }
+        field(50310; "GST Tax Amount"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+            Editable = false;
+        }
 
     }
 }

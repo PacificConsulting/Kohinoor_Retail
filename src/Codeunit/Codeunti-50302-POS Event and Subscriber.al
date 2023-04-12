@@ -188,7 +188,7 @@ codeunit 50302 "POS Event and Subscriber"
     /// </summary>
     procedure ExchangeItem(documentno: Code[20]; exchangeitem: code[20]; qty: text; serialno: code[50]; price: text): text
     var
-        myInt: Integer;
+        SalesLine: Record 37;
     begin
 
     end;
@@ -258,6 +258,7 @@ codeunit 50302 "POS Event and Subscriber"
         LastEntryNo: Integer;
         SalesLine: Record 37;
         SerialNo: Code[50];
+        ItemLedgEntry: Record 32;
     begin
         // exit('Success....');
         Evaluate(SerialNo, input);
@@ -271,36 +272,36 @@ codeunit 50302 "POS Event and Subscriber"
             ReservEntry.LOCKTABLE;
             IF ReservEntry.FINDLAST THEN
                 LastEntryNo := ReservEntry."Entry No.";
-
-            ReservEntryInit.INIT;
-            LastEntryNo += 1;
-            ReservEntryInit."Entry No." := LastEntryNo;
-            ReservEntryInit."Reservation Status" := ReservEntryInit."Reservation Status"::Surplus;
-            ReservEntryInit.Positive := FALSE;
-            ReservEntryInit."Item No." := SalesLine."No.";
-            ReservEntryInit."Location Code" := SalesLine."Location Code";
-            ReservEntryInit."Qty. per Unit of Measure" := SalesLine."Qty. per Unit of Measure";
-            ReservEntryInit.VALIDATE("Quantity (Base)", /*SalesLine.Quantity*/1 * -1);
-            ReservEntryInit."Source Type" := DATABASE::"Sales Line";
-            ReservEntryInit."Source ID" := SalesLine."Document No.";
-            ReservEntryInit."Source Ref. No." := SalesLine."Line No.";
-            ReservEntryInit."Source Subtype" := 1;
-            ReservEntryInit.validate("Serial No.", SerialNo);
-            ReservEntryInit."Item Tracking" := ReservEntryInit."Item Tracking"::"Serial No.";
-            ReservEntryInit."Shipment Date" := SalesLine."Shipment Date";
-            ReservEntryInit."Planning Flexibility" := ReservEntryInit."Planning Flexibility"::Unlimited;
-            // ReservEntryInit.VALIDATE("Lot No.", ItemLedgEntry."Lot No.");
-            // ReservEntryInit."Variant Code" := ItemLedgEntry."Variant Code";
-
-            // IF ReservEntryInit.Positive THEN BEGIN
-            //     ReservEntryInit."Warranty Date" := ItemLedgEntry."Warranty Date";
-            //     ReservEntryInit."Expiration Date" := ItemLedgEntry."Expiration Date";
-            //     ReservEntryInit."Expected Receipt Date" := 0D
-            // END ELSE
-
-            ReservEntryInit."Creation Date" := TODAY;
-            ReservEntryInit."Created By" := USERID;
-            ReservEntryInit.INSERT;
+            ItemLedgEntry.RESET;
+            ItemLedgEntry.SETCURRENTKEY("Item No.", Open, "Variant Code", Positive, "Location Code");
+            ItemLedgEntry.SETRANGE("Item No.", SalesLine."No.");
+            ItemLedgEntry.SETRANGE("Variant Code", SalesLine."Variant Code");
+            ItemLedgEntry.SETRANGE(Open, TRUE);
+            ItemLedgEntry.SETRANGE("Location Code", SalesLine."Location Code");
+            ItemLedgEntry.SetRange("Serial No.", SerialNo);
+            IF ItemLedgEntry.FindSet() then Begin //repeat
+                ReservEntryInit.INIT;
+                LastEntryNo += 1;
+                ReservEntryInit."Entry No." := LastEntryNo;
+                ReservEntryInit."Reservation Status" := ReservEntryInit."Reservation Status"::Surplus;
+                ReservEntryInit.Positive := FALSE;
+                ReservEntryInit."Item No." := SalesLine."No.";
+                ReservEntryInit."Location Code" := ItemLedgEntry."Location Code";  //SalesLine."Location Code";
+                ReservEntryInit."Qty. per Unit of Measure" := SalesLine."Qty. per Unit of Measure";
+                ReservEntryInit.VALIDATE("Quantity (Base)", SalesLine.Quantity * -1);
+                ReservEntryInit."Source Type" := DATABASE::"Sales Line";
+                ReservEntryInit."Source ID" := SalesLine."Document No.";
+                ReservEntryInit."Source Ref. No." := SalesLine."Line No.";
+                ReservEntryInit."Source Subtype" := 1;
+                ReservEntryInit.validate("Serial No.", ItemLedgEntry."Serial No."/*SerialNo*/);
+                ReservEntryInit."Item Tracking" := ReservEntryInit."Item Tracking"::"Serial No.";
+                ReservEntryInit."Shipment Date" := SalesLine."Shipment Date";
+                ReservEntryInit."Planning Flexibility" := ReservEntryInit."Planning Flexibility"::Unlimited;
+                //ReservEntry.
+                ReservEntryInit."Creation Date" := TODAY;
+                ReservEntryInit."Created By" := USERID;
+                ReservEntryInit.INSERT;
+            End; //Until
             exit('Success');
         end;
 
@@ -405,11 +406,88 @@ codeunit 50302 "POS Event and Subscriber"
     /// <summary>
     /// Tranfer Order Ship Item Tracking
     /// </summary>
-    procedure TranferShipItemTracking(no: code[20]; lineno: Integer; input: text[50]): text
+    procedure TranferShipItemTracking(documentno: code[20]; lineno: Integer; input: text[50]): text
     var
-        myInt: Integer;
+        ReservEntry: Record 337;
+        ReservEntryInit: Record 337;
+        LastEntryNo: Integer;
+        SerialNo: Code[50];
+        ItemLedgEntry: Record 32;
+        TranLine: Record "Transfer Line";
+
+
     begin
-        exit('Success');
+        // exit('Success....');
+        Evaluate(SerialNo, input);
+        Clear(LastEntryNo);
+
+        TranLine.Reset();
+        TranLine.SetRange("Document No.", documentno);
+        TranLine.SetRange("Line No.", lineno);
+        IF TranLine.FindFirst() then begin
+            ReservEntry.RESET;
+            ReservEntry.LOCKTABLE;
+            IF ReservEntry.FINDLAST THEN
+                LastEntryNo := ReservEntry."Entry No.";
+            // ItemLedgEntry.RESET;
+            // ItemLedgEntry.SETCURRENTKEY("Item No.", Open, "Variant Code", Positive, "Location Code");
+            // ItemLedgEntry.SETRANGE("Item No.", TranLine."Item No.");
+            // ItemLedgEntry.SETRANGE(Open, TRUE);
+            // ItemLedgEntry.SETRANGE("Location Code", ItemLedgEntry."Location Code");
+            // ItemLedgEntry.SetRange("Serial No.", SerialNo);
+            // IF ItemLedgEntry.FindSet() then Begin //repeat
+            ReservEntryInit.INIT;
+            LastEntryNo += 1;
+            ReservEntryInit."Entry No." := LastEntryNo;
+            ReservEntryInit."Reservation Status" := ReservEntryInit."Reservation Status"::Surplus;
+            ReservEntryInit.Positive := FALSE;
+            ReservEntryInit."Item No." := TranLine."Item No.";
+            ReservEntryInit."Location Code" := TranLine."Transfer-from Code";  //SalesLine."Location Code";
+            ReservEntryInit."Qty. per Unit of Measure" := TranLine."Qty. per Unit of Measure";
+            ReservEntryInit.VALIDATE("Quantity (Base)", TranLine.Quantity * -1);
+            ReservEntryInit."Source Type" := DATABASE::"Transfer Line";
+            ReservEntryInit."Source ID" := TranLine."Document No.";
+            ReservEntryInit."Source Ref. No." := TranLine."Line No.";
+            ReservEntryInit."Source Subtype" := 0;
+            ReservEntryInit.validate("Serial No.", SerialNo/*ItemLedgEntry."Serial No."/*SerialNo*/);
+            ReservEntryInit."Item Tracking" := ReservEntryInit."Item Tracking"::"Serial No.";
+            ReservEntryInit."Shipment Date" := TranLine."Shipment Date";
+            ReservEntryInit."Planning Flexibility" := ReservEntryInit."Planning Flexibility"::Unlimited;
+            //ReservEntry.
+            ReservEntryInit."Creation Date" := TODAY;
+            ReservEntryInit."Created By" := USERID;
+            ReservEntryInit.INSERT;
+            //<<<<<***********Postive Qty New Reservation Entry Created*************//
+            ReservEntry.RESET;
+            ReservEntry.LOCKTABLE;
+            IF ReservEntry.FINDLAST THEN
+                LastEntryNo := ReservEntry."Entry No.";
+            ReservEntryInit.INIT;
+            LastEntryNo += 1;
+            ReservEntryInit."Entry No." := LastEntryNo;
+            ReservEntryInit."Reservation Status" := ReservEntryInit."Reservation Status"::Surplus;
+            ReservEntryInit.Positive := FALSE;
+            ReservEntryInit."Item No." := TranLine."Item No.";
+            ReservEntryInit."Location Code" := TranLine."Transfer-to Code";  //SalesLine."Location Code";
+            ReservEntryInit."Qty. per Unit of Measure" := TranLine."Qty. per Unit of Measure";
+            ReservEntryInit.VALIDATE("Quantity (Base)", TranLine.Quantity);
+            ReservEntryInit."Source Type" := DATABASE::"Transfer Line";
+            ReservEntryInit."Source ID" := TranLine."Document No.";
+            ReservEntryInit."Source Ref. No." := TranLine."Line No.";
+            ReservEntryInit."Source Subtype" := 1;
+            ReservEntryInit.validate("Serial No.", SerialNo/* ItemLedgEntry."Serial No."*/);
+            ReservEntryInit."Item Tracking" := ReservEntryInit."Item Tracking"::"Serial No.";
+            ReservEntryInit."Shipment Date" := TranLine."Shipment Date";
+            ReservEntryInit."Planning Flexibility" := ReservEntryInit."Planning Flexibility"::Unlimited;
+            //ReservEntry.
+            ReservEntryInit."Creation Date" := TODAY;
+            ReservEntryInit."Created By" := USERID;
+            ReservEntryInit.INSERT;
+            // End; //Until
+            exit('Success');
+        end;
+
+
     end;
 
     // procedure POSActionEx(DocumentNo: Text; LineNo: integer; POSAction: Text; Parameter: Text; Input: Text): Text

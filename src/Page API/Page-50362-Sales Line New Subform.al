@@ -57,6 +57,20 @@ page 50362 "Sales Line New Subform"
                 {
                     Caption = 'Amount Incl. Vat';
                 }
+                field(description; Rec.Description)
+                {
+                    Caption = 'Description';
+                }
+                field(unitPriceInclOfTax; Rec."Unit Price Incl. of Tax")
+                {
+                    Caption = 'Unit Price Incl. of Tax';
+                }
+                field(gstTaxAmount; Rec."GST Tax Amount")
+                {
+                    Caption = 'GST Tax Amount';
+                }
+
+
             }
         }
     }
