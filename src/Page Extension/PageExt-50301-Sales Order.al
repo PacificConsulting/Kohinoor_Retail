@@ -156,6 +156,8 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     sl.SetRange("Approval Status", sl."Approval Status"::"Pending for Approval");
                     IF SL.FindFirst() then;
                     Hyperlink(GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List", SL));
+                    result := GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List", SL);
+                    Message(result);
 
                 end;
             }

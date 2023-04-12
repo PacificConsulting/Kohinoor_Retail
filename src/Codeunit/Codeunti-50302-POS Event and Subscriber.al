@@ -159,17 +159,18 @@ codeunit 50302 "POS Event and Subscriber"
         TenderHdr: Record "Tender Declartion Header";
         Vdate: date;
     begin
-        Evaluate(Vdate, sdate);
-        TenderHdr.Reset();
-        TenderHdr.SetRange("Store No.", storeno);
-        TenderHdr.SetRange("Staff ID", staffid);
-        TenderHdr.SetRange("Store Date", Vdate);
-        IF TenderHdr.FindFirst() then begin
-            TenderHdr.Status := TenderHdr.Status::Released;
-            TenderHdr.Modify();
-            exit('Sucess');
-        end else
-            exit('Failed, Tender does not exist');
+        exit('Sucess');
+        // Evaluate(Vdate, sdate);
+        // TenderHdr.Reset();
+        // TenderHdr.SetRange("Store No.", storeno);
+        // TenderHdr.SetRange("Staff ID", staffid);
+        // TenderHdr.SetRange("Store Date", Vdate);
+        // IF TenderHdr.FindFirst() then begin
+        //     TenderHdr.Status := TenderHdr.Status::Released;
+        //     TenderHdr.Modify();
+        //     exit('Sucess');
+        // end else
+        //     exit('Failed, Tender does not exist');
     end;
 
 
