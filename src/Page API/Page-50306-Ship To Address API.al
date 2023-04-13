@@ -21,7 +21,7 @@ page 50306 "Ship To Address API"
             {
                 field(systemId; Rec.SystemId)
                 {
-                    Caption = 'SystemId';
+                    Caption = 'SystemId';//
                 }
                 field(arnNo; Rec."ARN No.")
                 {
@@ -42,6 +42,16 @@ page 50306 "Ship To Address API"
                 field("code"; Rec."Code")
                 {
                     Caption = 'Code';
+                    trigger OnLookup(var Text: Text): Boolean
+                    Var
+                        SR: record 311;
+                        NoSeries: Codeunit NoSeriesManagement;
+                    begin
+                        SR.Get();
+                        SR.TestField("Ship To address No Series");
+                        Rec.code := NoSeries.GetNextNo(SR."Ship To address No Series", Today, true);
+                        //Rec.Modify();
+                    end;
                 }
                 field(consignee; Rec.Consignee)
                 {
