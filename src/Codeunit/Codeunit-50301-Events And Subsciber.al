@@ -56,6 +56,73 @@ codeunit 50301 "Event and Subscribers"
             SalesHeader.Invoice := true;
         end
     end;
+
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnAfterPostSalesDoc', '', false, false)]
+    local procedure OnAfterPostSalesDoc(var SalesHeader: Record "Sales Header"; var GenJnlPostLine: Codeunit "Gen. Jnl.-Post Line"; SalesShptHdrNo: Code[20]; RetRcpHdrNo: Code[20]; SalesInvHdrNo: Code[20]; SalesCrMemoHdrNo: Code[20]; CommitIsSuppressed: Boolean; InvtPickPutaway: Boolean; var CustLedgerEntry: Record "Cust. Ledger Entry"; WhseShip: Boolean; WhseReceiv: Boolean; PreviewMode: Boolean)
+    Var
+        ItemJ: record 83;
+        ItemJInit: record 83;
+        SalesLine: record 37;
+        SalesInvLine: record 113;
+        ReservEntryInit: Record 337;
+        ReservEntry: Record 337;
+        ItemJnlPostBatch: Codeunit "Item Jnl.-Post Batch";
+    begin
+        //<<***********Auto Postive Item Journal Line Created and Post*************
+        SalesLine.reset();
+        SalesLine.SetRange("Document No.", SalesHeader."No.");
+        SalesLine.SetFilter("Exchange Item No.", '<>%1', '');
+        IF SalesLine.findset() then
+            repeat
+                ItemJInit.Init();
+                ItemJInit."Journal Template Name" := 'ITEM';
+                ItemJInit."Journal Batch Name" := 'TEST';
+                ItemJ.Reset();
+                ItemJ.SetRange("Journal Template Name", 'ITEM');
+                ItemJ.SetRange("Journal Batch Name", 'TEST');
+                IF ItemJ.FindLast() then
+                    ItemJInit."Line No." := ItemJ."Line No." + 10000
+                else
+                    ItemJInit."Line No." := 10000;
+
+                ItemJInit."Document No." := SalesInvHdrNo;
+                ItemJInit.Validate("Posting Date", Today);
+                ItemJInit."Entry Type" := ItemJInit."Entry Type"::"Positive Adjmt.";
+                ItemJInit.Validate("Item No.", SalesLine."Exchange Item No.");
+                ItemJInit.Validate("Location Code", SalesLine."Location Code");
+                ItemJInit.validate(Quantity, SalesLine.Quantity);
+                ItemJInit.Validate("Unit of Measure Code", SalesLine."Unit of Measure Code");
+                ItemJInit.Validate("Unit Amount", ABS(SalesLine."Unit Price"));
+                ItemJInit.Validate("Shortcut Dimension 1 Code", SalesLine."Shortcut Dimension 1 Code");
+                ItemJInit.Validate("Shortcut Dimension 2 Code", SalesLine."Shortcut Dimension 2 Code");
+                ItemJInit.Insert();
+
+                //<<******Reservation Creat for item Journal Line************
+                ReservEntry.Reset();
+                ReservEntry.LockTable();
+                if ReservEntry.FindLast() then;
+                ReservEntryInit.Init();
+                ReservEntryInit."Entry No." := ReservEntry."Entry No." + 1;
+                ReservEntryInit."Item No." := ItemJInit."Item No.";
+                ReservEntryInit."Location Code" := ItemJInit."Location Code";
+                ReservEntryInit.Quantity := ItemJInit.Quantity;
+                ReservEntryInit."Reservation Status" := ReservEntryInit."Reservation Status"::Prospect;
+                ReservEntryInit."Source Type" := DATABASE::"Item Journal Line";
+                ReservEntryInit."Source Subtype" := 2;
+                ReservEntryInit."Source ID" := ItemJInit."Journal Template Name";
+                ReservEntryInit."Source Batch Name" := ItemJInit."Journal Batch Name";
+                ReservEntryInit."Source Ref. No." := ItemJInit."Line No.";
+                ReservEntryInit."Source ID" := SalesLine."Document No.";
+                ReservEntryInit."Creation Date" := Today;
+                ReservEntryInit."Created By" := UserId;
+                ReservEntryInit.Validate("Serial No.", SalesLine."Serial No.");
+                ReservEntryInit.Positive := true;
+                ReservEntry.Insert();
+
+                ItemJnlPostBatch.Run(ItemJInit);
+            until SalesLine.next() = 0;
+
+    end;
     //END**********************************Codeunit-80***************************************
 
     //START**********************************Codeunit-90***************************************

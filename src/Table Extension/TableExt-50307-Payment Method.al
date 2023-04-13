@@ -6,6 +6,10 @@ tableextension 50307 "Payment Method" extends "Payment Method"
         {
             DataClassification = ToBeClassified;
         }
+        field(50302; "Payment Type"; Enum "Payment Type Ext")
+        {
+            DataClassification = ToBeClassified;
+        }
     }
 
     var

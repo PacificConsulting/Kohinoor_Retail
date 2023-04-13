@@ -25,6 +25,16 @@ page 50341 "Customer List API"
                 field(No; Rec."No.")
                 {
                     Caption = 'No.';
+                    trigger OnLookup(var Text: Text): Boolean
+                    var
+                        NoSeries: Codeunit NoSeriesManagement;
+                        SR: Record "Sales & Receivables Setup";
+                    begin
+                        SR.Get();
+                        SR.TestField("Customer Nos.");
+                        Rec."No." := NoSeries.GetNextNo(SR."Order Nos.", Today, true);
+                        Rec.Modify();
+                    end;
                 }
                 field(Name; Rec.Name)
                 {
@@ -66,6 +76,11 @@ page 50341 "Customer List API"
                 {
                     Caption = 'Email';
                 }
+                field(PanNo; Rec."P.A.N. No.")
+                {
+                    Caption = 'P.A.N. No.';
+                }
+
 
 
             }

@@ -49,17 +49,20 @@ page 50305 "Menu Line Subform"
                         Menu: Record "Menu Header";
                         PaymentM: Record "Payment Method";
                     begin
-                        IF Rec.Action = 'Menu' then begin
-                            Menu.Get();
+                        IF Rec.Action = 'MENU' then begin
+                            Menu.Reset();
+                            //Menu.SetRange("Menu ID", rec."Menu ID");
+                            IF Menu.Find() then;
                             IF (Page.RunModal(Page::"Menu List", Menu, Menu."Menu ID") = Action::LookupOK) then begin
-                                rec.Parameter := Menu."Menu ID";
+                                Rec.Parameter := Menu."Menu ID";
+                                Rec.Modify();
                             end;
                         end
                         else begin
                             IF Rec.Action = 'PAYMENT' then begin
                                 PaymentM.Reset();
                                 PaymentM.SetRange(Tender, true);
-                                if PaymentM.FindFirst() then;
+                                if PaymentM.Find() then;
                                 IF (Page.RunModal(Page::"Payment Methods", PaymentM, PaymentM.Code) = Action::LookupOK) then begin
                                     Rec.Parameter := PaymentM.Code;
                                     Rec.Modify();

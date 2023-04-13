@@ -8,6 +8,10 @@ pageextension 50309 "Payment Methods" extends "Payment Methods"
             {
                 ApplicationArea = all;
             }
+            field("Payment Type";Rec."Payment Type")
+            {
+                ApplicationArea=all;
+            }
         }
     }
 

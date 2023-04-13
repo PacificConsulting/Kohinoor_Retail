@@ -21,6 +21,7 @@ tableextension 50301 Sales_Header_AmttoCust extends "Sales Header"
             DataClassification = ToBeClassified;
             Editable = false;
             Caption = 'Amount To Customer';
+            DecimalPlaces = 0 : 3;
         }
         field(50302; "Store No."; Code[20])
         {

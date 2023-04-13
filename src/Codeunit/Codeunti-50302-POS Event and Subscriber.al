@@ -23,15 +23,6 @@ codeunit 50302 "POS Event and Subscriber"
                     Else
                         if IsResult = 'Failed' then
                             exit('Given order No. does not exist.');
-
-
-                    //Recref.GetTable(recCust);
-                    // TempBlob.CreateOutStream(OutStr);
-                    // Report.SaveAs(Report::"Customer - List", '', ReportFormat::Pdf, OutStr, Recref);
-                    // OutStr.WriteText('F:\txtfile\', 1024);
-                    //exit('Request received for document No:-' + documentno);
-
-
                 end;
             'VOIDT':
                 begin
@@ -676,6 +667,7 @@ codeunit 50302 "POS Event and Subscriber"
         NoSeriesMgt: Codeunit 396;
         BankAcc: Record 270;
         PaymentLine: Record 50301;
+        GenJourLineInit: record 81;
     begin
         PaymentLine.Reset();
         PaymentLine.SetRange("Document Type", Salesheader."Document Type");
@@ -683,26 +675,26 @@ codeunit 50302 "POS Event and Subscriber"
         if PaymentLine.FindSet() then
             repeat
                 GenJourLine.Reset();
-                GenJourLine.SetRange("Journal Template Name", 'BANKRCPTY');
-                GenJourLine.SetRange("Journal Batch Name", 'USER-A');
-                GenJourLine.Init();
-                GenJourLine."Document No." := NoSeriesMgt.GetNextNo('BANKRCPTV', Salesheader."Posting Date", false);
-                GenJourLine."Posting Date" := Today;
+                GenJourLine.SetRange("Journal Template Name", 'BANK RECE');
+                GenJourLine.SetRange("Journal Batch Name", 'DEFAULT');
+                GenJourLineInit.Init();
+                GenJourLineInit."Journal Template Name" := 'BANK RECE';
+                GenJourLineInit."Journal Batch Name" := 'DEFAULT';
+                GenJourLineInit."Document No." := Salesheader."No.";
+                GenJourLineInit.Validate("Posting Date", Today);
                 IF GenJourLine.FindLast() then
                     GenJourLine."Line No." := GenJourLine."Line No." + 10000
                 else
                     GenJourLine."Line No." := 10000;
 
-                GenJourLine."Journal Template Name" := 'BANKRCPTY';
-                GenJourLine."Journal Batch Name" := 'USER-A';
-                GenJourLine."Account Type" := GenJourLine."Account Type"::"Bank Account";
-                GenJourLine."Bal. Account Type" := GenJourLine."Bal. Account Type"::Customer;
-                GenJourLine.Validate("Bal. Account No.", Salesheader."Sell-to Customer No.");
-                GenJourLine.validate("Account No.", 'GIRO');
-                GenJourLine."GST Group Code" := 'Goods';
-                GenJourLine.validate(Amount, PaymentLine.Amount);
-                GenJourLine.Comment := 'Auto Post';
-                GenJourLine.Insert(true);
+                GenJourLineInit."Account Type" := GenJourLineInit."Account Type"::"Bank Account";
+                GenJourLineInit."Bal. Account Type" := GenJourLineInit."Bal. Account Type"::Customer;
+                GenJourLineInit.Validate("Bal. Account No.", Salesheader."Sell-to Customer No.");
+                GenJourLineInit.validate("Account No.", 'BA000009');
+                GenJourLineInit."GST Group Code" := 'Goods';
+                GenJourLineInit.validate(Amount, PaymentLine.Amount);
+                GenJourLineInit.Comment := 'Auto Post';
+                GenJourLineInit.Insert(); //This Line Will Comment when auto post below codeunit Call
             Until PaymentLine.Next() = 0;
 
         // IF CODEUNIT.RUN(CODEUNIT::"Gen. Jnl.-Post", GenJourLine) then begin

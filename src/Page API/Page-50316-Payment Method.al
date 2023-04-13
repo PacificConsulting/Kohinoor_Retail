@@ -54,6 +54,10 @@ page 50316 "Payment Method"
                 {
                     Caption = 'Pmt. Export Line Definition';
                 }
+                field(paymentType; Rec."Payment Type")
+                {
+                    Caption = 'Payment Type';
+                }
                 field(systemId; Rec.SystemId)
                 {
                     Caption = 'SystemId';
