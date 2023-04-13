@@ -101,11 +101,11 @@ codeunit 50302 "POS Event and Subscriber"
             'CUPSL':
                 begin
                     IsResult := POSProcedure.ChangeUnitPrice(documentno, lineno, input);
-                    IF IsResult = 'Success' then
+                    IF IsResult = '' then
                         exit('Success')
                     Else
-                        if IsResult = 'Failed' then
-                            exit('Failed');
+                        exit(IsResult);
+
                 end;
         end;
 

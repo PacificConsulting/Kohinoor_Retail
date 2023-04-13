@@ -12,6 +12,11 @@ tableextension 50308 "Sales & Rec Setup" extends "Sales & Receivables Setup"
             DataClassification = ToBeClassified;
             TableRelation = "G/L Account"."No.";
         }
+        field(50303; "Ship To address No Series"; Code[10])
+        {
+            DataClassification = ToBeClassified;
+            TableRelation = "No. Series";
+        }
     }
 
     var

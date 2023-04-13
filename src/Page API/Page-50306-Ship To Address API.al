@@ -119,6 +119,7 @@ page 50306 "Ship To Address API"
                 {
                     Caption = 'Ship-to GST Customer Type';
                 }
+
                 field(shipmentMethodCode; Rec."Shipment Method Code")
                 {
                     Caption = 'Shipment Method Code';
@@ -135,6 +136,11 @@ page 50306 "Ship To Address API"
                 {
                     Caption = 'State';
                 }
+                field(shipType; Rec."Ship Type")
+                {
+                    Caption = 'Ship Type';
+                }
+
             }
         }
     }

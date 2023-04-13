@@ -150,13 +150,13 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     No: code[20];
 
                 begin
-                    //POS.SalesLineDeletion('1010045', 10000);
+                    result := POS.ChangeUnitPrice('KTPLSO23240018', 10000, '21000');
                     //result := POS.InvoiceComplete('KTPLSO23240003');
-                    SL.Reset();
-                    sl.SetRange("Approval Status", sl."Approval Status"::"Pending for Approval");
-                    IF SL.FindFirst() then;
-                    Hyperlink(GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List", SL));
-                    result := GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List", SL);
+                    // SL.Reset();
+                    // sl.SetRange("Approval Status", sl."Approval Status"::"Pending for Approval");
+                    // IF SL.FindFirst() then;
+                    // Hyperlink(GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List", SL));
+                    // result := GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List", SL);
                     Message(result);
 
                 end;
