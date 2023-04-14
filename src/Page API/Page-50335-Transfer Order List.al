@@ -2,7 +2,7 @@ page 50335 "Transfer Order List"
 {
     APIGroup = 'Transfer';
     APIPublisher = 'Pacific';
-    APIVersion = 'v1.0';
+    APIVersion = 'v4.0';
     ApplicationArea = All;
     Caption = 'transferOrderList';
     DelayedInsert = true;
@@ -105,6 +105,16 @@ page 50335 "Transfer Order List"
                 field(no; Rec."No.")
                 {
                     Caption = 'No.';
+                    trigger OnLookup(var Text: Text): Boolean
+                    var
+                        NoSeries: Codeunit NoSeriesManagement;
+                        InvtSetup: Record "Inventory Setup";
+                    begin
+                        InvtSetup.Get();
+                        InvtSetup.TestField("Transfer Order Nos.");
+                        Rec."No." := NoSeries.GetNextNo(InvtSetup."Transfer Order Nos.", rec."Posting Date", true);
+                        Rec.Modify();
+                    end;
                 }
                 field(noSeries; Rec."No. Series")
                 {

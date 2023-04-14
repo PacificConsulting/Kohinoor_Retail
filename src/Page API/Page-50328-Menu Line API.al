@@ -51,6 +51,10 @@ page 50328 "Menu Line API"
                 {
                     Caption = 'Parameter';
                 }
+                field(parameter2; Rec."Parameter 2")
+                {
+                    Caption = 'Parameter 2';
+                }
                 field(IsVisible; Rec."Is Visible")
                 {
                     Caption = 'Is Visible';
