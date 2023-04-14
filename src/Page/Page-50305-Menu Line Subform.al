@@ -71,6 +71,10 @@ page 50305 "Menu Line Subform"
                         end;
                     end;
                 }
+                field("Parameter 2"; Rec."Parameter 2")
+                {
+                    ApplicationArea = all;
+                }
             }
         }
     }

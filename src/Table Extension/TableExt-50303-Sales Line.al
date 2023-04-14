@@ -2,6 +2,27 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
 {
     fields
     {
+        modify("No.")
+        {
+            trigger OnAfterValidate()
+            var
+                TradeAggre: record "Trade Aggrement";
+                SalesHeder: record 36;
+            begin
+                IF SalesHeder.Get(rec."Document Type", rec."Document No.") then;
+                TradeAggre.Reset();
+                TradeAggre.SetRange(Item, Rec."No.");
+                TradeAggre.SetRange("Location Code", SalesHeder."Location Code");
+                TradeAggre.SetFilter("From Date", '<=%1', SalesHeder."Posting Date");
+                TradeAggre.SetFilter("To Date", '>=%1', SalesHeder."Posting Date");
+                IF TradeAggre.FindFirst() then begin
+                    Validate("Unit Price Incl. of Tax", TradeAggre."M.R.P");
+                    Validate("Price Inclusive of Tax", true);
+                end;
+                Validate("Unit Price Incl. of Tax", 25000);
+                Validate("Price Inclusive of Tax", true);
+            end;
+        }
         field(50301; "Store No."; Code[20])
         {
             Caption = 'Store No.';

@@ -114,7 +114,8 @@ table 50314 "Request Transfer Header"
         if IsHandled then
             exit;
 
-        NoSeriesCode := InvtSetup."Transfer Order Nos.";
+        // NoSeriesCode := InvtSetup."Transfer Order Nos.";
+        NoSeriesCode := InvtSetup."Request Tran. Order Nos.";
         exit(NoSeriesCode);
     end;
 
@@ -124,7 +125,7 @@ table 50314 "Request Transfer Header"
             ReqTransHeader := Rec;
             GetInventorySetup();
             //TestNoSeries();
-            InvtSetup.TestField("Transfer Order Nos.");
+            InvtSetup.TestField("Request Tran. Order Nos.");
             if NoSeriesMgt.SelectSeries(GetNoSeriesCode(), OldReqTransHeader."No. Series", "No. Series") then begin
                 NoSeriesMgt.SetSeries("No.");
                 Rec := ReqTransHeader;

@@ -69,6 +69,20 @@ page 50362 "Sales Line New Subform"
                 {
                     Caption = 'GST Tax Amount';
                 }
+                field(approvalStatus; Rec."Approval Status")
+                {
+                    Caption = 'Approval Status';
+                }
+                field(qtyToShip; Rec."Qty. to Ship")
+                {
+                    Caption = 'Qty. to Ship';
+                }
+                field(quantityShipped; Rec."Quantity Shipped")
+                {
+                    Caption = 'Quantity Shipped';
+                }
+
+
 
 
             }

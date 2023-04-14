@@ -47,7 +47,10 @@ table 50304 "Menu Line"
         field(8; "Is Visible"; Boolean)
         {
             DataClassification = ToBeClassified;
-
+        }
+        field(9; "Parameter 2"; Code[20])
+        {
+            DataClassification = ToBeClassified;
         }
 
     }

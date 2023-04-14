@@ -12,8 +12,20 @@ tableextension 50301 Sales_Header_AmttoCust extends "Sales Header"
                     IF RecLoc.Store then
                         "Store No." := "Location Code";
                 end;
+            end;
+        }
+        modify("Sell-to Customer No.")
+        {
+            trigger OnAfterValidate()
+            var
+                ShiptoAdd: record 222;
 
-
+            begin
+                ShiptoAdd.Reset();
+                ShiptoAdd.SetRange("Customer No.", Rec."Sell-to Customer No.");
+                IF ShiptoAdd.FindFirst() then begin
+                    Validate(Rec."Ship-to Code", ShiptoAdd.Code);
+                end
             end;
         }
         field(50301; "Amount To Customer"; Decimal)

@@ -1,4 +1,4 @@
-enum 50305 "Ship To Address Option"
+enum 50305 "Ship To Address Type"
 {
     Extensible = true;
 

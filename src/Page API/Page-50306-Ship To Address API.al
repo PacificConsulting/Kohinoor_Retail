@@ -42,16 +42,8 @@ page 50306 "Ship To Address API"
                 field("code"; Rec."Code")
                 {
                     Caption = 'Code';
-                    trigger OnLookup(var Text: Text): Boolean
-                    Var
-                        SR: record 311;
-                        NoSeries: Codeunit NoSeriesManagement;
-                    begin
-                        SR.Get();
-                        SR.TestField("Ship To address No Series");
-                        Rec.code := NoSeries.GetNextNo(SR."Ship To address No Series", Today, true);
-                        //Rec.Modify();
-                    end;
+
+
                 }
                 field(consignee; Rec.Consignee)
                 {
@@ -72,6 +64,16 @@ page 50306 "Ship To Address API"
                 field(customerNo; Rec."Customer No.")
                 {
                     Caption = 'Customer No.';
+                    trigger OnValidate()
+                    Var
+                        SR: record 311;
+                        NoSeries: Codeunit NoSeriesManagement;
+                    begin
+                        SR.Get();
+                        SR.TestField("Ship To address No Series");
+                        Rec.code := NoSeries.GetNextNo(SR."Ship To address No Series", Today, true);
+                        //Rec.Modify();
+                    end;
                 }
                 field(eMail; Rec."E-Mail")
                 {
@@ -146,12 +148,16 @@ page 50306 "Ship To Address API"
                 {
                     Caption = 'State';
                 }
-                field(shipType; Rec."Ship Type")
+                field(AddressType; Rec."Address Type")
                 {
-                    Caption = 'Ship Type';
+                    Caption = 'Address Type';
                 }
 
             }
         }
     }
+    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    begin
+        Rec."Address Type" := rec."Address Type"::Secondary;
+    end;
 }

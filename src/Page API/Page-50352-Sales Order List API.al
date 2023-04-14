@@ -46,22 +46,9 @@ page 50352 "Sales Order List API"
                     Caption = 'Sell-to Customer No.';
                     trigger OnValidate()
                     var
-                        SH: Record 36;
-                        NoSeries: Codeunit NoSeriesManagement;
-                        NewCust: Record 18;
-                        NewID: Guid;
+
                     begin
-                        //     IF Cust.get(rec."Sell-to Customer No.") then begin
-                        //         ID := Cust.SystemId;
-                        //         SH.Init();
-                        //         SH."Document Type" := SH."Document Type"::Order;
-                        //         SH."No." := NoSeries.GetNextNo('SO', SH."Posting Date", true);
-                        //         NewCust.Reset();
-                        //         NewCust.SetRange(SystemId, NewID);
-                        //         IF NewCust.FindFirst() then
-                        //             SH."Sell-to Customer No." := NewCust."No.";
-                        //         SH.Insert(true);
-                        //     end;
+
                     end;
                 }
                 field(sellToCustomerName; Rec."Sell-to Customer Name")
@@ -116,6 +103,10 @@ page 50352 "Sales Order List API"
                 {
                     Caption = 'Sell to Phone No.';
 
+                }
+                field(shipToCode; Rec."Ship-to Code")
+                {
+                    Caption = 'Ship-to Code';
                 }
             }
         }

@@ -17,7 +17,7 @@ pageextension 50312 "Ship To Address Card" extends "Ship-to Address"
         }
         addafter("Location Code")
         {
-            field("Ship Type"; Rec."Ship Type")
+            field("Ship Type"; Rec."Address Type")
             {
                 ApplicationArea = all;
             }

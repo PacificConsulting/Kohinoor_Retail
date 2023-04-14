@@ -91,10 +91,9 @@ page 50341 "Customer List API"
         Cust: record 18;
 
     begin
-        IF Cust.Get(rec."No.") then begin
-            Rec."Gen. Bus. Posting Group" := 'DOMESTIC';
-            Rec."Customer Posting Group" := 'GOODS';
-        end;
+
+        Rec."Gen. Bus. Posting Group" := 'DOMESTIC';
+        Rec."Customer Posting Group" := 'GOODS';
         ShipToAddressInsert(Rec);
 
 
@@ -118,10 +117,10 @@ page 50341 "Customer List API"
         ShipToAddInit.State := rec."State Code";
         ShipToAddInit.validate("Post Code", rec."Post Code");
         ShipToAddInit.Validate("Country/Region Code", Rec."Country/Region Code");
-        ShipToAddInit.Validate("GST Registration No.", rec."GST Registration No.");
         ShipToAddInit."E-Mail" := Rec."E-Mail";
         ShipToAddInit."Phone No." := Rec."Phone No.";
-        ShipToAddInit."Ship Type" := ShipToAddInit."Ship Type"::Primary;
+        ShipToAddInit."Address Type" := ShipToAddInit."Address Type"::Primary;
+        ShipToAddInit.Validate("GST Registration No.", rec."GST Registration No.");
         ShipToAddInit.Insert();
     end;
 }

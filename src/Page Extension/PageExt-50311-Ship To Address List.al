@@ -17,7 +17,7 @@ pageextension 50311 "Ship To Address Ext" extends "Ship-to Address List"
         }
         addafter("Location Code")
         {
-            field("Ship Type"; Rec."Ship Type")
+            field("Ship Type"; Rec."Address Type")
             {
                 ApplicationArea = all;
             }
