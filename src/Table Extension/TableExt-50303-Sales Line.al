@@ -9,6 +9,7 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
                 TradeAggre: record "Trade Aggrement";
                 SalesHeder: record 36;
             begin
+                /*
                 IF SalesHeder.Get(rec."Document Type", rec."Document No.") then;
                 TradeAggre.Reset();
                 TradeAggre.SetRange(Item, Rec."No.");
@@ -19,6 +20,7 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
                     Validate("Unit Price Incl. of Tax", TradeAggre."M.R.P");
                     Validate("Price Inclusive of Tax", true);
                 end;
+                */
                 Validate("Unit Price Incl. of Tax", 25000);
                 Validate("Price Inclusive of Tax", true);
             end;
@@ -71,17 +73,6 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
         }
 
     }
-    // trigger OnBeforeModify()
-    // begin
-    //     IF "Approval Status" = "Approval Status"::"Pending for Approval" then
-    //         Error('You can not modify Lines if Approval Status is Pending for Approval ');
-    // end;
-
-    // trigger OnAfterInsert()
-    // begin
-    //     IF "Approval Status" = "Approval Status"::"Pending for Approval" then
-    //         Error('You can not modify Lines if Approval Status is Pending for Approval ');
-    // end;
 
     trigger OnModify()
     begin

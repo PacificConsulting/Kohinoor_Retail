@@ -11,8 +11,8 @@ codeunit 50301 "Event and Subscribers"
     [EventSubscriber(ObjectType::Table, Database::"Sales Line", 'OnAfterUpdateUnitPrice', '', false, false)]
     local procedure OnAfterUpdateUnitPrice(var SalesLine: Record "Sales Line"; xSalesLine: Record "Sales Line"; CalledByFieldNo: Integer; CurrFieldNo: Integer)
     begin
-        if not SalesLine."Price Inclusive of Tax" then
-            exit;
+        // if not SalesLine."Price Inclusive of Tax" then
+        //     exit;
         IF SalesLine."Unit Price" <> 0 then
             SalesLine."GST Tax Amount" := (SalesLine."Unit Price Incl. of Tax" - SalesLine."Unit Price");
     end;

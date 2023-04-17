@@ -198,6 +198,7 @@ codeunit 50302 "POS Event and Subscriber"
         TotalAmt: Decimal;
         TotalTCSAmt: Decimal;
         SalesRec11: record "Sales & Receivables Setup";
+        SalesLine: Record 37;
     begin
         clear(TotalGSTAmount1);
         Clear(TotalTCSAmt);
@@ -206,11 +207,19 @@ codeunit 50302 "POS Event and Subscriber"
 
         SalesHeader.Reset();
         SalesHeader.SetRange("No.", DocumentNo);
+        IF SalesHeader.FindFirst() then begin
+            IF SalesHeader.Status = SalesHeader.Status::Released then begin
+                SalesHeader.Status := SalesHeader.Status::Open;
+                SalesHeader.Modify();
+            end;
+        end;
+        SalesHeader.Reset();
+        SalesHeader.SetRange("No.", DocumentNo);
         if SalesHeader.FindFirst() then begin
             GetGSTAmountTotal(SalesHeader, TotalGSTAmount1);
             GetTCSAmountTotal(SalesHeader, TotalTCSAmt);
             GetSalesorderStatisticsAmount(SalesHeader, TotalAmt);
-            SalesHeader."Amount To Customer" := TotalAmt + TotalGSTAmount1 + TotalTCSAmt;
+            SalesHeader."Amount To Customer" := ROUND(TotalAmt + TotalGSTAmount1 + TotalTCSAmt);
             SalesHeader.Modify();
 
             Clear(TotalPayemtamt);
@@ -231,6 +240,17 @@ codeunit 50302 "POS Event and Subscriber"
                     SalesHeader.Validate("Location Code", SalesRec11."Default Warehouse");
                     //SalesHdr."Staff Id" :=
                     SalesHeader."POS Released Date" := Today;
+                    SalesHeader.Modify();
+
+                    SalesLine.Reset();
+                    SalesLine.SetRange("Document No.", DocumentNo);
+                    IF SalesLine.FindSet() then
+                        repeat
+                            SalesLine.Validate("Location Code", SalesHeader."Location Code");
+                            SalesLine.Validate("Shortcut Dimension 1 Code", SalesHeader."Shortcut Dimension 1 Code");
+                            SalesLine.Validate("Shortcut Dimension 2 Code", SalesHeader."Shortcut Dimension 2 Code");
+                            SalesLine.Modify()
+                        until SalesLine.Next() = 0;
                     SalesHeader.Status := SalesHeader.Status::Released;
                     SalesHeader.Modify();
                     //Exit('Success');
@@ -254,6 +274,7 @@ codeunit 50302 "POS Event and Subscriber"
         TotalAmt: Decimal;
         TotalTCSAmt: Decimal;
         SalesRec: record "Sales & Receivables Setup";
+        SalesLine: record 37;
     begin
         clear(TotalGSTAmount1);
         Clear(TotalTCSAmt);
@@ -266,7 +287,7 @@ codeunit 50302 "POS Event and Subscriber"
             GetGSTAmountTotal(SalesHdr, TotalGSTAmount1);
             GetTCSAmountTotal(SalesHdr, TotalTCSAmt);
             GetSalesorderStatisticsAmount(SalesHdr, TotalAmt);
-            SalesHdr."Amount To Customer" := TotalAmt + TotalGSTAmount1 + TotalTCSAmt;
+            SalesHdr."Amount To Customer" := Round(TotalAmt + TotalGSTAmount1 + TotalTCSAmt);
             SalesHdr.Modify();
 
             Clear(TotalPayemtamt);
@@ -291,6 +312,17 @@ codeunit 50302 "POS Event and Subscriber"
                     SalesHdr.Modify();
                     //Exit('Success');
                 end;
+                SalesLine.Reset();
+                SalesLine.SetRange("Document No.", DocumentNo);
+                IF SalesLine.FindSet() then
+                    repeat
+                        SalesLine.Validate("Location Code", SalesHdr."Location Code");
+                        SalesLine.Validate("Shortcut Dimension 1 Code", SalesHdr."Shortcut Dimension 1 Code");
+                        SalesLine.Validate("Shortcut Dimension 2 Code", SalesHdr."Shortcut Dimension 2 Code");
+                        SalesLine.Modify()
+                    until SalesLine.Next() = 0;
+                SalesHdr.Status := SalesHdr.Status::Released;
+                SalesHdr.Modify();
             end;
         end else
             exit('Failed');
@@ -333,6 +365,34 @@ codeunit 50302 "POS Event and Subscriber"
             IF not TransShip.Run(TranHdr) then
                 exit('Failed');
 
+        end;
+    end;
+
+    /// <summary>
+    /// Update Ship to Code on Sales Order
+    /// </summary>
+    procedure UpdateShiptoCodeOnSalesHeder(DocumentNo: Code[20]; shiptocode: code[10]): Text
+    var
+        SalesHeader: record 36;
+        ShiptoAdd: record 222;
+    begin
+        SalesHeader.Reset();
+        SalesHeader.SetRange("No.", DocumentNo);
+        IF SalesHeader.FindFirst() then begin
+            IF SalesHeader.Status = SalesHeader.Status::Released then begin
+                SalesHeader.Status := SalesHeader.Status::Open;
+                SalesHeader.Modify();
+            end;
+
+            ShiptoAdd.Reset();
+            ShiptoAdd.SetRange(Code, shiptocode);
+            IF not ShiptoAdd.FindFirst() then
+                exit('Failed');
+
+            SalesHeader.Validate("Ship-to Code", shiptocode);
+            SalesHeader.Modify(true);
+            IF SalesHeader."Ship-to Code" <> shiptocode then
+                exit('Failed');
         end;
     end;
 

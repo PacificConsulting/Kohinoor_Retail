@@ -198,8 +198,8 @@ codeunit 50303 "POS Procedure"
                 TransferHeaderShip.Modify(true);
                 IF TransferlineShip."Qty. to Ship" <> ShiptoQty then
                     exit('Failed');
-                IF not Transpostship.Run(TransferHeaderShip) then
-                    exit('Failed');
+                Transpostship.Run(TransferHeaderShip);
+                    //exit('Failed');
             end;
         end;
 
@@ -248,8 +248,8 @@ codeunit 50303 "POS Procedure"
             //>> Comment Mandetory so We have to pass Order Comment
             SalesHdr.Status := SalesHdr.Status::Released;
             SalesHdr.Modify();
-            IF Not Salespost.Run(SalesHdr) then
-                exit('Failed');
+            Salespost.Run(SalesHdr);
+                //exit('Failed');
         end;
     End;
 
@@ -262,9 +262,11 @@ codeunit 50303 "POS Procedure"
         SaleLinerInv: Record "Sales Line";
         ShipInvtoQty: Decimal;
         Salespost: codeunit 80;
+        SalespostYN: codeunit 81;
         SalesCommLine: Record 44;
+        ReturnBool: Boolean;
     begin
-        Clear(InputData);
+        // Clear(InputData);
         Evaluate(ShipInvtoQty, InputData);
         SaleHeaderInv.Reset();
         SaleHeaderInv.SetRange("No.", DocumentNo);
@@ -295,8 +297,9 @@ codeunit 50303 "POS Procedure"
                 //>> Comment Mandetory so We have to pass Order Comment
                 SaleHeaderInv.Status := SaleHeaderInv.Status::Released;
                 SaleHeaderInv.Modify(true);
-                IF not Salespost.Run(SaleHeaderInv) then
-                    exit('Failed');
+                Salespost.Run(SaleHeaderInv);
+                //Message(FORMAT(ReturnBool));
+                //exit('Failed');
             end
         end;
     end;
@@ -315,7 +318,7 @@ codeunit 50303 "POS Procedure"
         TranspostReceived: Codeunit "TransferOrder-Post Receipt";
 
     begin
-        Clear(InputData);
+        //Clear(InputData);
         Evaluate(QtyToReceive, InputData);
         PurchHeader.Reset();
         PurchHeader.SetRange("No.", DocumentNo);

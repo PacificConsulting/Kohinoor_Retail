@@ -40,6 +40,11 @@ page 50362 "Sales Line New Subform"
                 field(ItemNo; Rec."No.")
                 {
                     Caption = 'Item No.';
+                    // trigger OnValidate()
+                    // begin
+                    //     Rec.Validate("Unit Price Incl. of Tax", 25000);
+                    //     Rec.Validate("Price Inclusive of Tax", true);
+                    // end;
                 }
                 field(Qty; Rec.Quantity)
                 {
@@ -81,9 +86,10 @@ page 50362 "Sales Line New Subform"
                 {
                     Caption = 'Quantity Shipped';
                 }
-
-
-
+                field(priceInclusiveOfTax; Rec."Price Inclusive of Tax")
+                {
+                    Caption = 'Price Inclusive of Tax';
+                }
 
             }
         }

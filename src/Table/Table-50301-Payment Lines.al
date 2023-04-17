@@ -57,14 +57,14 @@ table 50301 "Payment Lines"
         {
             DataClassification = ToBeClassified;
             Caption = 'Owner Name';
-            trigger OnValidate()
-            var
-                Icount: integer;
-            begin
-                Icount := StrLen(Format("Credit Card No. Last 4 digit"));
-                IF Icount <> 4 then
-                    error('Last 4 digit of credit card is allowed only')
-            end;
+            // trigger OnValidate()
+            // var
+            //     Icount: integer;
+            // begin
+            //     Icount := StrLen(Format("Credit Card No. Last 4 digit"));
+            //     IF Icount <> 4 then
+            //         error('Last 4 digit of credit card is allowed only')
+            // end;
         }
         field(11; "Card Expiry Date"; Date)
         {
@@ -105,14 +105,14 @@ table 50301 "Payment Lines"
         {
             DataClassification = ToBeClassified;
             Caption = 'Cheque No 6 Digit';
-            trigger OnValidate()
-            var
-                Icount: Integer;
-            begin
-                Icount := StrLen(Format("Cheque No 6 Digit"));
-                IF Icount <> 6 then
-                    error('6 digit of Cheque No. is allowed only')
-            end;
+            // trigger OnValidate()
+            // var
+            //     Icount: Integer;
+            // begin
+            //     Icount := StrLen(Format("Cheque No 6 Digit"));
+            //     IF Icount <> 6 then
+            //         error('6 digit of Cheque No. is allowed only')
+            // end;
         }
     }
 

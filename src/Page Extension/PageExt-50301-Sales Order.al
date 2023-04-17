@@ -148,10 +148,11 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     NoSer: Codeunit NoSeriesManagement;
                     result: Text;
                     No: code[20];
+                    CU: Codeunit 50302;
 
                 begin
-                    result := POS.ChangeUnitPrice('KTPLSO23240018', 10000, '21000');
-                    //result := POS.InvoiceComplete('KTPLSO23240003');
+                    result := CU.OrderConfirmationforDelivery('KTPLSO23240014');
+                    //result := POS.InvoiceLine('KTPLSO23240019', 20000, '', '1');
                     // SL.Reset();
                     // sl.SetRange("Approval Status", sl."Approval Status"::"Pending for Approval");
                     // IF SL.FindFirst() then;
