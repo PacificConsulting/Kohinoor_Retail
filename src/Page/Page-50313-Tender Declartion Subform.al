@@ -8,6 +8,7 @@ page 50313 "Tender Declartion Subform"
     MultipleNewLines = true;
     PageType = ListPart;
     SourceTable = "Tender Declartion Line ";
+    RefreshOnActivate = true;
 
     layout
     {

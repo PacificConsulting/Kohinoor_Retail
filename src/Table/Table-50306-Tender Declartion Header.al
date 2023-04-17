@@ -33,12 +33,15 @@ table 50306 "Tender Declartion Header"
                 TenderInitLine: Record "Tender Declartion Line ";
                 Paymethod: Record "Payment Method";
                 TenderInitLineNew: Record "Tender Declartion Line ";
+                PageTenderSubform: Page "Tender Declartion Subform";
             begin
                 IF StaffMaster.Get("Staff ID") then begin
                     "Store No." := StaffMaster."Store No.";
                     "Store Date" := Today;
+                    Rec.Insert();
                     Commit();
                     Paymethod.Reset();
+                    Paymethod.SetRange(Tender, true);
                     IF Paymethod.FindSet() then
                         repeat
                             TenderInitLine.Init();
@@ -59,6 +62,16 @@ table 50306 "Tender Declartion Header"
                             TenderInitLine."Payment Method code" := Paymethod.Code;
                             TenderInitLine.Modify();
                         until Paymethod.Next() = 0;
+                    Commit();
+                    // TenderInitLine.Reset();
+                    // TenderInitLine.SetRange("Staff ID", "Staff ID");
+                    // TenderInitLine.SetRange("Store No.", "Store No.");
+                    // TenderInitLine.SetRange("Store Date", "Store Date");
+                    // IF TenderInitLine.FindFirst() then begin
+                    //     PageTenderSubform.SetTableView(TenderInitLine);
+                    //     PageTenderSubform.Update(true);
+                    // end;
+
                 end;
             end;
         }

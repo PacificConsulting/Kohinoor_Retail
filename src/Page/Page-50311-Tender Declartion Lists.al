@@ -58,6 +58,25 @@ page 50311 "Tender Declartion Lists"
                 end;
 
             }
+            action("Tender Line Delete")
+            {
+                ApplicationArea = all;
+                Promoted = true;
+                PromotedIsBig = true;
+                PromotedCategory = Process;
+                Image = Create;
+                trigger OnAction()
+                var
+                    TDC: page "Tender Declartion Creation";
+                    TDL: Record "Tender Declartion Line ";
+                begin
+                    TDL.DeleteAll();
+
+                end;
+
+            }
+
+
 
         }
     }

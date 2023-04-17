@@ -4,6 +4,7 @@ page 50312 "Tender Declartion Card"
     Caption = 'Tender Declartion Card';
     PageType = Card;
     SourceTable = "Tender Declartion Header";
+    RefreshOnActivate = true;
 
     layout
     {
@@ -15,6 +16,48 @@ page 50312 "Tender Declartion Card"
                 {
                     ToolTip = 'Specifies the value of the Staff ID field.';
                     Editable = false;
+                    // trigger OnValidate()
+                    // var
+                    //     StaffMaster: Record "Staff Master";
+                    //     TenderHdr: Record "Tender Declartion Header";
+                    //     PagetenderCard: page "Tender Declartion Card";
+                    //     TenderInit: Record "Tender Declartion Header";
+                    //     TenderInitLine: Record "Tender Declartion Line ";
+                    //     Paymethod: Record "Payment Method";
+                    //     TenderInitLineNew: Record "Tender Declartion Line ";
+                    //     PageTenderSubform: Page "Tender Declartion Subform";
+                    // begin
+                    //     IF StaffMaster.Get(rec."Staff ID") then begin
+                    //         Rec."Store No." := StaffMaster."Store No.";
+                    //         Rec."Store Date" := Today;
+                    //         Rec.Insert();
+
+                    //         Paymethod.Reset();
+                    //         Paymethod.SetRange(Tender, true);
+                    //         IF Paymethod.FindSet() then
+                    //             repeat
+                    //                 TenderInitLine.Init();
+                    //                 TenderInitLine."Store No." := Rec."Store No.";
+                    //                 TenderInitLine."Store Date" := Today;
+                    //                 TenderInitLine."Staff ID" := Rec."Staff ID";
+
+                    //                 TenderInitLineNew.Reset();
+                    //                 TenderInitLineNew.SetRange("Store No.", TenderInitLine."Store No.");
+                    //                 TenderInitLineNew.SetRange("Store Date", TenderInitLine."Store Date");
+                    //                 TenderInitLineNew.SetRange("Staff ID", TenderInitLine."Staff ID");
+                    //                 IF TenderInitLineNew.FindLast() then
+                    //                     TenderInitLine."Line No." := TenderInitLineNew."Line No." + 10000
+                    //                 else
+                    //                     TenderInitLine."Line No." := 10000;
+
+                    //                 TenderInitLine.Insert();
+                    //                 TenderInitLine."Payment Method code" := Paymethod.Code;
+                    //                 TenderInitLine.Modify();
+                    //             until Paymethod.Next() = 0;
+                    //         CurrPage.Update(true);
+
+                    //     end;
+                    // end;
                 }
                 field("Store No."; Rec."Store No.")
                 {
@@ -32,6 +75,7 @@ page 50312 "Tender Declartion Card"
                 field(Status; Rec.Status)
                 {
                     Caption = 'Status';
+                    Editable = false;
                 }
 
             }
@@ -39,6 +83,7 @@ page 50312 "Tender Declartion Card"
             {
                 ApplicationArea = all;
                 SubPageLink = "Staff ID" = field("Staff ID"), "Store No." = field("Store No."), "Store Date" = field("Store Date");
+                UpdatePropagation = Both;
             }
         }
     }
