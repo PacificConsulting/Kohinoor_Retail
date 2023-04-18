@@ -188,7 +188,7 @@ codeunit 50302 "POS Event and Subscriber"
     /// <summary>
     /// Order Confirmation for WareHouse function POS.
     /// </summary>
-    procedure OrderConfirmationforDelivery(DocumentNo: Code[20]): Text
+    procedure OrderConfirmationforDelivery(documentno: Code[20]): Text
     var
         PaymentLine: Record "Payment Lines";
         TotalPayemtamt: Decimal;
@@ -264,7 +264,7 @@ codeunit 50302 "POS Event and Subscriber"
     /// <summary>
     /// Order Confirmation for WareHouse function POS.
     /// </summary>
-    procedure OrderConfirmationforWH(DocumentNo: Code[20]): Text
+    procedure OrderConfirmationforWH(documentno: Code[20]): Text
     var
         PaymentLine: Record "Payment Lines";
         TotalPayemtamt: Decimal;
@@ -371,7 +371,7 @@ codeunit 50302 "POS Event and Subscriber"
     /// <summary>
     /// Update Ship to Code on Sales Order
     /// </summary>
-    procedure UpdateShiptoCodeOnSalesHeder(DocumentNo: Code[20]; shiptocode: code[10]): Text
+    procedure UpdateShiptoCodeOnSalesHeader(documentno: Code[20]; shiptocode: code[10]): Text
     var
         SalesHeader: record 36;
         ShiptoAdd: record 222;

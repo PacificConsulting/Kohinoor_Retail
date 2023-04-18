@@ -148,7 +148,7 @@ codeunit 50303 "POS Procedure"
     /// <summary>
     /// Post Shipment for a specific order Line / TO Line
     /// </summary>
-    procedure ShipLine(DocumentNo: Code[20]; LineNo: Integer; InputData: Text): text
+    procedure ShipLine(documentNo: Code[20]; LineNo: Integer; InputData: Text): text
     var
         SaleHeaderShip: Record "Sales Header";
         ShiptoQty: Decimal;
@@ -199,7 +199,7 @@ codeunit 50303 "POS Procedure"
                 IF TransferlineShip."Qty. to Ship" <> ShiptoQty then
                     exit('Failed');
                 Transpostship.Run(TransferHeaderShip);
-                    //exit('Failed');
+                //exit('Failed');
             end;
         end;
 
@@ -249,7 +249,7 @@ codeunit 50303 "POS Procedure"
             SalesHdr.Status := SalesHdr.Status::Released;
             SalesHdr.Modify();
             Salespost.Run(SalesHdr);
-                //exit('Failed');
+            //exit('Failed');
         end;
     End;
 
@@ -488,6 +488,7 @@ codeunit 50303 "POS Procedure"
         SerialNo: Code[50];
         ItemLedgEntry: Record 32;
         TranLine: Record "Transfer Line";
+        PurchLine: Record 39;
     begin
         // exit('Success....');
         Evaluate(SerialNo, input);
@@ -612,11 +613,44 @@ codeunit 50303 "POS Procedure"
                 // End; //Until
                 //exit('Success');
             end;
+        end;
+        PurchLine.Reset();
+        PurchLine.SetRange("Document No.", documentno);
+        PurchLine.SetRange("Line No.", lineno);
+        IF PurchLine.FindFirst() then begin
+            IF PurchLine."Qty. to Receive" = 0 then begin
+                PurchLine.Validate("Qty. to Receive", PurchLine.Quantity);
+                PurchLine.Modify();
+            end;
+
+            ReservEntry.RESET;
+            ReservEntry.LOCKTABLE;
+            IF ReservEntry.FINDLAST THEN
+                LastEntryNo := ReservEntry."Entry No.";
+
+            ReservEntryInit.INIT;
+            LastEntryNo += 1;
+            ReservEntryInit."Entry No." := LastEntryNo;
+            ReservEntryInit."Reservation Status" := ReservEntryInit."Reservation Status"::Surplus;
+            ReservEntryInit.Positive := true;
+            ReservEntryInit."Item No." := PurchLine."No.";
+            ReservEntryInit."Location Code" := PurchLine."Location Code";
+            ReservEntryInit."Qty. per Unit of Measure" := PurchLine."Qty. per Unit of Measure";
+            ReservEntryInit.VALIDATE("Quantity (Base)", PurchLine.Quantity);
+            ReservEntryInit."Source Type" := DATABASE::"Purchase Line";
+            ReservEntryInit."Source ID" := PurchLine."Document No.";
+            ReservEntryInit."Source Ref. No." := PurchLine."Line No.";
+            ReservEntryInit."Source Subtype" := 1;
+            ReservEntryInit.validate("Serial No.", SerialNo/*ItemLedgEntry."Serial No."/*SerialNo*/);
+            ReservEntryInit."Item Tracking" := ReservEntryInit."Item Tracking"::"Serial No.";
+            ReservEntryInit."Expected Receipt Date" := PurchLine."Posting Date";
+            ReservEntryInit."Planning Flexibility" := ReservEntryInit."Planning Flexibility"::Unlimited;
+            ReservEntryInit."Creation Date" := TODAY;
+            ReservEntryInit."Created By" := USERID;
+            ReservEntryInit.INSERT;
 
         end;
-
     end;
-
 
 
     /*
