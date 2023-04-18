@@ -80,9 +80,10 @@ page 50341 "Customer List API"
                 {
                     Caption = 'P.A.N. No.';
                 }
-
-
-
+                field(shipToCode; Rec."Ship-to Code")
+                {
+                    Caption = 'Ship-to Code';
+                }
             }
         }
     }

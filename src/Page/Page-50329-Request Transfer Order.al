@@ -77,7 +77,7 @@ page 50329 "Request Transfer Order"
                 ApplicationArea = All;
                 PromotedCategory = Process;
                 Promoted = true;
-                Caption = 'Submit Transfer Order';
+                Caption = 'Send for Approval';
                 Image = SendApprovalRequest;
                 trigger OnAction()
                 var
@@ -105,10 +105,13 @@ page 50329 "Request Transfer Order"
                     TransferLine: Record "Transfer Line";
                     RrqTransferLine: Record "Request Transfer Line";
                     RLocation: Record Location;
+                    InvSetup: Record "Inventory Setup";
+                //NavAction:Page navi
                 begin
 
+                    InvSetup.Get();
                     TransferHeader.Init();
-                    TransferHeader."No." := Noseries.GetNextNo('T-ORD', Today, true);
+                    TransferHeader."No." := Noseries.GetNextNo(InvSetup."Transfer Order Nos.", Today, true);
                     TransferHeader.Insert(true);
                     TransferHeader."Transfer-from Code" := Rec."Transfer-from Code";
                     TransferHeader."Transfer-to Code" := rec."Transfer-to Code";
@@ -118,7 +121,6 @@ page 50329 "Request Transfer Order"
                     IF RLocation.FindFirst() then begin
                         TransferHeader."In-Transit Code" := RLocation.Code;
                     end;
-                    //TransferHeader."In-Transit Code" := 'OWN LOG.';
                     TransferHeader.Modify(true);
 
                     RrqTransferLine.Reset();
@@ -135,7 +137,9 @@ page 50329 "Request Transfer Order"
                         until RrqTransferLine.Next() = 0;
                     TransferHeader.Status := TransferHeader.Status::Released;
                     TransferHeader.Modify();
-                    // Message('Transfer Order Craeted wiTransferHeader No. %1', TransferHeader."No.");
+                    //Message('Transfer Order Craeted with Trasfer Order No. %1', TransferHeader."No.");
+                    if InstructionMgt.IsEnabled(InstructionMgt.ShowPostedConfirmationMessageCode()) then
+                        ShowPostedConfirmationMessage(TransferHeader."No.");
 
                 end;
             }
@@ -145,5 +149,25 @@ page 50329 "Request Transfer Order"
     }
     var
         Noseries: Codeunit NoSeriesManagement;
+        InstructionMgt: Codeunit "Instruction Mgt.";
+        OpenPostedSalesOrderQst: Label 'The transfer Order is Created as number %1 .\\Do you want to open the Transfer Order?', Comment = '%1 = posted document number';
+
+
+
+    local procedure ShowPostedConfirmationMessage(TranferNo: code[20])
+    var
+        TrasferHeader: Record "Transfer Header";
+        InstructionMgt: Codeunit "Instruction Mgt.";
+    begin
+
+        TrasferHeader.SetRange("No.", TranferNo);
+        if TrasferHeader.FindFirst() then
+            if InstructionMgt.ShowConfirm(StrSubstNo(OpenPostedSalesOrderQst, TrasferHeader."No."),
+                 InstructionMgt.ShowPostedConfirmationMessageCode())
+            then
+                InstructionMgt.ShowPostedDocument(TrasferHeader, Page::"Transfer Order");
+    end;
+
+
 
 }

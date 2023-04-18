@@ -21,6 +21,16 @@ page 50346 "Request Transfer List"
                 field(no; Rec."No.")
                 {
                     Caption = 'No.';
+                    trigger OnLookup(var Text: Text): Boolean
+                    var
+                        NoSeries: Codeunit NoSeriesManagement;
+                        InvtSetup: Record "Inventory Setup";
+                    begin
+                        InvtSetup.Get();
+                        InvtSetup.TestField("Request Tran. Order Nos.");
+                        Rec."No." := NoSeries.GetNextNo(InvtSetup."Request Tran. Order Nos.", rec."Posting Date", true);
+                        Rec.Modify();
+                    end;
                 }
                 field(staffID; Rec."Staff ID")
                 {

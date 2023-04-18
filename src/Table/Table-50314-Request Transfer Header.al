@@ -87,6 +87,20 @@ table 50314 "Request Transfer Header"
             Clustered = true;
         }
     }
+
+    trigger OnDelete()
+    var
+        RTL: Record "Request Transfer Line";
+    begin
+        RTL.Reset();
+        RTL.SetRange("Document No.", "No.");
+        IF RTL.FindSet() then
+            repeat
+                RTL.Delete();
+            until RTL.Next() = 0;
+
+    end;
+
     local procedure GetInventorySetup()
     begin
         if not HasInventorySetup then begin
@@ -133,5 +147,7 @@ table 50314 "Request Transfer Header"
             end;
         end;
     end;
+
+
 
 }

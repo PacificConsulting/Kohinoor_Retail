@@ -148,7 +148,7 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     NoSer: Codeunit NoSeriesManagement;
                     result: Text;
                     No: code[20];
-                    CU: Codeunit 50302;
+                    CU: Codeunit 50303;
 
                 begin
                     result := CU.OrderConfirmationforDelivery('KTPLSO23240014');

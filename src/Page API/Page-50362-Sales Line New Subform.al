@@ -90,6 +90,10 @@ page 50362 "Sales Line New Subform"
                 {
                     Caption = 'Price Inclusive of Tax';
                 }
+                field(totalUPITAmount; Rec."Total UPIT Amount")
+                {
+                    Caption = 'Total UPIT Amount';
+                }
 
             }
         }

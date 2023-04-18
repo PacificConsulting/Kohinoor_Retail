@@ -49,4 +49,15 @@ page 50348 "Request Tranfer Subform"
             }
         }
     }
+    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    var
+        ReqTranLine: record "Request Transfer Line";
+    begin
+        ReqTranLine.reset;
+        ReqTranLine.SETRANGE("Document No.", Rec."Document No.");
+        IF ReqTranLine.findlast then
+            Rec."Line No." := ReqTranLine."Line No." + 10000
+        else
+            Rec."Line No." := 10000;
+    end;
 }

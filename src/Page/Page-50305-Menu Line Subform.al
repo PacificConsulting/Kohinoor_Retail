@@ -39,7 +39,7 @@ page 50305 "Menu Line Subform"
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Action field.';
                 }
-                field(Parameter; Rec.Parameter)
+                field("Parameter 1"; Rec.Parameter)
                 {
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Parameter field.';

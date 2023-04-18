@@ -6,6 +6,24 @@ pageextension 50306 "ItemCArdExtension" extends "Item Card"
         {
             group(Picture)
             {
+                action(TradeAggrement)
+                {
+                    Caption = 'Trade Aggrement';
+                    Promoted = true;
+                    PromotedCategory = Process;
+                    PromotedIsBig = true;
+                    PromotedOnly = true;
+                    Image = Agreement;
+                    ApplicationArea = All;
+                    RunObject = page "Trade Aggrement List";
+                    RunPageLink = Item = field("No.");
+                    trigger OnAction()
+                    var
+                    begin
+
+                    end;
+                }
+
                 action(CreatePicture)
                 {
                     Caption = 'Create Picture by Description';

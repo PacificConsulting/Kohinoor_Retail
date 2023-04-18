@@ -115,6 +115,33 @@ codeunit 50302 "POS Event and Subscriber"
                         exit(IsResult);
 
                 end;
+            'ORDWH':  //<<<<** Order Confirm for Warehouse **>>>>
+                begin
+                    IsResult := POSProcedure.OrderConfirmationforWH(documentno);
+                    IF IsResult = '' then
+                        exit('Success')
+                    Else
+                        exit(IsResult);
+
+                end;
+            'ORDDEL':  //<<<<** Order Confirm for Warehouse **>>>>
+                begin
+                    IsResult := POSProcedure.OrderConfirmationforDelivery(documentno);
+                    IF IsResult = '' then
+                        exit('Success')
+                    Else
+                        exit(IsResult);
+
+                end;
+            'INVCOM':  //<<<<** compelete Invoice Auto Qty to ship Update **>>>>
+                begin
+                    IsResult := POSProcedure.InvoiceComplete(documentno);
+                    IF IsResult = '' then
+                        exit('Success')
+                    Else
+                        exit(IsResult);
+
+                end;
         end;
 
     end;
@@ -185,148 +212,6 @@ codeunit 50302 "POS Event and Subscriber"
     end;
 
 
-    /// <summary>
-    /// Order Confirmation for WareHouse function POS.
-    /// </summary>
-    procedure OrderConfirmationforDelivery(documentno: Code[20]): Text
-    var
-        PaymentLine: Record "Payment Lines";
-        TotalPayemtamt: Decimal;
-        SalesHeader: Record "Sales Header";
-        AmountToCust: decimal;
-        TotalGSTAmount1: Decimal;
-        TotalAmt: Decimal;
-        TotalTCSAmt: Decimal;
-        SalesRec11: record "Sales & Receivables Setup";
-        SalesLine: Record 37;
-    begin
-        clear(TotalGSTAmount1);
-        Clear(TotalTCSAmt);
-        Clear(TotalAmt);
-        SalesRec11.get();
-
-        SalesHeader.Reset();
-        SalesHeader.SetRange("No.", DocumentNo);
-        IF SalesHeader.FindFirst() then begin
-            IF SalesHeader.Status = SalesHeader.Status::Released then begin
-                SalesHeader.Status := SalesHeader.Status::Open;
-                SalesHeader.Modify();
-            end;
-        end;
-        SalesHeader.Reset();
-        SalesHeader.SetRange("No.", DocumentNo);
-        if SalesHeader.FindFirst() then begin
-            GetGSTAmountTotal(SalesHeader, TotalGSTAmount1);
-            GetTCSAmountTotal(SalesHeader, TotalTCSAmt);
-            GetSalesorderStatisticsAmount(SalesHeader, TotalAmt);
-            SalesHeader."Amount To Customer" := ROUND(TotalAmt + TotalGSTAmount1 + TotalTCSAmt);
-            SalesHeader.Modify();
-
-            Clear(TotalPayemtamt);
-            PaymentLine.Reset();
-            PaymentLine.SetRange("Document No.", SalesHeader."No.");
-            if PaymentLine.FindSet() then
-                repeat
-                    TotalPayemtamt := PaymentLine.Amount;
-                until PaymentLine.Next() = 0;
-
-            IF TotalPayemtamt <> SalesHeader."Amount To Customer" then
-                Error('Sales Order amount is not match with Payment amount')
-            else begin
-                BankPayentReceiptAutoPost(SalesHeader);
-                SalesHeader.Reset();
-                SalesHeader.SetRange("No.", SalesHeader."No.");
-                If SalesHeader.FindFirst() then begin
-                    SalesHeader.Validate("Location Code", SalesRec11."Default Warehouse");
-                    //SalesHdr."Staff Id" :=
-                    SalesHeader."POS Released Date" := Today;
-                    SalesHeader.Modify();
-
-                    SalesLine.Reset();
-                    SalesLine.SetRange("Document No.", DocumentNo);
-                    IF SalesLine.FindSet() then
-                        repeat
-                            SalesLine.Validate("Location Code", SalesHeader."Location Code");
-                            SalesLine.Validate("Shortcut Dimension 1 Code", SalesHeader."Shortcut Dimension 1 Code");
-                            SalesLine.Validate("Shortcut Dimension 2 Code", SalesHeader."Shortcut Dimension 2 Code");
-                            SalesLine.Modify()
-                        until SalesLine.Next() = 0;
-                    SalesHeader.Status := SalesHeader.Status::Released;
-                    SalesHeader.Modify();
-                    //Exit('Success');
-                end;
-            end;
-        end else
-            exit('Failed');
-    end;
-
-
-    /// <summary>
-    /// Order Confirmation for WareHouse function POS.
-    /// </summary>
-    procedure OrderConfirmationforWH(documentno: Code[20]): Text
-    var
-        PaymentLine: Record "Payment Lines";
-        TotalPayemtamt: Decimal;
-        SalesHdr: Record "Sales Header";
-        AmountToCust: decimal;
-        TotalGSTAmount1: Decimal;
-        TotalAmt: Decimal;
-        TotalTCSAmt: Decimal;
-        SalesRec: record "Sales & Receivables Setup";
-        SalesLine: record 37;
-    begin
-        clear(TotalGSTAmount1);
-        Clear(TotalTCSAmt);
-        Clear(TotalAmt);
-        SalesRec.Get();
-
-        SalesHdr.Reset();
-        SalesHdr.SetRange("No.", DocumentNo);
-        if SalesHdr.FindFirst() then begin
-            GetGSTAmountTotal(SalesHdr, TotalGSTAmount1);
-            GetTCSAmountTotal(SalesHdr, TotalTCSAmt);
-            GetSalesorderStatisticsAmount(SalesHdr, TotalAmt);
-            SalesHdr."Amount To Customer" := Round(TotalAmt + TotalGSTAmount1 + TotalTCSAmt);
-            SalesHdr.Modify();
-
-            Clear(TotalPayemtamt);
-            PaymentLine.Reset();
-            PaymentLine.SetRange("Document No.", SalesHdr."No.");
-            if PaymentLine.FindSet() then
-                repeat
-                    TotalPayemtamt := PaymentLine.Amount;
-                until PaymentLine.Next() = 0;
-
-            IF TotalPayemtamt <> SalesHdr."Amount To Customer" then
-                Error('Sales Order amount is not match with Payment amount')
-            else begin
-                BankPayentReceiptAutoPost(SalesHdr);
-                SalesHdr.Reset();
-                SalesHdr.SetRange("No.", SalesHdr."No.");
-                If SalesHdr.FindFirst() then begin
-                    SalesHdr.Validate("Location Code", SalesRec."Default Warehouse");
-                    //SalesHdr."Staff Id" :=
-                    SalesHdr."POS Released Date" := Today;
-                    SalesHdr.Status := SalesHdr.Status::Released;
-                    SalesHdr.Modify();
-                    //Exit('Success');
-                end;
-                SalesLine.Reset();
-                SalesLine.SetRange("Document No.", DocumentNo);
-                IF SalesLine.FindSet() then
-                    repeat
-                        SalesLine.Validate("Location Code", SalesHdr."Location Code");
-                        SalesLine.Validate("Shortcut Dimension 1 Code", SalesHdr."Shortcut Dimension 1 Code");
-                        SalesLine.Validate("Shortcut Dimension 2 Code", SalesHdr."Shortcut Dimension 2 Code");
-                        SalesLine.Modify()
-                    until SalesLine.Next() = 0;
-                SalesHdr.Status := SalesHdr.Status::Released;
-                SalesHdr.Modify();
-            end;
-        end else
-            exit('Failed');
-    end;
 
 
     /// <summary>
