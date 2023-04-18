@@ -207,8 +207,22 @@ codeunit 50302 "POS Event and Subscriber"
     /// </summary>
     procedure Bankdropsubmit(storeno: Code[20]; staffid: Code[20]; sdate: text; amount: text): Text
     var
+        BanKdrop: Record "Bank Drop Entry";
+        Storedate: Date;
     begin
-        exit('Success')
+        //exit('Success');
+        Evaluate(Storedate, Format(sdate));
+        BanKdrop.Reset();
+        BanKdrop.SetRange("Store No.", storeno);
+        BanKdrop.SetRange("Staff ID", staffid);
+        BanKdrop.SetRange("Store Date", Storedate);
+        IF BanKdrop.FindFirst() then begin
+            BanKdrop.Status := BanKdrop.Status::Release;
+            BanKdrop.Modify();
+            IF BanKdrop.Status = BanKdrop.Status::Open then
+                exit('Failed');
+        end;
+
     end;
 
 
