@@ -49,6 +49,18 @@ table 50309 "Bank Drop Entry"
             DataClassification = ToBeClassified;
             Caption = 'Description';
         }
+        field(7; "Bank Account"; Code[20])
+        {
+            DataClassification = ToBeClassified;
+            TableRelation = "Bank Account"."No." where(Tender = filter(false));
+            Caption = 'Bank Account';
+        }
+        field(8; "Cash Account"; Code[20])
+        {
+            DataClassification = ToBeClassified;
+            TableRelation = "G/L Account"."No.";
+            Caption = 'Cash Account';
+        }
 
     }
 

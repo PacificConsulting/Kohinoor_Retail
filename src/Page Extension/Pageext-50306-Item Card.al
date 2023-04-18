@@ -16,7 +16,7 @@ pageextension 50306 "ItemCArdExtension" extends "Item Card"
                     Image = Agreement;
                     ApplicationArea = All;
                     RunObject = page "Trade Aggrement List";
-                    RunPageLink = Item = field("No.");
+                    RunPageLink = "Item No." = field("No.");
                     trigger OnAction()
                     var
                     begin

@@ -95,10 +95,9 @@ page 50341 "Customer List API"
 
         Rec."Gen. Bus. Posting Group" := 'DOMESTIC';
         Rec."Customer Posting Group" := 'GOODS';
-        ShipToAddressInsert(Rec);
-
-
+        // ShipToAddressInsert(Rec);
     end;
+
 
     local procedure ShipToAddressInsert(Cust: Record Customer)
     var

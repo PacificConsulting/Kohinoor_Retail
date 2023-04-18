@@ -12,7 +12,7 @@ page 50357 "Trade Aggrement List"
         {
             repeater(General)
             {
-                field(Item; Rec.Item)
+                field(Item; Rec."Item No.")
                 {
                     ToolTip = 'Specifies the value of the Item field.';
                 }
@@ -95,6 +95,78 @@ page 50357 "Trade Aggrement List"
                 field("Sellout Text"; Rec."Sellout Text")
                 {
                     ToolTip = 'Specifies the value of the Sellout Text field.';
+                }
+                field("Actual From Date"; Rec."Actual From Date")
+                {
+                    ToolTip = 'Specifies the value of the Actual From Date field.';
+                }
+                field(ALLFINANCE; Rec.ALLFINANCE)
+                {
+                    ToolTip = 'Specifies the value of the ALLFINANCE field.';
+                }
+                field(AMZ; Rec.AMZ)
+                {
+                    ToolTip = 'Specifies the value of the AMZ field.';
+                }
+                field("Actual To Date"; Rec."Actual To Date")
+                {
+                    ToolTip = 'Specifies the value of the Actual To Date field.';
+                }
+                field("Amount in Transaction Currency"; Rec."Amount in Transaction Currency")
+                {
+                    ToolTip = 'Specifies the value of the Amount in Transaction Currency field.';
+                }
+                field(CASHBACK; Rec.CASHBACK)
+                {
+                    ToolTip = 'Specifies the value of the CASHBACK field.';
+                }
+                field("Customer Group"; Rec."Customer Group")
+                {
+                    ToolTip = 'Specifies the value of the Customer Group field.';
+                }
+                field("FOC/Sellout"; Rec."FOC/Sellout")
+                {
+                    ToolTip = 'Specifies the value of the FOC/Sellout field.';
+                }
+                field("Fnnlc with sell out"; Rec."Fnnlc with sell out")
+                {
+                    ToolTip = 'Specifies the value of the Fnnlc with sell out field.';
+                }
+                field(From; Rec.From)
+                {
+                    ToolTip = 'Specifies the value of the From field.';
+                }
+                field(KTVWEB_WE; Rec.KTVWEB_WE)
+                {
+                    ToolTip = 'Specifies the value of the KTVWEB_WE field.';
+                }
+                field(KTVWEB_WOE; Rec.KTVWEB_WOE)
+                {
+                    ToolTip = 'Specifies the value of the KTVWEB_WOE field.';
+                }
+                field("Manager Discection - INC"; Rec."Manager Discection - INC")
+                {
+                    ToolTip = 'Specifies the value of the Manager Discection - INC field.';
+                }
+                field(PRICE_TAG; Rec.PRICE_TAG)
+                {
+                    ToolTip = 'Specifies the value of the PRICE_TAG field.';
+                }
+                field(PROMO; Rec.PROMO)
+                {
+                    ToolTip = 'Specifies the value of the PROMO field.';
+                }
+                field("SLAB 1 - INC"; Rec."SLAB 1 - INC")
+                {
+                    ToolTip = 'Specifies the value of the SLAB 1 - INC field.';
+                }
+                field("To"; Rec."To")
+                {
+                    ToolTip = 'Specifies the value of the To field.';
+                }
+                field(UOM; Rec.UOM)
+                {
+                    ToolTip = 'Specifies the value of the UOM field.';
                 }
             }
         }

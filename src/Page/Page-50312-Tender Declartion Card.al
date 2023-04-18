@@ -1,6 +1,6 @@
 page 50312 "Tender Declartion Card"
 {
-    ApplicationArea = All;
+    //ApplicationArea = All;
     Caption = 'Tender Declartion Card';
     PageType = Card;
     SourceTable = "Tender Declartion Header";

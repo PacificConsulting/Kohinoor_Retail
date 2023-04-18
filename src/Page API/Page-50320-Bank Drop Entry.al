@@ -42,6 +42,14 @@ page 50320 "Bank Drop Entry"
                 {
                     Caption = 'Amount';
                 }
+                // field(bankAccount; Rec."Bank Account")
+                // {
+                //     Caption = 'Bank Account';
+                // }
+                // field(cashAccount; Rec."Cash Account")
+                // {
+                //     Caption = 'Cash Account';
+                // }
                 field(systemId; Rec.SystemId)
                 {
                     Caption = 'SystemId';

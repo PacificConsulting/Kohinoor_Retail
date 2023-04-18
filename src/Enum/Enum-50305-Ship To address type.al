@@ -6,7 +6,7 @@ enum 50305 "Ship To Address Type"
     {
         Caption = 'Primary';
     }
-    value(2; Secondary)
+    value(1; Secondary)
     {
         Caption = 'Secondary';
     }

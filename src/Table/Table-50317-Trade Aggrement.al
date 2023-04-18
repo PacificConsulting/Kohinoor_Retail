@@ -6,9 +6,9 @@ table 50317 "Trade Aggrement"
 
     fields
     {
-        field(1; Item; Code[20])
+        field(1; "Item No."; Code[20])
         {
-            Caption = 'Item';
+            Caption = 'Item No.';
             DataClassification = ToBeClassified;
             TableRelation = Item."No.";
         }
@@ -113,10 +113,101 @@ table 50317 "Trade Aggrement"
             Caption = 'SLAB 2 - INC';
             DataClassification = ToBeClassified;
         }
+        field(22; "Customer Group"; Enum "Trade Customer Group")
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Customer Group';
+        }
+        field(23; UOM; Code[10])
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'UOM';
+        }
+        field(24; "Amount in Transaction Currency"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Amount in Transaction Currency';
+        }
+        field(25; "Fnnlc with sell out"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Fnnlc with sell out';
+        }
+        field(26; "Actual From Date"; Date)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Actual From Date';
+        }
+        field(27; "Actual To Date"; Date)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Actual To Date';
+        }
+        field(28; From; Date)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'From';
+        }
+        field(29; "To"; Date)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'To';
+        }
+        field(30; "SLAB 1 - INC"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'SLAB 1 - INC';
+        }
+        field(31; "Manager Discection - INC"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Manager Discection - INC';
+        }
+        field(32; "FOC/Sellout"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'FOC/Sellout';
+        }
+        field(33; AMZ; Decimal)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'AMZ';
+        }
+        field(34; "KTVWEB_WOE"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'KTVWEB_WOE';
+        }
+        field(35; "KTVWEB_WE"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'KTVWEB_WE';
+        }
+        field(36; "PRICE_TAG"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'PRICE_TAG';
+        }
+        field(37; "ALLFINANCE"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'ALLFINANCE';
+        }
+        field(38; CASHBACK; Decimal)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'CASHBACK';
+        }
+        field(39; PROMO; Decimal)
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'PROMO';
+        }
+
     }
     keys
     {
-        key(PK; Item, "From Date", "To Date", "Location Code")
+        key(PK; "Item No.", "From Date", "To Date", "Location Code")
         {
             Clustered = true;
         }

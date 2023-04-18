@@ -12,7 +12,7 @@ xmlport 50301 "Trade Aggrement Data Upload"
             tableelement(TradeAggrement; "Trade Aggrement")
             {
                 XmlName = 'Import';
-                fieldelement(Item; TradeAggrement.Item)
+                fieldelement(Item; TradeAggrement."Item No.")
                 {
                 }
                 fieldelement(FromDate; TradeAggrement."From Date")
@@ -73,6 +73,61 @@ xmlport 50301 "Trade Aggrement Data Upload"
                 {
                 }
                 fieldelement(SLAB2INC; TradeAggrement."SLAB 2 - INC")
+                {
+                }
+                fieldelement(ActualFromDate; TradeAggrement."Actual From Date")
+                {
+                }
+                fieldelement(ALLFINANCE; TradeAggrement.ALLFINANCE)
+                {
+                }
+                fieldelement(AMZ; TradeAggrement.AMZ)
+                {
+                }
+                fieldelement(ActualToDate; TradeAggrement."Actual To Date")
+                {
+                }
+                fieldelement(AmountinTransactionCurrency; TradeAggrement."Amount in Transaction Currency")
+                {
+                }
+                fieldelement(CASHBACK; TradeAggrement.CASHBACK)
+                {
+                }
+                fieldelement(CustomerGroup; TradeAggrement."Customer Group")
+                {
+                }
+                fieldelement(FOCSellout; TradeAggrement."FOC/Sellout")
+                {
+                }
+                fieldelement(Fnnlcwithsellout; TradeAggrement."Fnnlc with sell out")
+                {
+                }
+                fieldelement(From; TradeAggrement.From)
+                {
+                }
+                fieldelement(To; TradeAggrement."To")
+                {
+                }
+                fieldelement(KTVWEB_WE; TradeAggrement.KTVWEB_WE)
+                {
+                }
+                fieldelement(KTVWEB_WOE; TradeAggrement.KTVWEB_WOE)
+                {
+                }
+                fieldelement(PRICE_TAG; TradeAggrement.PRICE_TAG)
+                {
+                }
+                fieldelement(ManagerDiscectionINC; TradeAggrement."Manager Discection - INC")
+                {
+                }
+                fieldelement(PROMO; TradeAggrement.PROMO)
+                {
+                }
+                fieldelement(SLAB1INC; TradeAggrement."SLAB 1 - INC")
+                {
+                }
+
+                fieldelement(UOM; TradeAggrement.UOM)
                 {
                 }
                 trigger OnAfterInitRecord()

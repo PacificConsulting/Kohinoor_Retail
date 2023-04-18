@@ -158,6 +158,6 @@ page 50306 "Ship To Address API"
     }
     trigger OnInsertRecord(BelowxRec: Boolean): Boolean
     begin
-        Rec."Address Type" := rec."Address Type"::Secondary;
+        //  Rec."Address Type" := rec."Address Type"::Secondary;
     end;
 }

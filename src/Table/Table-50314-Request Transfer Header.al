@@ -22,6 +22,15 @@ table 50314 "Request Transfer Header"
         field(2; "Transfer-from Code"; Code[10])
         {
             Caption = 'Transfer-from Code';
+            TableRelation = Location WHERE("Use As In-Transit" = CONST(false));
+            trigger OnValidate()
+            var
+                RecLoc: Record 14;
+            begin
+                IF RecLoc.Get("Transfer-from Code") then begin
+                    "Transfer-to Name" := RecLoc.Name;
+                end;
+            end;
         }
         field(3; "Transfer-to Code"; Code[10])
         {
@@ -40,10 +49,12 @@ table 50314 "Request Transfer Header"
         field(4; "Transfer-from Name"; Text[100])
         {
             Caption = 'Transfer-from Name';
+            Editable = false;
         }
         field(5; "Transfer-to Name"; Text[100])
         {
             Caption = 'Transfer-to Name';
+            Editable = false;
         }
         field(6; "Posting Date"; Date)
         {
@@ -73,6 +84,7 @@ table 50314 "Request Transfer Header"
             begin
                 IF StaffMaster.Get("Staff ID") then begin
                     Validate("Transfer-to Code", StaffMaster."Store No.");
+
                 end;
 
 
