@@ -88,6 +88,11 @@ page 50341 "Customer List API"
                 {
                     Caption = 'GST Customer Type';
                 }
+                field(searchName; Rec."Search Name")
+                {
+                    Caption = 'Search Name';
+                }
+
             }
         }
     }

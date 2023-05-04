@@ -186,11 +186,12 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     Emailmessage: Codeunit "Email Message";
                     DecryptedValue: Text;
                 begin
+                    //if recCust.get
                     DecryptedValue := GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List");
                     Window.OPEN(
                      'Sending Mail              #1######\');
 
-                    Emailmessage.Create(recCust."E-Mail", 'Approval Slab', '', true);
+                    Emailmessage.Create('niwagh16@gmail.com', 'Approval Slab', '', true);
                     Emailmessage.AppendToBody('<p><font face="Georgia">Dear <B>Sir,</B></font></p>');
                     Char := 13;
                     Emailmessage.AppendToBody(FORMAT(Char));

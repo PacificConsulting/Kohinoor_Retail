@@ -1,5 +1,15 @@
 pageextension 50306 "ItemCArdExtension" extends "Item Card"
 {
+    layout
+    {
+        // addafter(Description)
+        // {
+        //     field("Search Description"; Rec."Search Description")
+        //     {
+        //         ApplicationArea = all;
+        //     }
+        // }
+    }
     actions
     {
         addlast(processing)

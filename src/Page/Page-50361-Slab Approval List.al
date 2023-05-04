@@ -34,11 +34,12 @@ page 50361 "Slab Approval List"
                     ToolTip = 'Specifies a description of the item or service on the line.';
                     Editable = false;
                 }
-                field("Unit Price"; Rec."Unit Price")
+                field("Unit Price Incl. of Tax"; Rec."Unit Price Incl. of Tax")
                 {
-                    ToolTip = 'Specifies the price for one unit on the sales line.';
+                    ToolTip = 'Specifies unit prices are inclusive of tax on the line.';
                     Editable = false;
                 }
+
                 field("Location Code"; Rec."Location Code")
                 {
                     ToolTip = 'Specifies the inventory location from which the items sold should be picked and where the inventory decrease is registered.';
@@ -59,7 +60,7 @@ page 50361 "Slab Approval List"
         {
             action("Approved Status")
             {
-                Caption = 'Approved Status';
+                Caption = 'Approved';
                 ApplicationArea = all;
                 PromotedCategory = Process;
                 Promoted = true;
@@ -73,6 +74,29 @@ page 50361 "Slab Approval List"
                     SalesLine.SetRange("Approval Status", SalesLine."Approval Status"::"Pending for Approval");
                     IF SalesLine.FindFirst() then begin
                         SalesLine."Approval Status" := SalesLine."Approval Status"::" ";
+                        SalesLine."Approved By" := UserId;
+                        SalesLine."Approved On" := Today;
+                        SalesLine.Modify();
+                    end;
+                end;
+            }
+            action("Reject")
+            {
+                Caption = 'Reject';
+                ApplicationArea = all;
+                PromotedCategory = Process;
+                Promoted = true;
+                PromotedOnly = true;
+                Image = Reject;
+                trigger OnAction()
+                var
+                    SalesLine: Record 37;
+                begin
+                    CurrPage.SetSelectionFilter(SalesLine);
+                    SalesLine.SetRange("Approval Status", SalesLine."Approval Status"::"Pending for Approval");
+                    IF SalesLine.FindFirst() then begin
+                        SalesLine."Approval Status" := SalesLine."Approval Status"::" ";
+                        SalesLine.Validate("Unit Price Incl. of Tax", rec."Change Unit Price Incl. of Tax");
                         SalesLine.Modify();
                     end;
                 end;

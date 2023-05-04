@@ -49,6 +49,12 @@ pageextension 50304 "Sales Line Subform" extends "Sales Order Subform"
                 ToolTip = 'Specifies the value of the GST Tax Amount.';
 
             }
+            field("Change Unit Price Incl. of Tax"; Rec."Change Unit Price Incl. of Tax")
+            {
+                ApplicationArea = All;
+                ToolTip = 'Specifies the value of the Change Unit Price Incl. of Tax field.';
+            }
+
         }
     }
 

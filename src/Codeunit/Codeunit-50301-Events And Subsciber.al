@@ -14,7 +14,7 @@ codeunit 50301 "Event and Subscribers"
         // if not SalesLine."Price Inclusive of Tax" then
         //     exit;
         IF SalesLine."Unit Price" <> 0 then
-            SalesLine."GST Tax Amount" := (SalesLine."Unit Price Incl. of Tax" - SalesLine."Unit Price");
+            SalesLine."GST Tax Amount" := (SalesLine."Unit Price Incl. of Tax" - SalesLine."Unit Price") * SalesLine.Quantity;
     end;
 
     //END**********************************Table-37*********************************************
@@ -129,10 +129,10 @@ codeunit 50301 "Event and Subscribers"
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Purch.-Post", 'OnAfterSetPostingFlags', '', false, false)]
     local procedure OnAfterSetPostingFlags(var PurchHeader: Record "Purchase Header")
     begin
-        // IF PurchHeader."Store No." then begin
-        PurchHeader.Receive := true;
-        PurchHeader.Invoice := false;
-        //end;
+        IF PurchHeader."Document Type" = PurchHeader."Document Type"::Order then begin
+            PurchHeader.Receive := true;
+            PurchHeader.Invoice := false;
+        end;
     end;
     //START**********************************Codeunit-5704***************************************
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"TransferOrder-Post Shipment", 'OnBeforeTransferOrderPostShipment', '', false, false)]
