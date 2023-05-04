@@ -507,6 +507,34 @@ codeunit 50302 "POS Event and Subscriber"
         exit(TaxTransactionValue.Amount);
     end;
 
+    //Salesperson Update
+    //
+    procedure UpdateSalesPerson(DocumentNo: Code[20]; LineNo: Integer; SPCode: Code[20]): Text
+    var
+
+        RecSalesLine: Record 37;
+
+
+    begin
+        RecSalesLine.Reset();
+        RecSalesLine.SetRange("Document No.", DocumentNo);
+        RecSalesLine.SetRange("Line No.", LineNo);
+        IF RecSalesLine.FindFirst() then begin
+            RecSalesLine."Salesperson Code" := SPCode;
+            RecSalesLine.Modify();
+            exit('Success')
+        end
+        Else
+            exit('Document Line not found');
+
+    end;
+
+
+
+
+
+
+
     procedure GetSalesorderStatisticsAmount(
             SalesHeader: Record 36;
             var TotalInclTaxAmount: Decimal)

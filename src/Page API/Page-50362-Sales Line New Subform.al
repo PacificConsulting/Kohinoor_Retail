@@ -94,6 +94,10 @@ page 50362 "Sales Line New Subform"
                 {
                     Caption = 'Total UPIT Amount';
                 }
+                field(salesPersonCode; rec."Salesperson Code")
+                {
+                    Caption = 'Salesperson Code';
+                }
 
             }
         }

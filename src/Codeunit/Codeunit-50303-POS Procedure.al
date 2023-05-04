@@ -267,10 +267,11 @@ codeunit 50303 "POS Procedure"
         ReturnBool: Boolean;
     begin
         // Clear(InputData);
-        Evaluate(ShipInvtoQty, InputData);
+        // Evaluate(ShipInvtoQty, InputData);
         SaleHeaderInv.Reset();
         SaleHeaderInv.SetRange("No.", DocumentNo);
         IF SaleHeaderInv.FindFirst() then begin
+            //  EXIT('Found');
             IF SaleHeaderInv.Status = SaleHeaderInv.Status::Released then begin
                 SaleHeaderInv.Status := SaleHeaderInv.Status::Open;
                 SaleHeaderInv.Modify(true);
@@ -489,20 +490,22 @@ codeunit 50303 "POS Procedure"
         ItemLedgEntry: Record 32;
         TranLine: Record "Transfer Line";
         PurchLine: Record 39;
+        DocFound: Boolean;
     begin
-        // exit('Success....');
+        //exit('Error');
         Evaluate(SerialNo, input);
         Clear(LastEntryNo);
-
+        DocFound := false;
         SalesLine.Reset();
         SalesLine.SetRange("Document No.", documentno);
         SalesLine.SetRange("Line No.", lineno);
         IF SalesLine.FindFirst() then begin
+            DocFound := true;
             IF SalesLine."Qty. to Ship" = 0 then begin
                 SalesLine.Validate("Qty. to Ship", SalesLine.Quantity);
                 SalesLine.Modify();
             end;
-
+            //exit('Error');
             ReservEntry.RESET;
             ReservEntry.LOCKTABLE;
             IF ReservEntry.FINDLAST THEN
@@ -536,7 +539,9 @@ codeunit 50303 "POS Procedure"
                 ReservEntryInit."Creation Date" := TODAY;
                 ReservEntryInit."Created By" := USERID;
                 ReservEntryInit.INSERT;
-            End; //Until
+            End
+            ELSE
+                EXIT('Insufficient Inventory'); //Until
             //exit('Success');
         end else begin
             Evaluate(SerialNo, input);
@@ -546,6 +551,7 @@ codeunit 50303 "POS Procedure"
             TranLine.SetRange("Document No.", documentno);
             TranLine.SetRange("Line No.", lineno);
             IF TranLine.FindFirst() then begin
+                DocFound := true;
                 IF TranLine."Qty. to Ship" = 0 then begin
                     TranLine.Validate("Qty. to Ship", TranLine.Quantity);
                     TranLine.Modify();
@@ -618,6 +624,7 @@ codeunit 50303 "POS Procedure"
         PurchLine.SetRange("Document No.", documentno);
         PurchLine.SetRange("Line No.", lineno);
         IF PurchLine.FindFirst() then begin
+            DocFound := true;
             IF PurchLine."Qty. to Receive" = 0 then begin
                 PurchLine.Validate("Qty. to Receive", PurchLine.Quantity);
                 PurchLine.Modify();
@@ -650,6 +657,8 @@ codeunit 50303 "POS Procedure"
             ReservEntryInit.INSERT;
 
         end;
+        IF DocFound = false then
+            exit('No document found')
     end;
 
     /// <summary>
@@ -1135,9 +1144,9 @@ codeunit 50303 "POS Procedure"
         //         Until PaymentLine.Next() = 0;
         // end;
     end;
-
-
-
+    // <summary>
+    /// Update the Unit Price Sales Line
+    /// </summary>
 
 
 }

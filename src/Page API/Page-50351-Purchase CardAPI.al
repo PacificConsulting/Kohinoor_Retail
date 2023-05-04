@@ -238,10 +238,7 @@ page 50351 "Purchase Card API"
                 {
                     Caption = 'IC Status';
                 }
-                field(id; Rec.Id)
-                {
-                    Caption = 'Id';
-                }
+
                 field(inboundWhseHandlingTime; Rec."Inbound Whse. Handling Time")
                 {
                     Caption = 'Inbound Whse. Handling Time';

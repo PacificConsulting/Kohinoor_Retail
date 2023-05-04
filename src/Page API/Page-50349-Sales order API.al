@@ -226,7 +226,7 @@ page 50349 "Sales order API"
                 {
                     Caption = 'E-Commerce Customer';
                 }
-               
+
                 field(eWayBillNo; Rec."E-Way Bill No.")
                 {
                     Caption = 'E-Way Bill No.';
@@ -299,10 +299,7 @@ page 50349 "Sales order API"
                 {
                     Caption = 'IC Status';
                 }
-                field(id; Rec.Id)
-                {
-                    Caption = 'Id';
-                }
+
                 field(incomingDocumentEntryNo; Rec."Incoming Document Entry No.")
                 {
                     Caption = 'Incoming Document Entry No.';
@@ -351,7 +348,7 @@ page 50349 "Sales order API"
                 {
                     Caption = 'Language Code';
                 }
-                
+
                 field(lastPostingNo; Rec."Last Posting No.")
                 {
                     Caption = 'Last Posting No.';
@@ -684,7 +681,7 @@ page 50349 "Sales order API"
                 {
                     Caption = 'Send IC Document';
                 }
-               
+
                 field(ship; Rec.Ship)
                 {
                     Caption = 'Ship';

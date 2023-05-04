@@ -73,6 +73,13 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
             DataClassification = ToBeClassified;
             Editable = false;
         }
+        field(50311; "Salesperson Code"; Code[20])
+        {
+            Caption = 'Salesperson Code';
+            DataClassification = ToBeClassified;
+            TableRelation = "Salesperson/Purchaser".Code;
+
+        }
 
     }
 

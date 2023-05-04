@@ -84,6 +84,10 @@ page 50341 "Customer List API"
                 {
                     Caption = 'Ship-to Code';
                 }
+                field(gstCustType; Rec."GST Customer Type")
+                {
+                    Caption = 'GST Customer Type';
+                }
             }
         }
     }

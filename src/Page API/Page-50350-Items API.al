@@ -218,10 +218,7 @@ page 50350 "Items API"
                 {
                     Caption = 'HSN/SAC Code';
                 }
-                field(id; Rec.Id)
-                {
-                    Caption = 'Id';
-                }
+
                 field(identifierCode; Rec."Identifier Code")
                 {
                     Caption = 'Identifier Code';

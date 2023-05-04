@@ -36,6 +36,10 @@ pageextension 50304 "Sales Line Subform" extends "Sales Order Subform"
             {
                 ApplicationArea = all;
             }
+            field("Salesperson Code"; Rec."Salesperson Code")
+            {
+                ApplicationArea = all;
+            }
         }
         addafter("Unit Price Incl. of Tax")
         {

@@ -18,10 +18,7 @@ page 50316 "Payment Method"
         {
             repeater(GroupName)
             {
-                field(id; Rec.Id)
-                {
-                    Caption = 'Id';
-                }
+
                 field("code"; Rec."Code")
                 {
                     Caption = 'Code';

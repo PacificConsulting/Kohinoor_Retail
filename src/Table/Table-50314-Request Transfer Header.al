@@ -28,7 +28,7 @@ table 50314 "Request Transfer Header"
                 RecLoc: Record 14;
             begin
                 IF RecLoc.Get("Transfer-from Code") then begin
-                    "Transfer-to Name" := RecLoc.Name;
+                    "Transfer-From Name" := RecLoc.Name;
                 end;
             end;
         }
@@ -112,6 +112,18 @@ table 50314 "Request Transfer Header"
             until RTL.Next() = 0;
 
     end;
+
+    trigger OnInsert()
+    var
+        NoSeries: Codeunit NoSeriesManagement;
+        InvtSetup: Record "Inventory Setup";
+    begin
+        InvtSetup.Get();
+        InvtSetup.TestField("Request Tran. Order Nos.");
+        Rec."No." := NoSeries.GetNextNo(InvtSetup."Request Tran. Order Nos.", rec."Posting Date", true);
+        //Rec.Modify();
+    end;
+
 
     local procedure GetInventorySetup()
     begin

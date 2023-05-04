@@ -19,10 +19,7 @@ page 50317 "Shipping method"
             repeater(GroupName)
             {
 
-                field(id; Rec.Id)
-                {
-                    Caption = 'Id';
-                }
+
                 field("code"; Rec."Code")
                 {
                     Caption = 'Code';
