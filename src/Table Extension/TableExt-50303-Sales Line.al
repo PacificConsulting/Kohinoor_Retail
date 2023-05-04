@@ -19,7 +19,7 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
                 IF TradeAggre.FindFirst() then begin
                     Validate("Unit Price Incl. of Tax", TradeAggre."Amount in Transaction Currency");
                     "Price Inclusive of Tax" := true;
-                    //Validate("Price Inclusive of Tax", true);
+                    //Validate("Price Inclusive of Tax", true);//
                 end;
 
                 Validate("Unit Price Incl. of Tax", 25000);
