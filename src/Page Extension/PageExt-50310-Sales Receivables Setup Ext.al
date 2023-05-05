@@ -19,6 +19,15 @@ pageextension 50310 "Sales & Receivables Setup Ext" extends "Sales & Receivables
             {
                 ApplicationArea = all;
             }
+            field("Tender Declartion No Series"; Rec."Tender Declartion No Series")
+            {
+                ApplicationArea = all;
+            }
+            field("Bank Drop No Series"; Rec."Bank Drop No Series")
+            {
+                ApplicationArea = All;
+                ToolTip = 'Specifies the value of the Bank Drop No Series field.';
+            }
         }
     }
 }

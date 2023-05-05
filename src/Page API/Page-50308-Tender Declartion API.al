@@ -80,8 +80,19 @@ page 50308 "Tender Declartion API Hdr"
                 {
                     Caption = 'Status';
                 }
+                field(no; Rec."No.")
+                {
+                    Caption = 'No.';
+                }
 
             }
         }
     }
+    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    var
+        NoSeries: Codeunit NoSeriesManagement;
+        SR: Record "Sales & Receivables Setup";
+    begin
+        Rec."No." := NoSeries.GetNextNo(SR."Tender Declartion No Series", Today, true);
+    end;
 }

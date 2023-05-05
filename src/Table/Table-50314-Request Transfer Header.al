@@ -162,7 +162,7 @@ table 50314 "Request Transfer Header"
         with ReqTransHeader do begin
             ReqTransHeader := Rec;
             GetInventorySetup();
-            //TestNoSeries();
+
             InvtSetup.TestField("Request Tran. Order Nos.");
             if NoSeriesMgt.SelectSeries(GetNoSeriesCode(), OldReqTransHeader."No. Series", "No. Series") then begin
                 NoSeriesMgt.SetSeries("No.");
@@ -170,7 +170,7 @@ table 50314 "Request Transfer Header"
                 exit(true);
             end;
         end;
-    end;
+    end;//
 
 
 

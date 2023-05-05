@@ -137,7 +137,6 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
             {
                 ApplicationArea = all;
                 Image = PostedPayment;
-                //Caption = 'Payment Post';
                 Promoted = true;
                 PromotedIsBig = true;
                 trigger OnAction()
@@ -149,10 +148,12 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     result: Text;
                     No: code[20];
                     CU: Codeunit 50303;
+                    POS: Codeunit 50302;
 
                 begin
-                    result := CU.OrderConfirmationforDelivery('KTPLSO23240014');
-                    //result := POS.InvoiceLine('KTPLSO23240019', 20000, '', '1');
+                    Message('hi');
+                    result := POS.POSAction('KTPLSO23240091', 0, 'INVLINE', '', '', '');
+                    result := CU.InvoiceLine('KTPLSO23240019', 0, '', '');
                     // SL.Reset();
                     // sl.SetRange("Approval Status", sl."Approval Status"::"Pending for Approval");
                     // IF SL.FindFirst() then;
@@ -160,6 +161,25 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     // result := GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List", SL);
                     Message(result);
 
+                end;
+            }
+            action("POS Function Test")
+            {
+                Caption = 'POS Function Test';
+                ApplicationArea = all;
+                PromotedCategory = Process;
+                Promoted = true;
+                PromotedOnly = true;
+                Image = Email;
+                trigger OnAction()
+                var
+                    CU: Codeunit 50303;
+                    POS: Codeunit 50302;
+                    result: Text;
+                begin
+                    result := POS.POSAction('KTPLSO23240091', 10000, 'INVLINE', '1', '', '');
+                    //result := CU.InvoiceLine('KTPLSO23240019', 0, '', '');
+                    Message(result);
                 end;
             }
             action("Send PAGE Mail")
@@ -185,7 +205,13 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     EMail: Codeunit Email;
                     Emailmessage: Codeunit "Email Message";
                     DecryptedValue: Text;
+                    CU: Codeunit 50303;
+                    POS: Codeunit 50302;
+                    result: Text;
                 begin
+                    Message('hi');
+                    result := POS.POSAction('KTPLSO23240091', 0, 'INVLINE', '', '', '');
+                    result := CU.InvoiceLine('KTPLSO23240019', 0, '', '');
                     //if recCust.get
                     DecryptedValue := GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List");
                     Window.OPEN(

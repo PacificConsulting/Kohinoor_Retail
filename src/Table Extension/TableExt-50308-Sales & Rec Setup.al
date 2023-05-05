@@ -17,6 +17,17 @@ tableextension 50308 "Sales & Rec Setup" extends "Sales & Receivables Setup"
             DataClassification = ToBeClassified;
             TableRelation = "No. Series";
         }
+        field(50304; "Tender Declartion No Series"; Code[10])
+        {
+            DataClassification = ToBeClassified;
+            TableRelation = "No. Series";
+        }
+        field(50305; "Bank Drop No Series"; Code[10])
+        {
+            DataClassification = ToBeClassified;
+            TableRelation = "No. Series";
+        }
+
     }
 
     var

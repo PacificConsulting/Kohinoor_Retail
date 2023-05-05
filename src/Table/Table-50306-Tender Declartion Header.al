@@ -5,21 +5,36 @@ table 50306 "Tender Declartion Header"
 
     fields
     {
-        field(1; "Store No."; Code[20])
+        field(1; "No."; Code[20])
+        {
+            Caption = 'No.';
+            DataClassification = ToBeClassified;
+            Editable = false;
+
+            trigger OnValidate()
+            begin
+                // "No." := NoSeriesMgt.GetNextNo(SalesRec."Tender Declartion No Series", Today, true)
+                if "No." <> xRec."No." then begin
+                    NoSeriesMgt.TestManual(GetNoSeriesCode());
+                    "No. Series" := '';
+                end;
+            end;
+        }
+        field(2; "Store No."; Code[20])
         {
             DataClassification = ToBeClassified;
             Caption = 'Store No.';
             Editable = false;
 
         }
-        field(2; "Store Date"; Date)
+        field(3; "Store Date"; Date)
         {
             DataClassification = ToBeClassified;
             Caption = 'Date';
             Editable = false;
 
         }
-        field(3; "Staff ID"; code[10])
+        field(4; "Staff ID"; code[10])
         {
             DataClassification = ToBeClassified;
             Caption = 'Staff ID';
@@ -35,7 +50,9 @@ table 50306 "Tender Declartion Header"
                 TenderInitLineNew: Record "Tender Declartion Line ";
                 PageTenderSubform: Page "Tender Declartion Subform";
             begin
+                SalesRec.Get();
                 IF StaffMaster.Get("Staff ID") then begin
+                    "No." := NoSeriesMgt.GetNextNo(SalesRec."Tender Declartion No Series", Today, true);
                     "Store No." := StaffMaster."Store No.";
                     "Store Date" := Today;
                     Rec.Insert();
@@ -45,6 +62,7 @@ table 50306 "Tender Declartion Header"
                     IF Paymethod.FindSet() then
                         repeat
                             TenderInitLine.Init();
+                            TenderInitLine."Document No." := "No.";
                             TenderInitLine."Store No." := "Store No.";
                             TenderInitLine."Store Date" := Today;
                             TenderInitLine."Staff ID" := "Staff ID";
@@ -75,24 +93,34 @@ table 50306 "Tender Declartion Header"
                 end;
             end;
         }
-        field(4; Status; Enum "Tender Header Dec.Status")
+        field(5; Status; Enum "Tender Header Dec.Status")
         {
             DataClassification = ToBeClassified;
             Caption = 'Status';
+        }
+        field(6; "No. Series"; Code[20])
+        {
+            Caption = 'No. Series';
+            TableRelation = "No. Series";
         }
 
     }
 
     keys
     {
-        key(Key1; "Store No.", "Store Date", "Staff ID")
+        key(Key1; "No.")
         {
             Clustered = true;
         }
     }
 
     var
-        myInt: Integer;
+        NoSeriesMgt: Codeunit NoSeriesManagement;
+        HasInventorySetup: Boolean;
+        InvtSetup: Record "Inventory Setup";
+        TenderDecHdr: Record "Tender Declartion Header";
+        SalesRec: Record "Sales & Receivables Setup";
+
 
     trigger OnInsert()
     begin
@@ -122,5 +150,34 @@ table 50306 "Tender Declartion Header"
     begin
 
     end;
+
+    local procedure GetNoSeriesCode(): Code[20]
+    var
+        NoSeriesCode: Code[20];
+        IsHandled: Boolean;
+
+    begin
+        SalesRec.Get();
+        IsHandled := false;
+        if IsHandled then
+            exit;
+        NoSeriesCode := SalesRec."Tender Declartion No Series";
+        exit(NoSeriesCode);
+    end;
+
+    procedure AssistEdit(OldReqTenderHdr: Record "Tender Declartion Header"): Boolean
+    begin
+        with TenderDecHdr do begin
+            TenderDecHdr := Rec;
+            SalesRec.Get();
+            SalesRec.TestField("Tender Declartion No Series");
+            if NoSeriesMgt.SelectSeries(GetNoSeriesCode(), OldReqTenderHdr."No. Series", "No. Series") then begin
+                NoSeriesMgt.SetSeries("No.");
+                Rec := TenderDecHdr;
+                exit(true);
+            end;
+        end;
+    end;//
+
 
 }

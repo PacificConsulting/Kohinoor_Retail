@@ -17,9 +17,14 @@ page 50311 "Tender Declartion Lists"
         {
             repeater(General)
             {
+
                 field("Staff ID"; Rec."Staff ID")
                 {
                     ToolTip = 'Specifies the value of the Staff ID field.';
+                }
+                field("No."; Rec."No.")
+                {
+                    ToolTip = 'Specifies the value of the No. field.';
                 }
                 field("Store No."; Rec."Store No.")
                 {

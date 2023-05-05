@@ -9,6 +9,7 @@ page 50314 "Tender Declartion Creation"
         area(Content)
         {
             group("Tender Creation")
+
             {
                 field("Select Staff ID "; StaffID)
                 {
@@ -26,12 +27,14 @@ page 50314 "Tender Declartion Creation"
                         TenderInitLineNew: Record "Tender Declartion Line ";
                     begin
                         IF StaffMaster.Get(StaffID) then begin
+                            SR.Get();
                             TenderHdr.Reset();
                             TenderHdr.SetRange("Staff ID", StaffID);
                             TenderHdr.SetRange("Store No.", StaffMaster."Store No.");
                             TenderHdr.SetRange("Store Date", Today);
                             IF not TenderHdr.FindFirst() then begin
                                 TenderInit.Init();
+                                TenderInit."No." := Noseries.GetNextNo(sr."Tender Declartion No Series", Today, true);
                                 TenderInit."Store No." := StaffMaster."Store No.";
                                 TenderInit."Store Date" := Today;
                                 TenderInit."Staff ID" := StaffID;
@@ -42,6 +45,7 @@ page 50314 "Tender Declartion Creation"
                                 IF Paymethod.FindSet() then
                                     repeat
                                         TenderInitLine.Init();
+                                        TenderInitLine."Document No." := TenderInit."No.";
                                         TenderInitLine."Store No." := TenderInit."Store No.";
                                         TenderInitLine."Store Date" := TenderInit."Store Date";
                                         TenderInitLine."Staff ID" := TenderInit."Staff ID";
@@ -112,4 +116,6 @@ page 50314 "Tender Declartion Creation"
     }
     var
         StaffID: Code[10];
+        Noseries: Codeunit NoSeriesManagement;
+        SR: Record "Sales & Receivables Setup";
 }

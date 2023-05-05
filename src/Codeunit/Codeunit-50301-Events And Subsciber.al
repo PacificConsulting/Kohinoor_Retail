@@ -41,7 +41,7 @@ codeunit 50301 "Event and Subscribers"
         end;
     end;
     //********below given code for auto ship all order for POS*****************************
-    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnBeforeSetPostingFlags', '', false, false)]
+    // [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnBeforePostSalesLines', '', false, false)]
     // local procedure OnBeforePostSalesLines(var SalesHeader: Record "Sales Header"; var TempSalesLineGlobal: Record "Sales Line" temporary; var TempVATAmountLine: Record "VAT Amount Line" temporary; var EverythingInvoiced: Boolean)
     // begin
     //     IF SalesHeader."Store No." <> '' then begin
@@ -49,12 +49,16 @@ codeunit 50301 "Event and Subscribers"
     //         SalesHeader.Invoice := false;
     //     end
     // end;
+
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnBeforeSetPostingFlags', '', false, false)]
     local procedure OnBeforeSetPostingFlags(var SalesHeader: Record "Sales Header"; var IsHandled: Boolean)
     begin
-        IF SalesHeader."Store No." <> '' then begin
-            SalesHeader.Ship := true;
-            SalesHeader.Invoice := true;
-        end
+        IF SalesHeader."Document Type" = SalesHeader."Document Type"::Invoice then begin
+            IF SalesHeader."Store No." <> '' then begin
+                SalesHeader.Ship := true;
+                SalesHeader.Invoice := true;
+            end
+        end;
     end;
 
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnAfterPostSalesDoc', '', false, false)]

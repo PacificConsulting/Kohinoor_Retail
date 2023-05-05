@@ -12,6 +12,16 @@ page 50345 "Bank Drop Entry "
         {
             repeater(General)
             {
+                field("No."; Rec."No.")
+                {
+                    ToolTip = 'Specifies the value of the No. field.';
+                    ApplicationArea = all;
+                    trigger OnAssistEdit()
+                    begin
+                        if Rec.AssistEdit(xRec) then
+                            CurrPage.Update();
+                    end;
+                }
                 field("Staff ID"; Rec."Staff ID")
                 {
                     ToolTip = 'Specifies the value of the Staff ID field.';

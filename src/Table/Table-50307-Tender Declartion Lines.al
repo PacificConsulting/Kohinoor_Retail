@@ -2,42 +2,48 @@ table 50307 "Tender Declartion Line "
 {
     fields
     {
-        field(1; "Store No."; Code[20])
+        field(1; "Document No."; Code[20])
+        {
+            DataClassification = ToBeClassified;
+            Caption = 'Document No.';
+
+        }
+        field(2; "Store No."; Code[20])
         {
             DataClassification = ToBeClassified;
             Caption = 'Store No.';
 
         }
-        field(2; "Store Date"; Date)
+        field(3; "Store Date"; Date)
         {
             DataClassification = ToBeClassified;
             Caption = 'Store Date';
 
         }
-        field(3; "Staff ID"; code[10])
+        field(4; "Staff ID"; code[10])
         {
             DataClassification = ToBeClassified;
             Caption = 'Staff ID';
             TableRelation = "Staff Master".ID;
         }
-        field(4; "Line No."; Integer)
+        field(5; "Line No."; Integer)
         {
             DataClassification = ToBeClassified;
             Caption = 'Line No.';
         }
 
-        field(5; "Payment Method code"; Code[20])
+        field(6; "Payment Method code"; Code[20])
         {
             DataClassification = ToBeClassified;
             Caption = 'Payment Method code';
             TableRelation = "Payment Method".Code;
         }
-        field(6; Amount; Decimal)
+        field(7; Amount; Decimal)
         {
             DataClassification = ToBeClassified;
             Caption = 'Amount';
         }
-        field(7; "Entry No."; Integer)
+        field(8; "Entry No."; Integer)
         {
             DataClassification = ToBeClassified;
             AutoIncrement = true;
@@ -45,7 +51,7 @@ table 50307 "Tender Declartion Line "
     }
     keys
     {
-        key(Key1; "Store No.", "Store Date", "Staff ID", "Line No.")
+        key(Key1; "Document No.", "Line No.")
         {
             Clustered = true;
         }

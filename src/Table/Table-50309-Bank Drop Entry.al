@@ -5,22 +5,32 @@ table 50309 "Bank Drop Entry"
 
     fields
     {
-        field(1; "Store No."; Code[20])
+        field(1; "No."; Code[20])
+        {
+            Caption = 'No.';
+            DataClassification = ToBeClassified;
+            trigger OnValidate()
+            begin
+                if "No." <> xRec."No." then begin
+                    NoSeriesMgt.TestManual(GetNoSeriesCode());
+                    "No. Series" := '';
+                end;
+            end;
+        }
+        field(2; "Store No."; Code[20])
         {
             DataClassification = ToBeClassified;
             Caption = 'Store No.';
             Editable = false;
-
-
         }
-        field(2; "Store Date"; Date)
+        field(3; "Store Date"; Date)
         {
             DataClassification = ToBeClassified;
             Caption = 'Date';
             //Editable = false;
 
         }
-        field(3; "Staff ID"; code[10])
+        field(4; "Staff ID"; code[10])
         {
             DataClassification = ToBeClassified;
             Caption = 'Staff ID';
@@ -34,46 +44,53 @@ table 50309 "Bank Drop Entry"
                 end;
             end;
         }
-        field(4; Amount; Decimal)
+        field(5; Amount; Decimal)
         {
             DataClassification = ToBeClassified;
             Caption = 'Amount';
         }
-        field(5; Status; Enum "Bank Drop Status")
+        field(6; Status; Enum "Bank Drop Status")
         {
             DataClassification = ToBeClassified;
             Caption = 'Status';
         }
-        field(6; Description; Text[30])
+        field(7; Description; Text[30])
         {
             DataClassification = ToBeClassified;
             Caption = 'Description';
         }
-        field(7; "Bank Account"; Code[20])
+        field(8; "Bank Account"; Code[20])
         {
             DataClassification = ToBeClassified;
             TableRelation = "Bank Account"."No." where(Tender = filter(false));
             Caption = 'Bank Account';
         }
-        field(8; "Cash Account"; Code[20])
+        field(9; "Cash Account"; Code[20])
         {
             DataClassification = ToBeClassified;
             TableRelation = "G/L Account"."No.";
             Caption = 'Cash Account';
+        }
+        field(10; "No. Series"; Code[20])
+        {
+            Caption = 'No. Series';
+            TableRelation = "No. Series";
         }
 
     }
 
     keys
     {
-        key(Key1; "Store No.", "Staff ID", "Store Date")
+        key(Key1; "No.")
         {
             Clustered = true;
         }
     }
 
     var
-        myInt: Integer;
+        SR: Record "Sales & Receivables Setup";
+        NoSeriesMgt: Codeunit NoSeriesManagement;
+        BankD: Record "Bank Drop Entry";
 
     trigger OnInsert()
     begin
@@ -94,5 +111,34 @@ table 50309 "Bank Drop Entry"
     begin
 
     end;
+
+    local procedure GetNoSeriesCode(): Code[20]
+    var
+        NoSeriesCode: Code[20];
+        IsHandled: Boolean;
+
+    begin
+        SR.Get();
+        IsHandled := false;
+        if IsHandled then
+            exit;
+        NoSeriesCode := SR."Bank Drop No Series";
+        exit(NoSeriesCode);
+    end;
+
+    procedure AssistEdit(OldBankdrop: Record "Bank Drop Entry"): Boolean
+    begin
+        with BankD do begin
+            BankD := Rec;
+            SR.Get();
+            SR.TestField("Bank Drop No Series");
+            if NoSeriesMgt.SelectSeries(GetNoSeriesCode(), OldBankdrop."No. Series", "No. Series") then begin
+                NoSeriesMgt.SetSeries("No.");
+                Rec := BankD;
+                exit(true);
+            end;
+        end;
+    end;//
+
 
 }

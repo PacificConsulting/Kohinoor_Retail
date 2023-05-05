@@ -18,10 +18,12 @@ page 50320 "Bank Drop Entry"
         {
             repeater(General)
             {
+
                 field(staffID; Rec."Staff ID")
                 {
                     Caption = 'Staff ID';
                 }
+
                 field(storeNo; Rec."Store No.")
                 {
                     Caption = 'Store No.';
@@ -42,14 +44,11 @@ page 50320 "Bank Drop Entry"
                 {
                     Caption = 'Amount';
                 }
-                // field(bankAccount; Rec."Bank Account")
-                // {
-                //     Caption = 'Bank Account';
-                // }
-                // field(cashAccount; Rec."Cash Account")
-                // {
-                //     Caption = 'Cash Account';
-                // }
+                field(no; Rec."No.")
+                {
+                    Caption = 'No.';
+                }
+
                 field(systemId; Rec.SystemId)
                 {
                     Caption = 'SystemId';
@@ -57,4 +56,11 @@ page 50320 "Bank Drop Entry"
             }
         }
     }
+    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    var
+        NoSeries: Codeunit NoSeriesManagement;
+        SR: Record "Sales & Receivables Setup";
+    begin
+        Rec."No." := NoSeries.GetNextNo(SR."Bank Drop No Series", Today, true);
+    end;
 }
