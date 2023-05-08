@@ -30,10 +30,12 @@ codeunit 50303 "POS Procedure"
                 SalesLineDel.Delete();
                 //Message('Line deleted successfully......');
                 //exit('Success');
-            end else
-                exit('Failed');
-        end else
-            exit('Failed');
+            end
+            //else
+            //  exit('Failed');
+        end
+        //else
+        //  exit('Failed');
 
     end;
 
@@ -83,8 +85,9 @@ codeunit 50303 "POS Procedure"
             PayLineDelete.Delete();
             //Message('Given payment line deleted successfully...');
             //exit('Success');
-        end else
-            exit('Failed');
+        end
+        //else
+        //  exit('Failed');
     end;
 
 
@@ -267,7 +270,7 @@ codeunit 50303 "POS Procedure"
         ReturnBool: Boolean;
     begin
         // Clear(InputData);
-        Evaluate(ShipInvtoQty, parameter);
+        //Evaluate(ShipInvtoQty, InputData);
         SaleHeaderInv.Reset();
         SaleHeaderInv.SetRange("No.", DocumentNo);
         IF SaleHeaderInv.FindFirst() then begin
@@ -280,8 +283,8 @@ codeunit 50303 "POS Procedure"
             SaleLinerInv.SetRange("Document No.", SaleHeaderInv."No.");
             SaleLinerInv.SetRange("Line No.", LineNo);
             IF SaleLinerInv.FindFirst() then begin
-                SaleLinerInv.validate("Qty. to Ship", ShipInvtoQty);
-                SaleLinerInv.Validate("Qty. to Invoice", ShipInvtoQty);
+                SaleLinerInv.validate("Qty. to Ship", SaleLinerInv."Qty. to Ship");
+                SaleLinerInv.Validate("Qty. to Invoice", SaleLinerInv."Qty. to Ship");
                 SaleLinerInv.Modify(true);
                 //<< Comment Mandetory so We have to pass Order Comment
                 SalesCommLine.Reset();
@@ -338,9 +341,9 @@ codeunit 50303 "POS Procedure"
                 PurchHeader.Status := PurchHeader.Status::Released;
                 PurchHeader.Modify(true);
                 IF PurchLine."Qty. to Receive" <> QtyToReceive then
-                    exit('Failed');
-                IF Purchpost.Run(PurchHeader) then
-                    exit('Failed');
+                    exit('Qty to Receive not Updated');
+                Purchpost.Run(PurchHeader);
+                //exit('Failed');
             end
         end else begin
             TransferHeader.Reset();
@@ -359,12 +362,12 @@ codeunit 50303 "POS Procedure"
                     TransferHeader.Status := TransferHeader.Status::Released;
                     TransferHeader.Modify(true);
                     IF Transferline."Qty. to Receive" <> QtyToReceive then
-                        exit('Failed');
-                    IF TranspostReceived.Run(TransferHeader) then
-                        exit('Failed');
+                        exit('Qty to Receive not Updated');
+                    TranspostReceived.Run(TransferHeader);
+
                 end;
-            end else
-                exit('Failed');
+            end //else
+                //exit('Failed');
 
         end;
 
@@ -376,18 +379,20 @@ codeunit 50303 "POS Procedure"
     procedure DeliveryDetails(DocumentNo: Code[20]; InputData: Text): text
     var
         SalesHeder: Record "Sales Header";
+        DeliveryDate: Date;
     begin
+        Evaluate(DeliveryDate, InputData);
         SalesHeder.Reset();
         SalesHeder.SetRange("No.", DocumentNo);
         IF SalesHeder.FindFirst() then begin
             IF SalesHeder.Status = SalesHeder.Status::Released then begin
                 SalesHeder.Status := SalesHeder.Status::Open;
-                SalesHeder.Modify(true);
+                SalesHeder.Modify();
             end;
-            SalesHeder.Validate("Transport Method", InputData);
+            SalesHeder.Validate("Requested Delivery Date", DeliveryDate);
             SalesHeder.Modify();
-            IF SalesHeder."Transport Method" <> InputData then
-                exit('Failed');
+            IF SalesHeder."Requested Delivery Date" <> DeliveryDate then
+                exit('Delivery date not updated successfully.');
         end;
     end;
 
@@ -416,7 +421,7 @@ codeunit 50303 "POS Procedure"
             IF SalesLineunitPrice.FindFirst() then begin
                 //<< New Condtion add after with kunal Discussion to Send for Approval befor Modification Unit Price before price line level new field Add and Update first
                 IF SalesLineunitPrice."Unit Price" = NewUnitPrice then
-                    exit('Failed');
+                    exit('Unit Price not updated.');
                 SalesLineunitPrice."Approval Status" := SalesLineunitPrice."Approval Status"::"Pending for Approval";
                 SalesLineunitPrice."Approval Sent By" := UserId;
                 SalesLineunitPrice."Approval Sent On" := Today;
@@ -426,7 +431,7 @@ codeunit 50303 "POS Procedure"
                 //end;
                 SalesLineunitPrice.Modify();
                 IF SalesLineunitPrice."Unit Price" = NewUnitPrice then
-                    exit('Failed');
+                    exit('Unit Price not updated.');
             end;
 
         end;
@@ -443,6 +448,7 @@ codeunit 50303 "POS Procedure"
         Quantity: Decimal;
         SalesHeader: Record 36;
         UnitP: Decimal;
+        RecItem: Record 27;
     begin
         SalesHeader.Reset();
         SalesHeader.SetRange("No.", documentno);
@@ -469,11 +475,14 @@ codeunit 50303 "POS Procedure"
             SalesLineInit.Validate("Unit Price", UnitP * -1);
             SalesLineInit."Serial No." := serialno;
             SalesLineInit."Exchange Item No." := exchangeitem;
+            IF RecItem.Get(exchangeitem) then begin
+                SalesLine.Validate(Description, RecItem.Description);
+            end;
             SalesLineInit.Modify();
 
-            IF (SalesLineInit.Quantity <> Quantity) or (SalesLineInit."Unit Price" <> (UnitP * -1))
+            IF (SalesLineInit.Quantity <> Quantity) /*or (SalesLineInit."Unit Price" <> (UnitP * -1))*/
                or (SalesLineInit."Serial No." <> serialno) or (SalesLineInit."Exchange Item No." <> exchangeitem) then
-                Exit('Failed');
+                Exit('Quantity,Serial No. and Exchange Item No. not update');
 
         end;
     end;
@@ -492,8 +501,9 @@ codeunit 50303 "POS Procedure"
         TranLine: Record "Transfer Line";
         PurchLine: Record 39;
         DocFound: Boolean;
+
     begin
-        //exit('Error');
+
         Evaluate(SerialNo, input);
         Clear(LastEntryNo);
         DocFound := false;
@@ -502,10 +512,9 @@ codeunit 50303 "POS Procedure"
         SalesLine.SetRange("Line No.", lineno);
         IF SalesLine.FindFirst() then begin
             DocFound := true;
-            IF SalesLine."Qty. to Ship" = 0 then begin
-                SalesLine.Validate("Qty. to Ship", SalesLine.Quantity);
-                SalesLine.Modify();
-            end;
+            SalesLine.Validate("Qty. to Ship", SalesLine."Qty. to Ship" + 1);
+            SalesLine.Modify();
+
             //exit('Error');
             ReservEntry.RESET;
             ReservEntry.LOCKTABLE;
@@ -733,8 +742,8 @@ codeunit 50303 "POS Procedure"
                     //Exit('Success');
                 end;
             end;
-        end else
-            exit('Failed');
+        end; //else
+             //exit('Failed');
     end;
 
 
@@ -806,6 +815,12 @@ codeunit 50303 "POS Procedure"
     end;
 
 
+    procedure AddWarranty(documentno: Code[20]; lineno: Integer; brand: Code[20]; month: Integer): Text
+    var
+
+    begin
+
+    end;
 
     /*
     /// <summary>

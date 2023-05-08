@@ -26,6 +26,16 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
             end;
 
         }
+        modify(Quantity)
+        {
+            trigger OnAfterValidate()
+            begin
+                IF Rec.Type = rec.Type::Item then begin
+                    IF Quantity <> 0 then
+                        Validate("Qty. to Ship", 0);
+                end;
+            end;
+        }
 
         field(50301; "Store No."; Code[20])
         {
@@ -78,13 +88,15 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
             Caption = 'Salesperson Code';
             DataClassification = ToBeClassified;
             TableRelation = "Salesperson/Purchaser".Code;
-
         }
         field(50312; "Change Unit Price Incl. of Tax"; Decimal)
         {
             DataClassification = ToBeClassified;
-
         }
+        // field(50313; "Change Unit Price Incl. of Tax"; Decimal)
+        // {
+        //     DataClassification = ToBeClassified;
+        // }
 
     }
 

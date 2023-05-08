@@ -18,27 +18,27 @@ codeunit 50302 "POS Event and Subscriber"
                     Clear(IsResult);
                     IsResult := POSProcedure.SalesLineDeletion(documentno, lineno);
                     IF IsResult = '' then
-                        exit('Success')
-                    Else
-                        exit(IsResult);
+                        exit('Success');
+                    //Else
+                    //  exit(IsResult);
                 end;
             'VOIDT':  //<<<<** Complete Sales Order Delete **>>>>
                 begin
                     Clear(IsResult);
                     IsResult := POSProcedure.SalesOrderDeletion(documentno);
                     IF IsResult = '' then
-                        exit('Success')
-                    Else
-                        exit(IsResult);
+                        exit('Success');
+                    //Else
+                    //  exit(IsResult);
                 end;
             'VOIDP':  //<<<<** Payment Line Delete Function **>>>>
                 begin
                     Clear(IsResult);
                     IsResult := POSProcedure.PaymentLineDeletion(documentno, lineno);
                     IF IsResult = '' then
-                        exit('Success')
-                    Else
-                        exit(IsResult);
+                        exit('Success');
+                    //Else
+                    //  exit(IsResult);
                 end;
             'INVDISC':  //<<<<** Complete Sales order Discount Function **>>>>
                 begin
@@ -46,7 +46,7 @@ codeunit 50302 "POS Event and Subscriber"
                     IF IsResult = '' then
                         exit('Success')
                     Else
-                        exit(IsResult);
+                        exit('Invoice Discount Value not updated.');
                 end;
             'LINEDISC':  //<<<<** Sales Line Discount Function **>>>>
                 begin
@@ -54,7 +54,7 @@ codeunit 50302 "POS Event and Subscriber"
                     IF IsResult = '' then
                         exit('Success')
                     Else
-                        exit(IsResult);
+                        exit('Line Discount not updated.');
                 end;
             'SHIPLINE':  //Not used this Function
                 begin
@@ -68,17 +68,17 @@ codeunit 50302 "POS Event and Subscriber"
                 begin
                     IsResult := POSProcedure.InvoiceLine(documentno, lineno, parameter1, input);
                     IF IsResult = '' then
-                        exit('Success')
-                    Else
-                        exit(IsResult);
+                        exit('Success');
+                    // Else
+                    //   exit(IsResult);
                 end;
             'RECEIPT': //<<<<** Purchase Order or Tranfer Order Receive Function **>>>>
                 begin
                     IsResult := POSProcedure.ItemReceipt(documentno, lineno, input);
                     IF IsResult = '' then
-                        exit('Success')
-                    Else
-                        exit(IsResult);
+                        exit('Success');
+                    //Else
+                    //  exit(IsResult);
                 end;
             'DELDET':  //<<<<** Sales Order Transport Method Update Function **>>>>
                 begin
@@ -99,7 +99,7 @@ codeunit 50302 "POS Event and Subscriber"
                 end;
             'EXITEM':  //<<<<** Exchange Item with new GL Line Created on Sales Order Function **>>>>
                 begin
-                    IsResult := POSProcedure.ExchangeItem(documentno, input, parameter1, parameter1);
+                    IsResult := POSProcedure.ExchangeItem(documentno, input, parameter1, parameter2);
                     IF IsResult = '' then
                         exit('Success')
                     Else
@@ -124,22 +124,22 @@ codeunit 50302 "POS Event and Subscriber"
                         exit(IsResult);
 
                 end;
-            'ORDDEL':  //<<<<** Order Confirm for Warehouse **>>>>
+            'ORDDEL':  //<<<<** Order Confirm for Delivery **>>>>
                 begin
                     IsResult := POSProcedure.OrderConfirmationforDelivery(documentno);
                     IF IsResult = '' then
-                        exit('Success')
-                    Else
-                        exit(IsResult);
+                        exit('Success');
+                    //Else
+                    //  exit(IsResult);
 
                 end;
             'INVCOM':  //<<<<** compelete Invoice Auto Qty to ship Update **>>>>
                 begin
                     IsResult := POSProcedure.InvoiceComplete(documentno);
                     IF IsResult = '' then
-                        exit('Success')
-                    Else
-                        exit(IsResult);
+                        exit('Success');
+                    // Else
+                    //   exit(IsResult);
 
                 end;
         end;
@@ -205,17 +205,18 @@ codeunit 50302 "POS Event and Subscriber"
     /// <summary>
     /// Bank Drop Submit Function
     /// </summary>
-    procedure Bankdropsubmit(storeno: Code[20]; staffid: Code[20]; sdate: text; amount: text): Text
+    procedure Bankdropsubmit(entryno: Code[20]): Text
     var
         BanKdrop: Record "Bank Drop Entry";
         Storedate: Date;
     begin
         //exit('Success');
-        Evaluate(Storedate, Format(sdate));
+        //Evaluate(Storedate, Format(sdate));
         BanKdrop.Reset();
-        BanKdrop.SetRange("Store No.", storeno);
-        BanKdrop.SetRange("Staff ID", staffid);
-        BanKdrop.SetRange("Store Date", Storedate);
+        BanKdrop.SetRange("No.", entryno);
+        // BanKdrop.SetRange("Store No.", storeno);
+        // BanKdrop.SetRange("Staff ID", staffid);
+        // BanKdrop.SetRange("Store Date", Storedate);
         IF BanKdrop.FindFirst() then begin
             BanKdrop.Status := BanKdrop.Status::Release;
             BanKdrop.Modify();

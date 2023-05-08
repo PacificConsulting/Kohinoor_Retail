@@ -23,7 +23,6 @@ page 50320 "Bank Drop Entry"
                 {
                     Caption = 'Staff ID';
                 }
-
                 field(storeNo; Rec."Store No.")
                 {
                     Caption = 'Store No.';
@@ -61,6 +60,7 @@ page 50320 "Bank Drop Entry"
         NoSeries: Codeunit NoSeriesManagement;
         SR: Record "Sales & Receivables Setup";
     begin
+        SR.Get();
         Rec."No." := NoSeries.GetNextNo(SR."Bank Drop No Series", Today, true);
     end;
 }

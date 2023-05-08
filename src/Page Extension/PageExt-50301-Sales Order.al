@@ -178,7 +178,7 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     result: Text;
                 begin
                     result := POS.POSAction('KTPLSO23240091', 10000, 'INVLINE', '1', '', '');
-                    //result := CU.InvoiceLine('KTPLSO23240019', 0, '', '');
+                    //result := POS.Bankdropsubmit('BANKD-0000007');
                     Message(result);
                 end;
             }

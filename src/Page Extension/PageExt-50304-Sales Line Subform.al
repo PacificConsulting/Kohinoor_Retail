@@ -69,6 +69,12 @@ pageextension 50304 "Sales Line Subform" extends "Sales Order Subform"
             {
                 ApplicationArea = all;
             }
+            field("Exchange Item No."; Rec."Exchange Item No.")
+            {
+                ApplicationArea = All;
+                ToolTip = 'Specifies the value of the Exchange Item No. field.';
+            }
+
         }
         addafter("Unit Price Incl. of Tax")
         {
