@@ -21,7 +21,7 @@ table 50309 "Bank Drop Entry"
         {
             DataClassification = ToBeClassified;
             Caption = 'Store No.';
-            Editable = false;
+            //Editable = false;
         }
         field(3; "Store Date"; Date)
         {

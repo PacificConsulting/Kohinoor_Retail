@@ -267,7 +267,7 @@ codeunit 50303 "POS Procedure"
         ReturnBool: Boolean;
     begin
         // Clear(InputData);
-        // Evaluate(ShipInvtoQty, InputData);
+        Evaluate(ShipInvtoQty, parameter);
         SaleHeaderInv.Reset();
         SaleHeaderInv.SetRange("No.", DocumentNo);
         IF SaleHeaderInv.FindFirst() then begin
@@ -281,6 +281,7 @@ codeunit 50303 "POS Procedure"
             SaleLinerInv.SetRange("Line No.", LineNo);
             IF SaleLinerInv.FindFirst() then begin
                 SaleLinerInv.validate("Qty. to Ship", ShipInvtoQty);
+                SaleLinerInv.Validate("Qty. to Invoice", ShipInvtoQty);
                 SaleLinerInv.Modify(true);
                 //<< Comment Mandetory so We have to pass Order Comment
                 SalesCommLine.Reset();
