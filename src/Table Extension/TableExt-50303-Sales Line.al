@@ -73,6 +73,7 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
         {
             DataClassification = ToBeClassified;
             TableRelation = Item."No.";
+            Editable = false;
         }
         field(50309; "Serial No."; Code[50])
         {
@@ -93,10 +94,12 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
         {
             DataClassification = ToBeClassified;
         }
-        // field(50313; "Change Unit Price Incl. of Tax"; Decimal)
-        // {
-        //     DataClassification = ToBeClassified;
-        // }
+        field(50313; "Warranty Parent Line No."; Integer)
+        {
+            DataClassification = ToBeClassified;
+            Editable = false;
+
+        }
 
     }
 

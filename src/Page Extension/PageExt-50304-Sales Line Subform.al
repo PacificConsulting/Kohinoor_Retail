@@ -74,6 +74,11 @@ pageextension 50304 "Sales Line Subform" extends "Sales Order Subform"
                 ApplicationArea = All;
                 ToolTip = 'Specifies the value of the Exchange Item No. field.';
             }
+            field("Warranty Parent Line No."; Rec."Warranty Parent Line No.")
+            {
+                ApplicationArea = All;
+                ToolTip = 'Specifies the value of the Warranty Parent Line No. field.';
+            }
 
         }
         addafter("Unit Price Incl. of Tax")

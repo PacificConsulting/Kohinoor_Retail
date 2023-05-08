@@ -28,15 +28,16 @@ codeunit 50303 "POS Procedure"
             SalesLineDel.SetRange("Line No.", "Line No.");
             IF SalesLineDel.FindFirst() then begin
                 SalesLineDel.Delete();
-                //Message('Line deleted successfully......');
-                //exit('Success');
-            end
-            //else
-            //  exit('Failed');
-        end
-        //else
-        //  exit('Failed');
 
+                //******* Warranty Line delete code ******
+                SalesLineDel.Reset();
+                SalesLineDel.SetRange("Document No.", SalesHeder."No.");
+                SalesLineDel.SetRange("Warranty Parent Line No.", "Line No.");
+                IF SalesLineDel.FindFirst() then
+                    SalesLineDel.Delete();
+
+            end
+        end;
     end;
 
 
@@ -472,9 +473,10 @@ codeunit 50303 "POS Procedure"
             SalesLineInit.Validate("No.", SR."Exchange Item G/L");
             SalesLineInit.Validate(Quantity, 1);
             SalesLineInit.Validate("Unit of Measure Code", 'PCS');
-            SalesLineInit.Validate("Unit Price", UnitP * -1);
+            SalesLineInit.Validate("Unit Price Incl. of Tax", UnitP * -1);
             SalesLineInit."Serial No." := serialno;
             SalesLineInit."Exchange Item No." := exchangeitem;
+            SalesLineInit."Store No." := SalesLine."Store No.";
             IF RecItem.Get(exchangeitem) then begin
                 SalesLine.Validate(Description, RecItem.Description);
             end;
@@ -817,8 +819,41 @@ codeunit 50303 "POS Procedure"
 
     procedure AddWarranty(documentno: Code[20]; lineno: Integer; brand: Code[20]; month: Integer): Text
     var
-
+        SalesLine: Record "Sales Line";
+        Saleslineinit: record "Sales Line";
+        SR: Record "Sales & Receivables Setup";
+        WarrMaster: Record "Warranty Mater";
     begin
+        SR.Get();
+        sr.TestField("Warranty G/L Code");
+
+        Saleslineinit.Init();
+        Saleslineinit."Document Type" := SalesLine."Document Type";
+        Saleslineinit."Document No." := SalesLine."Document No.";
+
+        SalesLine.Reset();
+        SalesLine.SetRange("Document No.", documentno);
+        IF SalesLine.FindLast() then
+            Saleslineinit."Line No." := SalesLine."Line No." + 10000;
+
+        Saleslineinit.Insert(true);
+        Saleslineinit.Type := Saleslineinit.Type::"G/L Account";
+        Saleslineinit.Validate("No.", SR."Warranty G/L Code");
+        Saleslineinit.Validate(Quantity, 1);
+        Saleslineinit.Validate("Location Code", SalesLine."Location Code");
+        Saleslineinit.Validate("Unit of Measure Code", 'PCS');
+        WarrMaster.Reset();
+        WarrMaster.SetRange(Brand, brand);
+        WarrMaster.SetRange(Months, month);
+        IF WarrMaster.FindFirst() then begin
+            Saleslineinit.Validate("Unit Price Incl. of Tax", WarrMaster."EW Prices");
+        end;
+        SalesLine.Reset();
+        SalesLine.SetRange("Document No.", documentno);
+        SalesLine.SetRange("Line No.", lineno);
+        IF SalesLine.FindFirst() then
+            Saleslineinit."Warranty Parent Line No." := SalesLine."Line No.";
+        Saleslineinit.Modify();
 
     end;
 
