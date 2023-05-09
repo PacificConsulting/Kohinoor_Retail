@@ -12,6 +12,17 @@ pageextension 50308 Location_Card extends "Location Card"
             {
                 ApplicationArea = all;
             }
+            field("Payment Journal Template Name"; Rec."Payment Journal Template Name")
+            {
+                ApplicationArea = All;
+                ToolTip = 'Specifies the value of the Payment Journal Template Name field.';
+            }
+            field("Payment Journal Batch Name"; Rec."Payment Journal Batch Name")
+            {
+                ApplicationArea = All;
+                ToolTip = 'Specifies the value of the Payment Journal Batch Name field.';
+            }
+
         }
     }
 

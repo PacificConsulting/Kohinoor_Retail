@@ -148,6 +148,14 @@ codeunit 50301 "Event and Subscribers"
 
     end;
     //END**********************************Codeunit-5704***************************************
+
+    //START**********************************Codeunit-231***************************************
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Gen. Jnl.-Post", 'OnBeforeCode', '', false, false)]
+    local procedure OnBeforeCode(var GenJournalLine: Record "Gen. Journal Line"; var HideDialog: Boolean)
+    begin
+        // HideDialog := true;
+    end;
+    //END**********************************Codeunit-231***************************************
     local procedure DeletePayemntLines(salesHeaderRec: record "Sales Header"; RecPaymentLine: Record "Payment Lines")
     var
     begin

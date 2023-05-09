@@ -130,6 +130,28 @@ page 50301 "Payment Lines Subform"
             }
         }
     }
+    trigger OnModifyRecord(): Boolean
+    var
+        SH: Record 36;
+    begin
+        SH.Reset();
+        SH.SetRange("No.", Rec."Document No.");
+        SH.SetRange(Status, SH.Status::Released);
+        IF SH.FindFirst() then
+            Error('you can not modify when Sales order released');
+    end;
+
+    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    var
+        SH: Record 36;
+    begin
+        SH.Reset();
+        SH.SetRange("No.", Rec."Document No.");
+        SH.SetRange(Status, SH.Status::Released);
+        IF SH.FindFirst() then
+            Error('you can not modify when Sales order released');
+    end;
+
 
     var
         myInt: Integer;

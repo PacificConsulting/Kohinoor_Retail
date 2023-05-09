@@ -478,12 +478,11 @@ codeunit 50303 "POS Procedure"
             SalesLineInit."Exchange Item No." := exchangeitem;
             SalesLineInit."Store No." := SalesLine."Store No.";
             IF RecItem.Get(exchangeitem) then begin
-                SalesLine.Validate(Description, RecItem.Description);
+                SalesLineInit.Validate(Description, RecItem.Description);
             end;
             SalesLineInit.Modify();
 
-            IF (SalesLineInit.Quantity <> Quantity) /*or (SalesLineInit."Unit Price" <> (UnitP * -1))*/
-               or (SalesLineInit."Serial No." <> serialno) or (SalesLineInit."Exchange Item No." <> exchangeitem) then
+            IF (SalesLineInit."Serial No." <> serialno) or (SalesLineInit."Exchange Item No." <> exchangeitem) then
                 Exit('Quantity,Serial No. and Exchange Item No. not update');
 
         end;
@@ -693,6 +692,13 @@ codeunit 50303 "POS Procedure"
         Clear(TotalAmt);
         SalesRec11.get();
 
+        SalesLine.Reset();
+        SalesLine.SetRange("Document No.", DocumentNo);
+        SalesLine.SetRange(Type, SalesLine.Type::Item);
+        IF SalesLine.FindSet() then
+            repeat
+                SalesLine.TestField("Salesperson Code");
+            until SalesLine.Next() = 0;
         SalesHeader.Reset();
         SalesHeader.SetRange("No.", DocumentNo);
         IF SalesHeader.FindFirst() then begin
@@ -715,17 +721,17 @@ codeunit 50303 "POS Procedure"
             PaymentLine.SetRange("Document No.", SalesHeader."No.");
             if PaymentLine.FindSet() then
                 repeat
-                    TotalPayemtamt := PaymentLine.Amount;
+                    TotalPayemtamt += PaymentLine.Amount;
                 until PaymentLine.Next() = 0;
 
             IF TotalPayemtamt <> SalesHeader."Amount To Customer" then
-                Error('Sales Order amount is not match with Payment amount')
+                Error('Sales Order amount is not match with Payment amount %1 with %2', TotalPayemtamt, SalesHeader."Amount To Customer")
             else begin
                 BankPayentReceiptAutoPost(SalesHeader);
                 SalesHeader.Reset();
                 SalesHeader.SetRange("No.", SalesHeader."No.");
                 If SalesHeader.FindFirst() then begin
-                    SalesHeader.Validate("Location Code", SalesRec11."Default Warehouse");
+                    // SalesHeader.Validate("Location Code", SalesRec11."Default Warehouse");
                     //SalesHdr."Staff Id" :=
                     SalesHeader."POS Released Date" := Today;
                     SalesHeader.Modify();
@@ -738,6 +744,15 @@ codeunit 50303 "POS Procedure"
                             SalesLine.Validate("Shortcut Dimension 1 Code", SalesHeader."Shortcut Dimension 1 Code");
                             SalesLine.Validate("Shortcut Dimension 2 Code", SalesHeader."Shortcut Dimension 2 Code");
                             SalesLine.Modify()
+                        until SalesLine.Next() = 0;
+
+                    SalesLine.Reset();
+                    SalesLine.SetRange("Document No.", SalesHeader."No.");
+                    SalesLine.SetRange(Type, SalesLine.Type::Item);
+                    IF SalesLine.FindFirst() then
+                        repeat
+                            SalesLine.Validate("Qty. to Ship", 0);
+                            SalesLine.Modify();
                         until SalesLine.Next() = 0;
                     SalesHeader.Status := SalesHeader.Status::Released;
                     SalesHeader.Modify();
@@ -763,11 +778,21 @@ codeunit 50303 "POS Procedure"
         TotalTCSAmt: Decimal;
         SalesRec: record "Sales & Receivables Setup";
         SalesLine: record 37;
+        SalesCommLine: Record 44;
+        ReleaseSalesDoc: Codeunit "Release Sales Document";
     begin
         clear(TotalGSTAmount1);
         Clear(TotalTCSAmt);
         Clear(TotalAmt);
         SalesRec.Get();
+
+        SalesLine.Reset();
+        SalesLine.SetRange("Document No.", DocumentNo);
+        SalesLine.SetRange(Type, SalesLine.Type::Item);
+        IF SalesLine.FindSet() then
+            repeat
+                SalesLine.TestField("Salesperson Code");
+            until SalesLine.Next() = 0;
 
         SalesHdr.Reset();
         SalesHdr.SetRange("No.", DocumentNo);
@@ -783,7 +808,7 @@ codeunit 50303 "POS Procedure"
             PaymentLine.SetRange("Document No.", SalesHdr."No.");
             if PaymentLine.FindSet() then
                 repeat
-                    TotalPayemtamt := PaymentLine.Amount;
+                    TotalPayemtamt += PaymentLine.Amount;
                 until PaymentLine.Next() = 0;
 
             IF TotalPayemtamt <> SalesHdr."Amount To Customer" then
@@ -793,24 +818,41 @@ codeunit 50303 "POS Procedure"
                 SalesHdr.Reset();
                 SalesHdr.SetRange("No.", SalesHdr."No.");
                 If SalesHdr.FindFirst() then begin
-                    SalesHdr.Validate("Location Code", SalesRec."Default Warehouse");
+                    SalesHdr.Status := SalesHdr.Status::Open;
+                    SalesHdr.Modify();
                     //SalesHdr."Staff Id" :=
                     SalesHdr."POS Released Date" := Today;
-                    SalesHdr.Status := SalesHdr.Status::Released;
+                    SalesHdr.Validate("Location Code", SalesRec."Default Warehouse");
                     SalesHdr.Modify();
-                    //Exit('Success');
+
                 end;
                 SalesLine.Reset();
                 SalesLine.SetRange("Document No.", DocumentNo);
                 IF SalesLine.FindSet() then
                     repeat
-                        SalesLine.Validate("Location Code", SalesHdr."Location Code");
+                        SalesLine.Validate("Location Code", SalesRec."Default Warehouse");
                         SalesLine.Validate("Shortcut Dimension 1 Code", SalesHdr."Shortcut Dimension 1 Code");
                         SalesLine.Validate("Shortcut Dimension 2 Code", SalesHdr."Shortcut Dimension 2 Code");
-                        SalesLine.Modify()
+                        SalesLine.Modify();
+                        //<< Comment Mandetory so We have to pass Order Comment
+                        SalesCommLine.Reset();
+                        SalesCommLine.SetRange("No.", SalesHdr."No.");
+                        IF Not SalesCommLine.FindFirst() then begin
+                            SalesCommLine.Init();
+                            SalesCommLine."Document Type" := SalesCommLine."Document Type"::Order;
+                            SalesCommLine."No." := SalesHdr."No.";
+                            SalesCommLine."Line No." := SalesLine."Line No.";
+                            SalesCommLine."Document Line No." := SalesLine."Line No.";
+                            SalesCommLine.Insert();
+                            SalesCommLine.Comment := 'Document Processed from POS';
+                            SalesCommLine.Modify();
+                            //>> Comment Mandetory so We have to pass Order Comment
+                        end;
                     until SalesLine.Next() = 0;
-                SalesHdr.Status := SalesHdr.Status::Released;
-                SalesHdr.Modify();
+
+                ReleaseSalesDoc.PerformManualRelease(SalesHdr);
+                //SalesHdr.Status := SalesHdr.Status::Released;
+                //SalesHdr.Modify();
             end;
         end else
             exit('Failed');
@@ -822,7 +864,7 @@ codeunit 50303 "POS Procedure"
         SalesLine: Record "Sales Line";
         Saleslineinit: record "Sales Line";
         SR: Record "Sales & Receivables Setup";
-        WarrMaster: Record "Warranty Mater";
+        WarrMaster: Record "Warranty Master";
     begin
         SR.Get();
         sr.TestField("Warranty G/L Code");
@@ -1151,49 +1193,73 @@ codeunit 50303 "POS Procedure"
     local procedure BankPayentReceiptAutoPost(Salesheader: Record "Sales Header")
     var
         GenJourLine: Record 81;
+        GenJourLineInit: record 81;
         NoSeriesMgt: Codeunit 396;
         BankAcc: Record 270;
         PaymentLine: Record 50301;
+        PaymentMethod: record "Payment Method";
+        SR: record "Sales & Receivables Setup";
+        RecLocation: Record Location;
+        GenJnlPostBatch: Codeunit "Gen. Jnl.-Post Batch";
     begin
+        IF RecLocation.Get(Salesheader."Location Code") then begin
+            RecLocation.TestField("Payment Journal Template Name");
+            RecLocation.TestField("Payment Journal Batch Name");
+        end;
+
         PaymentLine.Reset();
         PaymentLine.SetRange("Document Type", Salesheader."Document Type");
         PaymentLine.SetRange("Document No.", Salesheader."No.");
         if PaymentLine.FindSet() then
             repeat
                 GenJourLine.Reset();
-                GenJourLine.SetRange("Journal Template Name", 'BANKRCPTY');
-                GenJourLine.SetRange("Journal Batch Name", 'USER-A');
-                GenJourLine.Init();
-                GenJourLine."Document No." := NoSeriesMgt.GetNextNo('BANKRCPTV', Salesheader."Posting Date", false);
-                GenJourLine."Posting Date" := Today;
+                GenJourLine.SetRange("Journal Template Name", RecLocation."Payment Journal Template Name");
+                GenJourLine.SetRange("Journal Batch Name", RecLocation."Payment Journal Batch Name");
+                GenJourLineInit.Init();
+                GenJourLineInit."Document No." := Salesheader."No.";
+                GenJourLineInit.validate("Posting Date", Today);
                 IF GenJourLine.FindLast() then
-                    GenJourLine."Line No." := GenJourLine."Line No." + 10000
+                    GenJourLineInit."Line No." := GenJourLine."Line No." + 10000
                 else
-                    GenJourLine."Line No." := 10000;
+                    GenJourLineInit."Line No." := 10000;
 
-                GenJourLine."Journal Template Name" := 'BANKRCPTY';
-                GenJourLine."Journal Batch Name" := 'USER-A';
-                GenJourLine."Account Type" := GenJourLine."Account Type"::"Bank Account";
-                GenJourLine."Bal. Account Type" := GenJourLine."Bal. Account Type"::Customer;
-                GenJourLine.Validate("Bal. Account No.", Salesheader."Sell-to Customer No.");
-                GenJourLine.validate("Account No.", 'GIRO');
-                GenJourLine."GST Group Code" := 'Goods';
-                GenJourLine.validate(Amount, PaymentLine.Amount);
-                GenJourLine.Comment := 'Auto Post';
-                GenJourLine.Insert(true);
+                GenJourLineInit."Journal Template Name" := RecLocation."Payment Journal Template Name";
+                GenJourLineInit."Journal Batch Name" := RecLocation."Payment Journal Batch Name";
+                // GenJourLineInit.Insert();
+
+                //*******Condition Add With Payment Method code*********
+                IF PaymentMethod.Get(PaymentLine."Payment Method Code") then begin
+                    IF PaymentMethod."Bal. Account Type" = PaymentMethod."Bal. Account Type"::"G/L Account" then
+                        GenJourLineInit."Account Type" := GenJourLineInit."Account Type"::"G/L Account"
+                    else
+                        IF PaymentMethod."Bal. Account Type" = PaymentMethod."Bal. Account Type"::"Bank Account" then
+                            GenJourLineInit."Account Type" := GenJourLineInit."Account Type"::"Bank Account";
+                    GenJourLineInit.validate("Account No.", PaymentMethod."Bal. Account No.");
+                end;
+
+                GenJourLineInit."Bal. Account Type" := GenJourLine."Bal. Account Type"::Customer;
+                GenJourLineInit.Validate("Bal. Account No.", Salesheader."Sell-to Customer No.");
+
+                GenJourLineInit."GST Group Code" := 'Goods';
+                GenJourLineInit.validate(Amount, PaymentLine.Amount);
+                GenJourLineInit.Validate("Shortcut Dimension 1 Code", Salesheader."Shortcut Dimension 1 Code");
+                GenJourLineInit.Validate("Shortcut Dimension 2 Code", Salesheader."Shortcut Dimension 2 Code");
+                GenJourLineInit.Comment := 'Auto Post';
+                //GenJourLineInit.modify();
+                GenJourLineInit.Insert();
             Until PaymentLine.Next() = 0;
-
-        // IF CODEUNIT.RUN(CODEUNIT::"Gen. Jnl.-Post", GenJourLine) then begin
-        //     PaymentLine.Reset();
-        //     PaymentLine.SetRange("Document Type", Rec."Document Type");
-        //     PaymentLine.SetRange("Document No.", Rec."No.");
-        //     if PaymentLine.FindSet() then
-        //         repeat
-        //             PaymentLine.Posted := True;
-        //             PaymentLine.Modify();
-        //             IsPaymentLineeditable := PaymentLine.PaymentLinesEditable()
-        //         Until PaymentLine.Next() = 0;
-        // end;
+        // GenJnlPostBatch.Run(GenJourLineInit);
+        //CODEUNIT.RUN(CODEUNIT::"Gen. Jnl.-Post", GenJourLine);// then begin
+        PaymentLine.Reset();
+        PaymentLine.SetRange("Document Type", Salesheader."Document Type");
+        PaymentLine.SetRange("Document No.", Salesheader."No.");
+        if PaymentLine.FindSet() then
+            repeat
+                PaymentLine.Posted := True;
+                PaymentLine.Modify();
+            //IsPaymentLineeditable := PaymentLine.PaymentLinesEditable()
+            Until PaymentLine.Next() = 0;
+        //end;
     end;
     // <summary>
     /// Update the Unit Price Sales Line

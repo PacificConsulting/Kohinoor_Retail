@@ -17,6 +17,8 @@ pageextension 50310 "Sales & Receivables Setup Ext" extends "Sales & Receivables
                 ApplicationArea = All;
                 ToolTip = 'Specifies the value of the Warranty G/L Code field.';
             }
+
+
         }
         addafter("Direct Debit Mandate Nos.")
         {

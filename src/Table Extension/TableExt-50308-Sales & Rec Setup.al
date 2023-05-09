@@ -33,6 +33,8 @@ tableextension 50308 "Sales & Rec Setup" extends "Sales & Receivables Setup"
             TableRelation = "G/L Account"."No.";
         }
 
+
+
     }
 
     var

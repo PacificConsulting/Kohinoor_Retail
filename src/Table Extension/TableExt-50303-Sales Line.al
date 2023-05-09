@@ -26,16 +26,16 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
             end;
 
         }
-        modify(Quantity)
-        {
-            trigger OnAfterValidate()
-            begin
-                IF Rec.Type = rec.Type::Item then begin
-                    IF Quantity <> 0 then
-                        Validate("Qty. to Ship", 0);
-                end;
-            end;
-        }
+        // modify(Quantity)
+        // {
+        //     trigger OnAfterValidate()
+        //     begin
+        //         IF Rec.Type = rec.Type::Item then begin
+        //             IF Quantity <> 0 then
+        //                 Validate("Qty. to Ship", 0);
+        //         end;
+        //     end;
+        // }
 
         field(50301; "Store No."; Code[20])
         {

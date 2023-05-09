@@ -2,6 +2,7 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
 {
     layout
     {
+
         addafter(SalesLines)
         {
             part(PaymentLine; "Payment Lines Subform")
@@ -38,10 +39,12 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
 
             }
         }
+
     }
 
     actions
     {
+
         modify(Statistics)
         {
             Trigger OnAfterAction()
@@ -52,25 +55,31 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                 GetGSTAmountTotal(Rec, TotalGSTAmount1);
                 GetTCSAmountTotal(Rec, TotalTCSAmt);
                 GetSalesorderStatisticsAmount(Rec, TotalAmt);
-                Rec."Amount To Customer" := TotalAmt + TotalGSTAmount1 + TotalTCSAmt;
+                Rec."Amount To Customer" := ROUND(TotalAmt + TotalGSTAmount1 + TotalTCSAmt);
                 Rec.Modify();
+                CurrPage.Update(true);
             end;
         }
-        // addlast("&Order Confirmation")
-        // {
-        //     action(InvoiceDiscount)
-        //     {
-        //         ApplicationArea = all;
-        //         Image = PostedPayment;
-        //         Caption = 'Invoice Discount ALL SO';
-        //         Promoted = true;
-        //         PromotedIsBig = true;
-        //         trigger OnAction()
-        //         begin
-        //             InvoiceDiscountAmountSO(rec."Document Type", rec."No.", 1000);
-        //         end;
-        //     }
-        // }
+        modify(Release)
+        {
+            trigger OnBeforeAction()
+            var
+                SL: Record "Sales Line";
+            begin
+                SL.Reset();
+                SL.SetRange("Document No.", rec."No.");
+                SL.SetRange(Type, SL.Type::Item);
+                IF SL.FindFirst() then
+                    repeat
+                        SL.Validate("Qty. to Ship", 0);
+                        SL.Modify();
+                    until SL.Next() = 0;
+
+            end;
+        }
+
+
+
         addafter(Post)
         {
             action("Payment Post")
@@ -96,6 +105,20 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                         Clear(TotalTCSAmt);
                         Clear(TotalAmt);
 
+                        PaymentLine.Reset();
+                        PaymentLine.SetRange("Document No.", Rec."No.");
+                        PaymentLine.SetRange(Posted, true);
+                        if PaymentLine.FindFirst() then
+                            Error('Payment Post already done');
+
+                        SaleLine.Reset();
+                        SaleLine.SetRange("Document No.", Rec."No.");
+                        SaleLine.SetRange(Type, SaleLine.Type::Item);
+                        IF SaleLine.FindSet() then
+                            repeat
+                                SaleLine.TestField("Salesperson Code");
+                            until SaleLine.Next() = 0;
+
                         SaleLine.Reset();
                         SaleLine.SetRange("Document No.", rec."No.");
                         SaleLine.SetRange("Approval Status", SaleLine."Approval Status"::"Pending for Approval");
@@ -105,7 +128,7 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                         GetGSTAmountTotal(Rec, TotalGSTAmount1);
                         GetTCSAmountTotal(Rec, TotalTCSAmt);
                         GetSalesorderStatisticsAmount(Rec, TotalAmt);
-                        Rec."Amount To Customer" := TotalAmt + TotalGSTAmount1 + TotalTCSAmt;
+                        Rec."Amount To Customer" := Round(TotalAmt + TotalGSTAmount1 + TotalTCSAmt);
                         Rec.Modify();
 
 
@@ -124,9 +147,9 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                             SalesHdr.Reset();
                             SalesHdr.SetRange("No.", rec."No.");
                             If SalesHdr.FindFirst() then begin
-                                /// SalesHdr.Status := SalesHdr.Status::Released;
-                            //    SalesHdr."POS Released Date" := today;
-                                //SalesHdr.Modify();
+                                SalesHdr.Status := SalesHdr.Status::Released;
+                                SalesHdr."POS Released Date" := today;
+                                SalesHdr.Modify();
                             end;
                         end;
 
@@ -152,8 +175,8 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
 
                 begin
                     Message('hi');
-                    result := POS.POSAction('KTPLSO23240091', 0, 'INVLINE', '', '', '');
-                    result := CU.InvoiceLine('KTPLSO23240019', 0, '', '');
+                    // result := POS.POSAction('KTPLSO23240091', 0, 'INVLINE', '', '', '');
+                    result := CU.OrderConfirmationforWH(rec."No.");
                     // SL.Reset();
                     // sl.SetRange("Approval Status", sl."Approval Status"::"Pending for Approval");
                     // IF SL.FindFirst() then;
@@ -177,8 +200,9 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     POS: Codeunit 50302;
                     result: Text;
                 begin
-                    result := POS.POSAction('KTPLSO23240091', 10000, 'INVLINE', '1', '', '');
-                    //result := POS.Bankdropsubmit('BANKD-0000007');
+                    //result := POS.POSAction('KTPLSO23240091', 10000, 'INVLINE', '1', '', '');
+                    result := cu.OrderConfirmationforWH(rec."No.");
+                    //result := Cu.OrderConfirmationforDelivery(rec."No.");
                     Message(result);
                 end;
             }
@@ -360,50 +384,67 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
         BankAcc: Record 270;
         PaymentLine: Record 50301;
         GenJourLineInit: Record 81;
-
+        ComInfo: record "Company Information";
+        PaymentMethod: record "Payment Method";
+        SR: record "Sales & Receivables Setup";
+        RecLocation: record Location;
+        GenJnlPostBatch: Codeunit "Gen. Jnl.-Post Batch";
     begin
+        SR.Get();
+        IF RecLocation.Get(rec."Location Code") then begin
+            RecLocation.TestField("Payment Journal Template Name");
+            RecLocation.TestField("Payment Journal Batch Name");
+        end;
+
+        ComInfo.Get();
         PaymentLine.Reset();
         PaymentLine.SetRange("Document Type", Rec."Document Type");
         PaymentLine.SetRange("Document No.", Rec."No.");
         if PaymentLine.FindSet() then
             repeat
                 GenJourLine.Reset();
-                GenJourLine.SetRange("Journal Template Name", 'BANK RECE');
-                GenJourLine.SetRange("Journal Batch Name", 'DEFAULT');
+                GenJourLine.SetRange("Journal Template Name", RecLocation."Payment Journal Template Name");
+                GenJourLine.SetRange("Journal Batch Name", RecLocation."Payment Journal Batch Name");
                 GenJourLineInit.Init();
-                GenJourLineInit."Journal Template Name" := 'BANK RECE';
-                GenJourLineInit."Journal Batch Name" := 'DEFAULT';
+                GenJourLineInit."Journal Template Name" := RecLocation."Payment Journal Template Name";
+                GenJourLineInit."Journal Batch Name" := RecLocation."Payment Journal Batch Name";
                 GenJourLineInit."Document No." := Salesheader."No.";
                 GenJourLineInit.Validate("Posting Date", Today);
                 IF GenJourLine.FindLast() then
-                    GenJourLine."Line No." := GenJourLine."Line No." + 10000
+                    GenJourLineInit."Line No." := GenJourLine."Line No." + 10000
                 else
-                    GenJourLine."Line No." := 10000;
+                    GenJourLineInit."Line No." := 10000;
 
-                GenJourLineInit."Account Type" := GenJourLineInit."Account Type"::"Bank Account";
-                GenJourLineInit."Bal. Account Type" := GenJourLineInit."Bal. Account Type"::Customer;
-                GenJourLineInit.Validate("Bal. Account No.", rec."Sell-to Customer No.");
-                GenJourLineInit.validate("Account No.", 'BA000009');
+
+                //*******Condition Add on With Payment Method code*********
+                IF PaymentMethod.Get(PaymentLine."Payment Method Code") then begin
+                    GenJourLineInit."Account Type" := PaymentMethod."Bal. Account Type";
+                    GenJourLineInit.validate("Account No.", PaymentMethod."Bal. Account No.");
+                end;
+
+                GenJourLineInit."Bal. Account Type" := GenJourLine."Bal. Account Type"::Customer;
+                GenJourLineInit.Validate("Bal. Account No.", Salesheader."Sell-to Customer No.");
+
                 GenJourLineInit."GST Group Code" := 'Goods';
                 GenJourLineInit.validate(Amount, PaymentLine.Amount);
+                GenJourLineInit.Validate("Shortcut Dimension 1 Code", Salesheader."Shortcut Dimension 1 Code");
+                GenJourLineInit.Validate("Shortcut Dimension 2 Code", Salesheader."Shortcut Dimension 2 Code");
                 GenJourLineInit.Comment := 'Auto Post';
-                GenJourLineInit.Insert(); //This Line Will Comment when auto post below codeunit Call
+            //GenJourLineInit.Insert(); //This Line Will Comment when auto post below codeunit Call
             Until PaymentLine.Next() = 0;
-
-        // IF CODEUNIT.RUN(CODEUNIT::"Gen. Jnl.-Post", GenJourLine) then begin
-        //     PaymentLine.Reset();
-        //     PaymentLine.SetRange("Document Type", Rec."Document Type");
-        //     PaymentLine.SetRange("Document No.", Rec."No.");
-        //     if PaymentLine.FindSet() then
-        //         repeat
-        //             PaymentLine.Posted := True;
-        //             PaymentLine.Modify();
-        //             IsPaymentLineeditable := PaymentLine.PaymentLinesEditable()
-        //         Until PaymentLine.Next() = 0;
-        // end;
+        GenJnlPostBatch.Run(GenJourLine);
+        //CODEUNIT.RUN(CODEUNIT::"Gen. Jnl.-Post", GenJourLineInit);
+        PaymentLine.Reset();
+        PaymentLine.SetRange("Document Type", Rec."Document Type");
+        PaymentLine.SetRange("Document No.", Rec."No.");
+        if PaymentLine.FindSet() then
+            repeat
+                PaymentLine.Posted := True;
+                PaymentLine.Modify();
+                IsPaymentLineeditable := PaymentLine.PaymentLinesEditable()
+            Until PaymentLine.Next() = 0;
+        //end;
     end;
-
-
 
 
     trigger OnAfterGetRecord()

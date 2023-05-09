@@ -1,4 +1,4 @@
-table 50318 "Warranty Mater"
+table 50318 "Warranty Master"
 {
     Caption = 'Warranty Mater';
     DataClassification = ToBeClassified;
