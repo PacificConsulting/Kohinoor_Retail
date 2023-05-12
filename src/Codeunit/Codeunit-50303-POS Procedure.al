@@ -45,18 +45,18 @@ codeunit 50303 "POS Procedure"
     /// <summary>
     /// Sales Order Deletion with all its child table
     /// </summary>
-    procedure SalesOrderDeletion(DocumentNo: Code[20]): Text
+    procedure SalesOrderDeletion(documentno: Code[20]): Text
     var
         SalesHeaderDelete: Record 36;
         PaymentLineDelete: record "Payment Lines";
         SalesLineDelete: Record 37;
     begin
         SalesHeaderDelete.Reset();
-        SalesHeaderDelete.SetRange("No.", DocumentNo);
+        SalesHeaderDelete.SetRange("No.", documentno);
         if SalesHeaderDelete.FindFirst() then begin
             SalesHeaderDelete.Delete();
             SalesLineDelete.Reset();
-            SalesLineDelete.SetRange("Document No.", DocumentNo);
+            SalesLineDelete.SetRange("Document No.", documentno);
             IF SalesLineDelete.FindFirst() then
                 SalesLineDelete.DeleteAll();
             PaymentLineDelete.reset();
@@ -75,13 +75,14 @@ codeunit 50303 "POS Procedure"
     /// <summary>
     /// Delete payment line
     /// </summary>
-    procedure PaymentLineDeletion(DocumentNo: Code[20]; LineNo: Integer): Text
+    procedure PaymentLineDeletion(documentNo: Code[20]; lineNo: Integer): Text
     var
         PayLineDelete: Record "Payment Lines";
     begin
         PayLineDelete.Reset();
         PayLineDelete.SetRange("Document No.", DocumentNo);
         PayLineDelete.SetRange("Line No.", LineNo);
+        PayLineDelete.SetRange(Posted, false);
         if PayLineDelete.FindFirst() then begin
             PayLineDelete.Delete();
             //Message('Given payment line deleted successfully...');
@@ -313,7 +314,7 @@ codeunit 50303 "POS Procedure"
     /// <summary>
     /// Receive GRN or Transfer Receipt
     /// </summary>
-    procedure ItemReceipt(DocumentNo: Code[20]; LineNo: Integer; InputData: Text): text
+    procedure ItemReceipt(documentNo: Code[20]; lineNo: Integer; inputData: Text): text
     var
         PurchHeader: Record 38;
         PurchLine: Record 39;
@@ -322,25 +323,27 @@ codeunit 50303 "POS Procedure"
         Transferline: Record "Transfer Line";
         Purchpost: Codeunit "Purch.-Post";
         TranspostReceived: Codeunit "TransferOrder-Post Receipt";
+        ReleasePurch: codeunit "Release Purchase Document";
 
     begin
         //Clear(InputData);
-        Evaluate(QtyToReceive, InputData);
+        // Evaluate(QtyToReceive, InputData);
         PurchHeader.Reset();
         PurchHeader.SetRange("No.", DocumentNo);
         IF PurchHeader.FindFirst() then begin
             IF PurchHeader.Status = PurchHeader.Status::Released then begin
                 PurchHeader.Status := PurchHeader.Status::Open;
-                PurchHeader.Modify(true);
+                PurchHeader.Modify();
             end;
             PurchLine.Reset();
             PurchLine.SetRange("Document No.", PurchHeader."No.");
             PurchLine.SetRange("Line No.", LineNo);
             IF PurchLine.FindFirst() then begin
-                PurchLine.validate("Qty. to Receive", QtyToReceive);
-                PurchLine.Modify(true);
-                PurchHeader.Status := PurchHeader.Status::Released;
-                PurchHeader.Modify(true);
+                PurchLine.validate("Qty. to Receive", PurchLine.Quantity);
+                PurchLine.Modify();
+                ReleasePurch.Run(PurchHeader);
+                //PurchHeader.Status := PurchHeader.Status::Released;
+                //PurchHeader.Modify();
                 IF PurchLine."Qty. to Receive" <> QtyToReceive then
                     exit('Qty to Receive not Updated');
                 Purchpost.Run(PurchHeader);
@@ -352,24 +355,22 @@ codeunit 50303 "POS Procedure"
             IF TransferHeader.FindFirst() then begin
                 IF TransferHeader.Status = TransferHeader.Status::Released then begin
                     TransferHeader.Status := TransferHeader.Status::Open;
-                    TransferHeader.Modify(true);
+                    TransferHeader.Modify();
                 end;
                 Transferline.Reset();
                 Transferline.SetRange("Document No.", TransferHeader."No.");
                 Transferline.SetRange("Line No.", LineNo);
                 IF Transferline.FindFirst() then begin
-                    Transferline.Validate("Qty. to Receive", QtyToReceive);
-                    Transferline.Modify(true);
+                    Transferline.Validate("Qty. to Receive", Transferline.Quantity);
+                    //Transferline.Modify();
                     TransferHeader.Status := TransferHeader.Status::Released;
-                    TransferHeader.Modify(true);
+                    TransferHeader.Modify();
                     IF Transferline."Qty. to Receive" <> QtyToReceive then
                         exit('Qty to Receive not Updated');
                     TranspostReceived.Run(TransferHeader);
-
                 end;
             end //else
                 //exit('Failed');
-
         end;
 
     end;
@@ -405,6 +406,9 @@ codeunit 50303 "POS Procedure"
         SaleHeaderUnitPrice: Record 36;
         SalesLineunitPrice: Record 37;
         NewUnitPrice: Decimal;
+        TradeAggre: record "Trade Aggrement";
+        SalesHeder: record 36;
+        SL: Record 37;
 
     begin
         Clear(NewUnitPrice);
@@ -414,25 +418,48 @@ codeunit 50303 "POS Procedure"
         IF SaleHeaderUnitPrice.FindFirst() then begin
             IF SaleHeaderUnitPrice.Status = SaleHeaderUnitPrice.Status::Released then begin
                 SaleHeaderUnitPrice.Status := SaleHeaderUnitPrice.Status::Open;
-                SaleHeaderUnitPrice.Modify(true);
+                SaleHeaderUnitPrice.Modify();
             end;
             SalesLineunitPrice.Reset();
             SalesLineunitPrice.SetRange("Document No.", SaleHeaderUnitPrice."No.");
             SalesLineunitPrice.SetRange("Line No.", LineNo);
             IF SalesLineunitPrice.FindFirst() then begin
                 //<< New Condtion add after with kunal Discussion to Send for Approval befor Modification Unit Price before price line level new field Add and Update first
-                IF SalesLineunitPrice."Unit Price" = NewUnitPrice then
-                    exit('Unit Price not updated.');
+                IF SalesLineunitPrice."Unit Price Incl. of Tax" <> NewUnitPrice then begin
+                    SalesLineunitPrice."Old Unit Price" := SalesLineunitPrice."Unit Price Incl. of Tax";
+                    SalesLineunitPrice.validate("Unit Price Incl. of Tax", NewUnitPrice);
+                    SalesLineunitPrice.Modify();
+                    IF SalesHeder.Get(SalesLineunitPrice."Document Type", SalesLineunitPrice."Document No.") then;
+                    TradeAggre.Reset();
+                    TradeAggre.SetCurrentKey("Item No.", "From Date", "To Date", "Location Code");
+                    TradeAggre.SetRange("Item No.", SalesLineunitPrice."No.");
+                    TradeAggre.SetRange("Location Code", SalesHeder."Location Code");
+                    TradeAggre.SetFilter("From Date", '<=%1', SalesHeder."Posting Date");
+                    TradeAggre.SetFilter("To Date", '>=%1', SalesHeder."Posting Date");
+                    IF TradeAggre.FindFirst() then begin
+                        IF TradeAggre."Amount In INR" < SalesLineunitPrice."Unit Price Incl. of Tax" then
+                            Error('Amount should not be more than %1 INR', TradeAggre."Amount In INR");
+                        IF TradeAggre."Last Selling Price" > SalesLineunitPrice."Unit Price Incl. of Tax" then begin
+                            ApprovalMailSent(SalesLineunitPrice);
+                        end;
+                    end;
+                end;
+                /*
                 SalesLineunitPrice."Approval Status" := SalesLineunitPrice."Approval Status"::"Pending for Approval";
                 SalesLineunitPrice."Approval Sent By" := UserId;
                 SalesLineunitPrice."Approval Sent On" := Today;
+                */
                 //  IF SalesLineunitPrice."Approval Status" = SalesLineunitPrice."Approval Status"::" " then begin
-                SalesLineunitPrice."Old Unit Price" := SalesLineunitPrice."Unit Price";
-                SalesLineunitPrice.validate("Unit Price", NewUnitPrice);
-                //end;
+                //SalesLineunitPrice."Old Unit Price" := SalesLineunitPrice."Unit Price";
+                //SalesLineunitPrice.validate("Unit Price", NewUnitPrice);
+                /*
+                SalesLineunitPrice."Old Unit Price" := SalesLineunitPrice."Unit Price Incl. of Tax";
+                SalesLineunitPrice.validate("Unit Price Incl. of Tax", NewUnitPrice);
                 SalesLineunitPrice.Modify();
+                
                 IF SalesLineunitPrice."Unit Price" = NewUnitPrice then
                     exit('Unit Price not updated.');
+                    */
             end;
 
         end;
@@ -457,7 +484,8 @@ codeunit 50303 "POS Procedure"
         IF SalesHeader.FindFirst() then begin
             SR.Get();
             SR.TestField("Exchange Item G/L");
-            Evaluate(UnitP, price);
+            IF price <> '' then
+                Evaluate(UnitP, price);
             SalesLineInit.Init();
             SalesLineInit."Document Type" := SalesLineInit."Document Type"::Order;
             SalesLineInit."Document No." := documentno;
@@ -473,13 +501,14 @@ codeunit 50303 "POS Procedure"
             SalesLineInit.Validate("No.", SR."Exchange Item G/L");
             SalesLineInit.Validate(Quantity, 1);
             SalesLineInit.Validate("Unit of Measure Code", 'PCS');
-            SalesLineInit.Validate("Unit Price Incl. of Tax", UnitP * -1);
+            IF RecItem.Get(exchangeitem) then begin
+                SalesLineInit.Validate(Description, RecItem.Description);
+                SalesLineInit.Validate("Unit Price", RecItem."Unit Price" * -1);
+            end;
             SalesLineInit."Serial No." := serialno;
             SalesLineInit."Exchange Item No." := exchangeitem;
             SalesLineInit."Store No." := SalesLine."Store No.";
-            IF RecItem.Get(exchangeitem) then begin
-                SalesLineInit.Validate(Description, RecItem.Description);
-            end;
+
             SalesLineInit.Modify();
 
             IF (SalesLineInit."Serial No." <> serialno) or (SalesLineInit."Exchange Item No." <> exchangeitem) then
@@ -502,6 +531,7 @@ codeunit 50303 "POS Procedure"
         TranLine: Record "Transfer Line";
         PurchLine: Record 39;
         DocFound: Boolean;
+        BincodeEvaluate: code[20];
 
     begin
 
@@ -513,8 +543,10 @@ codeunit 50303 "POS Procedure"
         SalesLine.SetRange("Line No.", lineno);
         IF SalesLine.FindFirst() then begin
             DocFound := true;
+            SalesLine.Validate("Bin Code", 'BACKPACK');
             SalesLine.Validate("Qty. to Ship", SalesLine."Qty. to Ship" + 1);
             SalesLine.Modify();
+
 
             //exit('Error');
             ReservEntry.RESET;
@@ -546,14 +578,25 @@ codeunit 50303 "POS Procedure"
                 ReservEntryInit."Item Tracking" := ReservEntryInit."Item Tracking"::"Serial No.";
                 ReservEntryInit."Shipment Date" := SalesLine."Shipment Date";
                 ReservEntryInit."Planning Flexibility" := ReservEntryInit."Planning Flexibility"::Unlimited;
+                ReservEntryInit."Back Pack/Display" := ItemLedgEntry."Back Pack/Display";
                 //ReservEntry.
                 ReservEntryInit."Creation Date" := TODAY;
                 ReservEntryInit."Created By" := USERID;
                 ReservEntryInit.INSERT;
+                SalesLine.Reset();
+                SalesLine.SetRange("Document No.", documentno);
+                SalesLine.SetRange("Line No.", lineno);
+                IF SalesLine.FindFirst() then begin
+                    // Evaluate(BincodeEvaluate,ItemLedgEntry."Back Pack/Display");
+                    //SalesLine.Validate("Bin Code", BincodeEvaluate);
+                    SalesLine.Modify();
+                end;
+
+
             End
             ELSE
                 EXIT('Insufficient Inventory'); //Until
-            //exit('Success');
+                                                //exit('Success');
         end else begin
             Evaluate(SerialNo, input);
             Clear(LastEntryNo);
@@ -564,7 +607,9 @@ codeunit 50303 "POS Procedure"
             IF TranLine.FindFirst() then begin
                 DocFound := true;
                 IF TranLine."Qty. to Ship" = 0 then begin
+                    TranLine.Validate("Transfer-from Bin Code", 'BACKPACK');
                     TranLine.Validate("Qty. to Ship", TranLine.Quantity);
+                    //TranLine.Validate("Bin Code", 'BACKPACK');
                     TranLine.Modify();
                 end;
                 ReservEntry.RESET;
@@ -637,6 +682,7 @@ codeunit 50303 "POS Procedure"
         IF PurchLine.FindFirst() then begin
             DocFound := true;
             IF PurchLine."Qty. to Receive" = 0 then begin
+                PurchLine.Validate("Bin Code", 'BACKPACK');
                 PurchLine.Validate("Qty. to Receive", PurchLine.Quantity);
                 PurchLine.Modify();
             end;
@@ -686,6 +732,7 @@ codeunit 50303 "POS Procedure"
         TotalTCSAmt: Decimal;
         SalesRec11: record "Sales & Receivables Setup";
         SalesLine: Record 37;
+        ReleaseSalesDoc: Codeunit "Release Sales Document";
     begin
         clear(TotalGSTAmount1);
         Clear(TotalTCSAmt);
@@ -699,13 +746,15 @@ codeunit 50303 "POS Procedure"
             repeat
                 SalesLine.TestField("Salesperson Code");
             until SalesLine.Next() = 0;
+
         SalesHeader.Reset();
         SalesHeader.SetRange("No.", DocumentNo);
         IF SalesHeader.FindFirst() then begin
-            IF SalesHeader.Status = SalesHeader.Status::Released then begin
-                SalesHeader.Status := SalesHeader.Status::Open;
-                SalesHeader.Modify();
-            end;
+            SalesHeader.TestField(Status, SalesHeader.Status::Open);
+            // IF SalessHeader.Status = SalesHeader.Status::Released then begin
+            //     SalesHeader.Status := SalesHeader.Status::Open;
+            //     SalesHeader.Modify();
+            // end;
         end;
         SalesHeader.Reset();
         SalesHeader.SetRange("No.", DocumentNo);
@@ -713,7 +762,7 @@ codeunit 50303 "POS Procedure"
             GetGSTAmountTotal(SalesHeader, TotalGSTAmount1);
             GetTCSAmountTotal(SalesHeader, TotalTCSAmt);
             GetSalesorderStatisticsAmount(SalesHeader, TotalAmt);
-            SalesHeader."Amount To Customer" := ROUND(TotalAmt + TotalGSTAmount1 + TotalTCSAmt);
+            SalesHeader."Amount To Customer" := ROUND(TotalAmt + TotalGSTAmount1 + TotalTCSAmt, 1);
             SalesHeader.Modify();
 
             Clear(TotalPayemtamt);
@@ -746,16 +795,17 @@ codeunit 50303 "POS Procedure"
                             SalesLine.Modify()
                         until SalesLine.Next() = 0;
 
-                    SalesLine.Reset();
-                    SalesLine.SetRange("Document No.", SalesHeader."No.");
-                    SalesLine.SetRange(Type, SalesLine.Type::Item);
-                    IF SalesLine.FindFirst() then
-                        repeat
-                            SalesLine.Validate("Qty. to Ship", 0);
-                            SalesLine.Modify();
-                        until SalesLine.Next() = 0;
-                    SalesHeader.Status := SalesHeader.Status::Released;
-                    SalesHeader.Modify();
+                    // SalesLine.Reset();
+                    // SalesLine.SetRange("Document No.", SalesHeader."No.");
+                    // SalesLine.SetRange(Type, SalesLine.Type::Item);
+                    // IF SalesLine.FindFirst() then
+                    //     repeat
+                    //         SalesLine.Validate("Qty. to Ship", 0);
+                    //         SalesLine.Modify();
+                    //     until SalesLine.Next() = 0;
+                    ReleaseSalesDoc.PerformManualRelease(SalesHeader);
+                    //SalesHeader.Status := SalesHeader.Status::Released;
+                    //SalesHeader.Modify();
                     //Exit('Success');
                 end;
             end;
@@ -786,6 +836,7 @@ codeunit 50303 "POS Procedure"
         Clear(TotalAmt);
         SalesRec.Get();
 
+
         SalesLine.Reset();
         SalesLine.SetRange("Document No.", DocumentNo);
         SalesLine.SetRange(Type, SalesLine.Type::Item);
@@ -797,10 +848,11 @@ codeunit 50303 "POS Procedure"
         SalesHdr.Reset();
         SalesHdr.SetRange("No.", DocumentNo);
         if SalesHdr.FindFirst() then begin
+            SalesHdr.TestField(Status, SalesHdr.Status::Open);
             GetGSTAmountTotal(SalesHdr, TotalGSTAmount1);
             GetTCSAmountTotal(SalesHdr, TotalTCSAmt);
             GetSalesorderStatisticsAmount(SalesHdr, TotalAmt);
-            SalesHdr."Amount To Customer" := Round(TotalAmt + TotalGSTAmount1 + TotalTCSAmt);
+            SalesHdr."Amount To Customer" := Round(TotalAmt + TotalGSTAmount1 + TotalTCSAmt, 1);
             SalesHdr.Modify();
 
             Clear(TotalPayemtamt);
@@ -1225,6 +1277,7 @@ codeunit 50303 "POS Procedure"
 
                 GenJourLineInit."Journal Template Name" := RecLocation."Payment Journal Template Name";
                 GenJourLineInit."Journal Batch Name" := RecLocation."Payment Journal Batch Name";
+                GenJourLineInit."Document Type" := GenJourLineInit."Document Type"::Payment;
                 // GenJourLineInit.Insert();
 
                 //*******Condition Add With Payment Method code*********
@@ -1248,7 +1301,7 @@ codeunit 50303 "POS Procedure"
                 //GenJourLineInit.modify();
                 GenJourLineInit.Insert();
             Until PaymentLine.Next() = 0;
-        // GenJnlPostBatch.Run(GenJourLineInit);
+        GenJnlPostBatch.Run(GenJourLineInit);
         //CODEUNIT.RUN(CODEUNIT::"Gen. Jnl.-Post", GenJourLine);// then begin
         PaymentLine.Reset();
         PaymentLine.SetRange("Document Type", Salesheader."Document Type");
@@ -1264,6 +1317,101 @@ codeunit 50303 "POS Procedure"
     // <summary>
     /// Update the Unit Price Sales Line
     /// </summary>
+
+
+    local procedure ApprovalMailSent(SalesLine: Record "Sales Line")
+    var
+        txtFile: Text[100];
+        Window: Dialog;
+        txtFileName: Text[100];
+        Char: Char;
+        recSalesInvHdr: Record 112;
+        Recref: RecordRef;
+        recCust: Record 18;
+        TempBlob: Codeunit "Temp Blob";
+        OutStr: OutStream;
+        Instr: InStream;
+        EMail: Codeunit Email;
+        Emailmessage: Codeunit "Email Message";
+        Pagelink: Text;
+        GLSetup: Record "General Ledger Setup";
+        ToRecipients: List of [text];
+        SL: Record 37;
+        RecUser1: Record "User Setup";
+        RecUser2: Record "User Setup";
+        RecUser3: Record "User Setup";
+    begin
+        Sl.Reset();
+        SL.SetRange("Document No.", SalesLine."Document No.");
+        SL.SetRange("Line No.", SalesLine."Line No.");
+        IF SL.FindFirst() then begin
+            SL."Approval Status" := SL."Approval Status"::"Pending for Approval";
+            SL.Modify();
+        end;
+
+        GLSetup.Get();
+        GLSetup.TestField("Slab Approval User 1");
+        //GLSetup.TestField("Slab Approval User 2");
+        //GLSetup.TestField("Slab Approval User 3");
+        //Pagelink := GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List");
+        Sl.Reset();
+        SL.SetRange("Document No.", SalesLine."Document No.");
+        SL.SetRange("Line No.", SalesLine."Line No.");
+        IF SL.FindFirst() then
+            Pagelink := GETURL(CURRENTCLIENTTYPE, 'Kohinoor Televideo Pvt. Ltd.', ObjectType::Page, 50361, SL, true);
+
+        //  Window.OPEN(
+        // 'Sending Mail#######1\');
+        IF RecUser1.Get(GLSetup."Slab Approval User 1") then begin
+            RecUser1.TestField("E-Mail");
+            ToRecipients.Add(RecUser1."E-Mail");
+        end;
+        /*
+        IF RecUser2.Get(GLSetup."Slab Approval User 2") then begin
+            RecUser2.TestField("E-Mail");
+            ToRecipients.Add(RecUser2."E-Mail");
+        end;
+        IF RecUser3.Get(GLSetup."Slab Approval User 3") then begin
+            RecUser3.TestField("E-Mail");
+            ToRecipients.Add(RecUser3."E-Mail");
+        end;
+        */
+
+
+        Emailmessage.Create(ToRecipients/*'niwagh16@gmail.com'*/, 'Approval Slab', '', true);
+        Emailmessage.AppendToBody('<p><font face="Georgia">Dear <B>Sir,</B></font></p>');
+        Char := 13;
+        Emailmessage.AppendToBody(FORMAT(Char));
+        Emailmessage.AppendToBody('<p><font face="Georgia"> <B>!!!Greetings!!!</B></font></p>');
+        Emailmessage.AppendToBody(FORMAT(Char));
+        Emailmessage.AppendToBody(FORMAT(Char));
+        Emailmessage.AppendToBody('<p><font face="Georgia"><BR>Please find below Approval Link Approve Date</BR></font></p>');
+        Emailmessage.AppendToBody(FORMAT(Char));
+        Emailmessage.AppendToBody(FORMAT(Char));
+        Emailmessage.AppendToBody('<a href=' + Pagelink + '/">Web Link!</a>');
+        Emailmessage.AppendToBody(Pagelink);
+        Emailmessage.AppendToBody(FORMAT(Char));
+        Emailmessage.AppendToBody(FORMAT(Char));
+        Emailmessage.AppendToBody('<p><font face="Georgia"><BR>Thanking you,</BR></font></p>');
+
+        // Window.UPDATE(1, STRSUBSTNO('%1', 'Mail Sent'));
+        EMail.Send(Emailmessage, Enum::"Email Scenario"::Default);
+        //Window.CLOSE;
+        Sl.Reset();
+        SL.SetRange("Document No.", SalesLine."Document No.");
+        SL.SetRange("Line No.", SalesLine."Line No.");
+        IF SL.FindFirst() then begin
+            SL."Approval Sent By" := UserId;
+            SL."Approval Sent On" := Today;
+            SL.Modify();
+        end;
+        //Rec."Approval Sent By" := UserId;
+        //Rec."Approval Sent On" := Today;
+        // Rec.Modify();
+        Message('Approval mail sent successfully');
+
+    end;
+
 
 
 }
