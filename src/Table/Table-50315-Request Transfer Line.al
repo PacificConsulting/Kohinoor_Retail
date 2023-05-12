@@ -46,6 +46,30 @@ table 50315 "Request Transfer Line"
             DecimalPlaces = 0 : 5;
             MinValue = 0;
         }
+        field(7; "Transfer-from Code"; Code[10])
+        {
+            Caption = 'Transfer-from Code';
+            TableRelation = Location WHERE("Use As In-Transit" = CONST(false));
+            trigger OnValidate()
+            var
+                RecLoc: Record 14;
+            begin
+                IF RecLoc.Get("Transfer-from Code") then begin
+                    "Transfer-From Name" := RecLoc.Name;
+                end;
+            end;
+        }
+        field(8; "Transfer-from Name"; Text[100])
+        {
+            Caption = 'Transfer-from Name';
+            Editable = false;
+        }
+        field(9; "Line Created"; Boolean)
+        {
+            Caption = 'Line Created';
+            Editable = false;
+        }
+
 
 
     }

@@ -98,6 +98,10 @@ page 50362 "Sales Line New Subform"
                 {
                     Caption = 'Salesperson Code';
                 }
+                field(salespersonName; Rec."Salesperson Name")
+                {
+                    Caption = 'Salesperson Name';
+                }
 
             }
         }

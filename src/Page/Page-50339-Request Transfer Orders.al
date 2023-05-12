@@ -27,14 +27,14 @@ page 50339 "Request Transfer Orders"
                 {
                     ToolTip = 'Specifies the value of the Status field.';
                 }
-                field("Transfer-from Code"; Rec."Transfer-from Code")
-                {
-                    ToolTip = 'Specifies the value of the Transfer-from Code field.';
-                }
-                field("Transfer-from Name"; Rec."Transfer-from Name")
-                {
-                    ToolTip = 'Specifies the value of the Transfer-from Name field.';
-                }
+                // field("Transfer-from Code"; Rec."Transfer-from Code")
+                // {
+                //     ToolTip = 'Specifies the value of the Transfer-from Code field.';
+                // }
+                // field("Transfer-from Name"; Rec."Transfer-from Name")
+                // {
+                //     ToolTip = 'Specifies the value of the Transfer-from Name field.';
+                // }
                 field("Transfer-to Code"; Rec."Transfer-to Code")
                 {
                     ToolTip = 'Specifies the value of the Transfer-to Code field.';

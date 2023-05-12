@@ -84,7 +84,6 @@ table 50314 "Request Transfer Header"
             begin
                 IF StaffMaster.Get("Staff ID") then begin
                     Validate("Transfer-to Code", StaffMaster."Store No.");
-
                 end;
 
 

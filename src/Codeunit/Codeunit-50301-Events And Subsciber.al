@@ -13,8 +13,11 @@ codeunit 50301 "Event and Subscribers"
     begin
         // if not SalesLine."Price Inclusive of Tax" then
         //     exit;
-        IF SalesLine."Unit Price" <> 0 then
+        IF SalesLine."Unit Price" <> 0 then begin
             SalesLine."GST Tax Amount" := (SalesLine."Unit Price Incl. of Tax" - SalesLine."Unit Price") * SalesLine.Quantity;
+            //Message('Amt %1- %2- %3 ', SalesLine."Unit Price Incl. of Tax", SalesLine."Unit Price", SalesLine."GST Tax Amount");
+        end;
+
     end;
 
     //END**********************************Table-37*********************************************
@@ -40,15 +43,6 @@ codeunit 50301 "Event and Subscribers"
             DeletePayemntLines(SalesHeader, PaymentLine);
         end;
     end;
-    //********below given code for auto ship all order for POS*****************************
-    // [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnBeforePostSalesLines', '', false, false)]
-    // local procedure OnBeforePostSalesLines(var SalesHeader: Record "Sales Header"; var TempSalesLineGlobal: Record "Sales Line" temporary; var TempVATAmountLine: Record "VAT Amount Line" temporary; var EverythingInvoiced: Boolean)
-    // begin
-    //     IF SalesHeader."Store No." <> '' then begin
-    //         SalesHeader.Ship := true;
-    //         SalesHeader.Invoice := false;
-    //     end
-    // end;
 
     //[EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnBeforeSetPostingFlags', '', false, false)]
 
@@ -149,13 +143,20 @@ codeunit 50301 "Event and Subscribers"
     end;
     //END**********************************Codeunit-5704***************************************
 
-    //START**********************************Codeunit-231***************************************
-    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Gen. Jnl.-Post", 'OnBeforeCode', '', false, false)]
-    local procedure OnBeforeCode(var GenJournalLine: Record "Gen. Journal Line"; var HideDialog: Boolean)
+    //START**********************************Table-18***************************************
+    [EventSubscriber(ObjectType::Table, Database::Customer, 'OnBeforeValidatePostCode', '', false, false)]
+    local procedure OnBeforeValidatePostCode(var Customer: Record Customer; var PostCodeRec: Record "Post Code"; CurrentFieldNo: Integer; var IsHandled: Boolean)
     begin
-        // HideDialog := true;
+        Customer."State Code" := PostCodeRec."State Code";
     end;
-    //END**********************************Codeunit-231***************************************
+
+    [EventSubscriber(ObjectType::Table, Database::Customer, 'OnAfterLookupPostCode', '', false, false)]
+    local procedure OnAfterLookupPostCode(var Customer: Record Customer; xCustomer: Record Customer; var PostCodeRec: Record "Post Code")
+    begin
+        Customer."State Code" := PostCodeRec."State Code";
+    end;
+
+    //END**********************************Table-18***************************************
     local procedure DeletePayemntLines(salesHeaderRec: record "Sales Header"; RecPaymentLine: Record "Payment Lines")
     var
     begin

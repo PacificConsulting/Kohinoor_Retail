@@ -26,6 +26,7 @@ page 50312 "Tender Declartion Card"
                 {
                     ToolTip = 'Specifies the value of the Staff ID field.';
                     Editable = false;
+                    ApplicationArea = all;
                     // trigger OnValidate()
                     // var
                     //     StaffMaster: Record "Staff Master";
@@ -72,20 +73,24 @@ page 50312 "Tender Declartion Card"
                 field("Store No."; Rec."Store No.")
                 {
                     ToolTip = 'Specifies the value of the Store No. field.';
+                    ApplicationArea = all;
                 }
                 field("Store Date"; Rec."Store Date")
                 {
                     ToolTip = 'Specifies the value of the Store Date field.';
+                    ApplicationArea = all;
                 }
 
                 field(SystemCreatedAt; Rec.SystemCreatedAt)
                 {
                     ToolTip = 'Specifies the value of the SystemCreatedAt field.';
+                    ApplicationArea = all;
                 }
                 field(Status; Rec.Status)
                 {
                     Caption = 'Status';
                     Editable = false;
+                    ApplicationArea = all;
                 }
 
             }

@@ -1,8 +1,8 @@
 {
   "id": "4ba22a4e-fc4f-4f0b-9a57-5874849a493e",
-  "name": "Kohinoor_Retail",
+  "name": "Kohinoor_Retail_Original",
   "publisher": "Pacific",
-  "version": "1.0.0.0",
+  "version": "1.0.0.3",
   "brief": "",
   "description": "",
   "privacyStatement": "",
@@ -43,6 +43,7 @@
     },
     {
       "id": "050f6146-bffd-40de-942c-d0dd510ec20f",
+      
       "publisher": "Microsoft",
       "name": "India Reports",
       "version": "18.2.26217.26490"
@@ -63,6 +64,12 @@
       "id": "695b1e73-2a6c-434c-bc06-621946c1215e",
       "publisher": "Pacific",
       "name": "Kohinoor_Sales",
+      "version": "1.0.0.0"
+    },
+    {
+      "id": "b320ec9f-af2e-4ae4-a5be-18d84cf24d01",
+      "publisher": "Pacific",
+      "name": "Kohinoor_Purchase",
       "version": "1.0.0.0"
     }
     

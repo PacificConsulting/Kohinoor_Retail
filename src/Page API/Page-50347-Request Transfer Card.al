@@ -34,14 +34,14 @@ page 50347 "Request Transfer Card"
                 {
                     Caption = 'Transfer-to Name';
                 }
-                field(transferFromCode; Rec."Transfer-from Code")
-                {
-                    Caption = 'Transfer-from Code';
-                }
-                field(transferFromName; Rec."Transfer-from Name")
-                {
-                    Caption = 'Transfer-from Name';
-                }
+                // field(transferFromCode; Rec."Transfer-from Code")
+                // {
+                //     Caption = 'Transfer-from Code';
+                // }
+                // field(transferFromName; Rec."Transfer-from Name")
+                // {
+                //     Caption = 'Transfer-from Name';
+                // }
 
                 field(postingDate; Rec."Posting Date")
                 {

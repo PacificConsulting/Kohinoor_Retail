@@ -38,6 +38,14 @@ page 50348 "Request Tranfer Subform"
                 {
                     Caption = 'Quantity';
                 }
+                field(transferFromCode; Rec."Transfer-from Code")
+                {
+                    Caption = 'Transfer-from Code';
+                }
+                field(transferFromName; Rec."Transfer-from Name")
+                {
+                    Caption = 'Transfer-from Name';
+                }
                 field(unitOfMeasureCode; Rec."Unit of Measure Code")
                 {
                     Caption = 'Unit of Measure Code';

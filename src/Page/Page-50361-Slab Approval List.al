@@ -96,7 +96,7 @@ page 50361 "Slab Approval List"
                     SalesLine.SetRange("Approval Status", SalesLine."Approval Status"::"Pending for Approval");
                     IF SalesLine.FindFirst() then begin
                         SalesLine."Approval Status" := SalesLine."Approval Status"::" ";
-                        SalesLine.Validate("Unit Price Incl. of Tax", rec."Change Unit Price Incl. of Tax");
+                        SalesLine.Validate("Unit Price Incl. of Tax", rec."Old Unit Price");
                         SalesLine.Modify();
                     end;
                 end;

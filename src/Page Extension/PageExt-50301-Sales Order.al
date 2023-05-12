@@ -66,14 +66,14 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
             var
                 SL: Record "Sales Line";
             begin
-                SL.Reset();
-                SL.SetRange("Document No.", rec."No.");
-                SL.SetRange(Type, SL.Type::Item);
-                IF SL.FindFirst() then
-                    repeat
-                        SL.Validate("Qty. to Ship", 0);
-                        SL.Modify();
-                    until SL.Next() = 0;
+                // SL.Reset();
+                // SL.SetRange("Document No.", rec."No.");
+                // SL.SetRange(Type, SL.Type::Item);
+                // IF SL.FindFirst() then
+                //     repeat
+                //         SL.Validate("Qty. to Ship", 0);
+                //         SL.Modify();
+                //     until SL.Next() = 0;
 
             end;
         }

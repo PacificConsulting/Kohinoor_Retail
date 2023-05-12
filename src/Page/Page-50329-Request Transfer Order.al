@@ -31,15 +31,15 @@ page 50329 "Request Transfer Order"
                 {
                     ToolTip = 'Specifies the value of the Posting Date field.';
                 }
-                field("Transfer-from Code"; Rec."Transfer-from Code")
-                {
-                    ToolTip = 'Specifies the value of the Transfer-from Code field.';
-                }
-                field("Transfer-from Name"; Rec."Transfer-from Name")
-                {
-                    ToolTip = 'Specifies the value of the Transfer-from Name field.';
-                    Editable = false;
-                }
+                // field("Transfer-from Code"; Rec."Transfer-from Code")
+                // {
+                //     ToolTip = 'Specifies the value of the Transfer-from Code field.';
+                // }
+                // field("Transfer-from Name"; Rec."Transfer-from Name")
+                // {
+                //     ToolTip = 'Specifies the value of the Transfer-from Name field.';
+                //     Editable = false;
+                // }
                 field("Transfer-to Code"; Rec."Transfer-to Code")
                 {
                     ToolTip = 'Specifies the value of the Transfer-to Code field.';
@@ -72,6 +72,21 @@ page 50329 "Request Transfer Order"
     {
         area(Processing)
         {
+            action("Open Transfer Orders")
+            {
+                ApplicationArea = All;
+                PromotedCategory = Process;
+                Promoted = true;
+                Caption = 'Open Transfer Orders';
+                Image = Open;
+                trigger OnAction()
+                var
+                    TH: Record "Transfer Header";
+                    TraOrderList: page "Transfer Orders";
+                begin
+                    TraOrderList.Run();
+                end;
+            }
             action("Send for Approval")
             {
                 ApplicationArea = All;
@@ -104,43 +119,74 @@ page 50329 "Request Transfer Order"
                     TransferHeader: Record "Transfer Header";
                     TransferLine: Record "Transfer Line";
                     RrqTransferLine: Record "Request Transfer Line";
+                    RrqTransferLineFilter: Record "Request Transfer Line";
                     RLocation: Record Location;
                     InvSetup: Record "Inventory Setup";
-                //NavAction:Page navi
+                    TransferRelease: Codeunit "Release Transfer Document";
+                    Transline: Record "Transfer Line";
+                    TranferFromcode: Code[10];
+                    RrqTransferLineNew: record "Request Transfer Line";
+                    TransferOrderNo: list of [Text];
+                    recLocation: Record 14;
                 begin
-
-                    InvSetup.Get();
-                    TransferHeader.Init();
-                    TransferHeader."No." := Noseries.GetNextNo(InvSetup."Transfer Order Nos.", Today, true);
-                    TransferHeader.Insert(true);
-                    TransferHeader."Transfer-from Code" := Rec."Transfer-from Code";
-                    TransferHeader."Transfer-to Code" := rec."Transfer-to Code";
-                    TransferHeader."Posting Date" := Rec."Posting Date";
-                    RLocation.Reset();
-                    RLocation.SetRange("Use As In-Transit", true);
-                    IF RLocation.FindFirst() then begin
-                        TransferHeader."In-Transit Code" := RLocation.Code;
-                    end;
-                    TransferHeader.Modify(true);
-
-                    RrqTransferLine.Reset();
-                    RrqTransferLine.SetRange("Document No.", Rec."No.");
-                    IF RrqTransferLine.FindSet() then
+                    RrqTransferLineFilter.Reset();
+                    RrqTransferLineFilter.SetRange("Document No.", Rec."No.");
+                    IF RrqTransferLineFilter.FindSet() then
                         repeat
-                            TransferLine.Init();
-                            TransferLine."Document No." := TransferHeader."No.";
-                            TransferLine."Line No." := RrqTransferLine."Line No.";
-                            TransferLine.Insert(true);
-                            TransferLine.Validate("Item No.", RrqTransferLine."Item No.");
-                            TransferLine.Validate(Quantity, RrqTransferLine.Quantity);
-                            TransferLine.Modify();
-                        until RrqTransferLine.Next() = 0;
-                    TransferHeader.Status := TransferHeader.Status::Released;
-                    TransferHeader.Modify();
-                    //Message('Transfer Order Craeted with Trasfer Order No. %1', TransferHeader."No.");
-                    if InstructionMgt.IsEnabled(InstructionMgt.ShowPostedConfirmationMessageCode()) then
-                        ShowPostedConfirmationMessage(TransferHeader."No.");
-
+                            //IF RrqTransferLineFilter."Transfer-from Code" <> TranferFromcode then begin
+                            IF RrqTransferLineFilter."Line Created" = false then begin
+                                InvSetup.Get();
+                                TransferHeader.Init();
+                                TransferHeader."No." := Noseries.GetNextNo(InvSetup."Transfer Order Nos.", Today, true);
+                                TransferHeader.Insert(true);
+                                //TransferHeader."Transfer-from Code" := Rec."Transfer-from Code";
+                                TransferHeader.Validate("Transfer-from Code", RrqTransferLineFilter."Transfer-from Code");
+                                TransferHeader.Validate("Transfer-to Code", rec."Transfer-to Code");
+                                IF recLocation.Get(Rec."Transfer-to Code") then begin
+                                    TransferHeader.Validate("Shortcut Dimension 1 Code", recLocation."Global Dimension 1 Code");
+                                    TransferHeader.Validate("Shortcut Dimension 2 Code", recLocation."Global Dimension 2 Code");
+                                end;
+                                TransferHeader."Posting Date" := Rec."Posting Date";
+                                RLocation.Reset();
+                                RLocation.SetRange("Use As In-Transit", true);
+                                IF RLocation.FindFirst() then begin
+                                    TransferHeader."In-Transit Code" := RLocation.Code;
+                                end;
+                                TransferHeader.Modify();
+                                //TranferFromcode := TransferHeader."Transfer-from Code";
+                                TransferOrderNo.Add(TransferHeader."No.");
+                                //******Transfer Line Creation**********
+                                RrqTransferLine.Reset();
+                                RrqTransferLine.SetRange("Document No.", Rec."No.");
+                                RrqTransferLine.SetRange("Transfer-from Code", TransferHeader."Transfer-from Code");
+                                IF RrqTransferLine.FindSet() then //begin
+                                    repeat
+                                        TransferLine.Init();
+                                        TransferLine."Document No." := TransferHeader."No.";
+                                        Transline.Reset();
+                                        Transline.SetRange("Document No.", TransferHeader."No.");
+                                        IF Transline.FindLast() then
+                                            TransferLine."Line No." := Transline."Line No." + 10000
+                                        else
+                                            TransferLine."Line No." := 10000;
+                                        //TransferLine."Line No." := RrqTransferLine."Line No.";
+                                        TransferLine.Insert(true);
+                                        TransferLine.Validate("Item No.", RrqTransferLine."Item No.");
+                                        TransferLine.Validate(Quantity, RrqTransferLine.Quantity);
+                                        TransferLine.Modify();
+                                        RrqTransferLine."Line Created" := True;
+                                        RrqTransferLine.Modify();
+                                    until RrqTransferLine.Next() = 0;
+                                TransferHeader.Status := TransferHeader.Status::Released;
+                                TransferHeader.Modify();
+                                //end;
+                            end;
+                        //end
+                        until RrqTransferLineFilter.Next() = 0;
+                    //TransferRelease.Run(TransferHeader);
+                    Message('Transfer Order Craeted with Trasfer Order No.');
+                    // if InstructionMgt.IsEnabled(InstructionMgt.ShowPostesdConfirmationMessageCode()) then
+                    //     ShowPostedConfirmationMessage(TransferHeader."No.");
                 end;
             }
 

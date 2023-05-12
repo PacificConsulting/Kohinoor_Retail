@@ -89,10 +89,19 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
             Caption = 'Salesperson Code';
             DataClassification = ToBeClassified;
             TableRelation = "Salesperson/Purchaser".Code;
+            trigger OnValidate()
+            var
+                SP: Record "Salesperson/Purchaser";
+            begin
+                IF SP.Get(Rec."Salesperson Code") then
+                    "Salesperson Name" := SP.Name;
+            end;
         }
-        field(50312; "Change Unit Price Incl. of Tax"; Decimal)
+        field(50312; "Salesperson Name"; Text[50])
         {
             DataClassification = ToBeClassified;
+            Editable = false;
+
         }
         field(50313; "Warranty Parent Line No."; Integer)
         {

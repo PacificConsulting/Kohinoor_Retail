@@ -55,14 +55,14 @@ page 50346 "Request Transfer List"
                 {
                     Caption = 'Transfer-to Name';
                 }
-                field(transferFromCode; Rec."Transfer-from Code")
-                {
-                    Caption = 'Transfer-from Code';
-                }
-                field(transferFromName; Rec."Transfer-from Name")
-                {
-                    Caption = 'Transfer-from Name';
-                }
+                // field(transferFromCode; Rec."Transfer-from Code")
+                // {
+                //     Caption = 'Transfer-from Code';
+                // }
+                // field(transferFromName; Rec."Transfer-from Name")
+                // {
+                //     Caption = 'Transfer-from Name';
+                // }
                 field(postingDate; Rec."Posting Date")
                 {
                     Caption = 'Posting Date';

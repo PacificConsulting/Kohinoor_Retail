@@ -10,25 +10,25 @@ pageextension 50304 "Sales Line Subform" extends "Sales Order Subform"
                 SalesHeder: record 36;
                 SL: Record 37;
             begin
-                // IF xRec."Unit Price Incl. of Tax" <> Rec."Unit Price Incl. of Tax" then begin
-                //     Rec."Change Unit Price Incl. of Tax" := Rec."Unit Price Incl. of Tax";
-                //     //Rec.Modify();
-                //     IF SalesHeder.Get(rec."Document Type", rec."Document No.") then;
-                //     TradeAggre.Reset();
-                //     TradeAggre.SetCurrentKey("Item No.", "From Date", "To Date", "Location Code");
-                //     TradeAggre.SetRange("Item No.", Rec."No.");
-                //     TradeAggre.SetRange("Location Code", SalesHeder."Location Code");
-                //     TradeAggre.SetFilter("From Date", '<=%1', SalesHeder."Posting Date");
-                //     TradeAggre.SetFilter("To Date", '>=%1', SalesHeder."Posting Date");
-                //     IF TradeAggre.FindFirst() then begin
-                //         IF TradeAggre."Amount In INR" < Rec."Unit Price Incl. of Tax" then
-                //             Error('Amount should not be more than %1 INR', TradeAggre."Amount In INR");
-                //         IF TradeAggre."Last Selling Price" > Rec."Unit Price Incl. of Tax" then begin
-                //             ApprovalMailSent(Rec);
+                IF xRec."Unit Price Incl. of Tax" <> Rec."Unit Price Incl. of Tax" then begin
+                    Rec."Old Unit Price" := Rec."Unit Price Incl. of Tax";
+                    //Rec.Modify();
+                    IF SalesHeder.Get(rec."Document Type", rec."Document No.") then;
+                    TradeAggre.Reset();
+                    TradeAggre.SetCurrentKey("Item No.", "From Date", "To Date", "Location Code");
+                    TradeAggre.SetRange("Item No.", Rec."No.");
+                    TradeAggre.SetRange("Location Code", SalesHeder."Location Code");
+                    TradeAggre.SetFilter("From Date", '<=%1', SalesHeder."Posting Date");
+                    TradeAggre.SetFilter("To Date", '>=%1', SalesHeder."Posting Date");
+                    IF TradeAggre.FindFirst() then begin
+                        IF TradeAggre."Amount In INR" < Rec."Unit Price Incl. of Tax" then
+                            Error('Amount should not be more than %1 INR', TradeAggre."Amount In INR");
+                        IF TradeAggre."Last Selling Price" > Rec."Unit Price Incl. of Tax" then begin
+                            ApprovalMailSent(Rec);
 
-                //         end;
-                //     end;
-                // end;
+                        end;
+                    end;
+                end;
             end;
         }
         addafter(Quantity)
@@ -69,6 +69,11 @@ pageextension 50304 "Sales Line Subform" extends "Sales Order Subform"
             {
                 ApplicationArea = all;
             }
+            field("Salesperson Name"; Rec."Salesperson Name")
+            {
+                ApplicationArea = All;
+                ToolTip = 'Specifies the value of the Salesperson Name field.';
+            }
             field("Exchange Item No."; Rec."Exchange Item No.")
             {
                 ApplicationArea = All;
@@ -89,11 +94,11 @@ pageextension 50304 "Sales Line Subform" extends "Sales Order Subform"
                 ToolTip = 'Specifies the value of the GST Tax Amount.';
 
             }
-            field("Change Unit Price Incl. of Tax"; Rec."Change Unit Price Incl. of Tax")
-            {
-                ApplicationArea = All;
-                ToolTip = 'Specifies the value of the Change Unit Price Incl. of Tax field.';
-            }
+            // field("Change Unit Price Incl. of Tax"; Rec."Change Unit Price Incl. of Tax")
+            // {
+            //     ApplicationArea = All;
+            //     ToolTip = 'Specifies the value of the Change Unit Price Incl. of Tax field.';
+            // }
 
         }
     }
