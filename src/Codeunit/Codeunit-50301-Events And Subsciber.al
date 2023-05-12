@@ -127,14 +127,23 @@ codeunit 50301 "Event and Subscribers"
     //END**********************************Codeunit-80***************************************
 
     //START**********************************Codeunit-90***************************************
-    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Purch.-Post", 'OnAfterSetPostingFlags', '', false, false)]
-    local procedure OnAfterSetPostingFlags(var PurchHeader: Record "Purchase Header")
-    begin
-        IF PurchHeader."Document Type" = PurchHeader."Document Type"::Order then begin
-            PurchHeader.Receive := true;
-            PurchHeader.Invoice := false;
-        end;
-    end;
+    // [EventSubscriber(ObjectType::Codeunit, Codeunit::"Purch.-Post", 'OnBeforeCheckReceiveInvoiceShip', '', false, false)]
+    // local procedure OnBeforeCheckReceiveInvoiceShip(var PurchHeader: Record "Purchase Header"; var IsHandled: Boolean)
+    // begin
+    //     IF PurchHeader."Document Type" = PurchHeader."Document Type"::Order then begin
+    //         PurchHeader.Receive := true;
+    //         PurchHeader.Invoice := false;
+    //     end;
+    // end;
+
+    //[EventSubscriber(ObjectType::Codeunit, Codeunit::"Purch.-Post", 'OnAfterSetPostingFlags', '', false, false)]
+    // local procedure OnAfterSetPostingFlags(var PurchHeader: Record "Purchase Header")
+    // begin
+    //     IF PurchHeader."Document Type" = PurchHeader."Document Type"::Order then begin
+    //         PurchHeader.Receive := true;
+    //         PurchHeader.Invoice := false;
+    //     end;
+    // end;
     //START**********************************Codeunit-5704***************************************
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"TransferOrder-Post Shipment", 'OnBeforeTransferOrderPostShipment', '', false, false)]
     local procedure OnBeforeTransferOrderPostShipment(var TransferHeader: Record "Transfer Header"; var CommitIsSuppressed: Boolean)

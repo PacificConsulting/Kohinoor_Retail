@@ -30,7 +30,8 @@ tableextension 50308 "Sales & Rec Setup" extends "Sales & Receivables Setup"
         field(50306; "Warranty G/L Code"; Code[20])
         {
             DataClassification = ToBeClassified;
-            TableRelation = "G/L Account"."No.";
+            Caption = 'Warranty Item No.';
+            TableRelation = Item."No.";
         }
 
 

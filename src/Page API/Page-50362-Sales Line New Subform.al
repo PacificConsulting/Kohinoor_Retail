@@ -102,6 +102,10 @@ page 50362 "Sales Line New Subform"
                 {
                     Caption = 'Salesperson Name';
                 }
+                field(totalLineAmount; TotalLineAmount)
+                {
+                    Caption = 'TotalLineAmount';
+                }
 
             }
         }
@@ -118,4 +122,16 @@ page 50362 "Sales Line New Subform"
             Rec."Line No." := 10000;
     end;
 
+    trigger OnAfterGetRecord()
+    begin
+        IF Rec.Type = rec.Type::"G/L Account" then
+            TotalLineAmount := rec."Line Amount"
+        else
+            IF Rec.Type = rec.Type::"G/L Account" then
+                TotalLineAmount := rec."Total UPIT Amount";
+
+    end;
+
+    var
+        TotalLineAmount: Decimal;
 }

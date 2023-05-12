@@ -172,17 +172,24 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     No: code[20];
                     CU: Codeunit 50303;
                     POS: Codeunit 50302;
+                    RES: Record 337;
 
                 begin
                     Message('hi');
                     // result := POS.POSAction('KTPLSO23240091', 0, 'INVLINE', '', '', '');
-                    result := CU.OrderConfirmationforWH(rec."No.");
+                    //result := CU.OrderConfirmationforWH(rec."No.");
                     // SL.Reset();
                     // sl.SetRange("Approval Status", sl."Approval Status"::"Pending for Approval");
                     // IF SL.FindFirst() then;
                     // Hyperlink(GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List", SL));
                     // result := GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List", SL);
-                    Message(result);
+                    //Message(result);
+                    RES.Reset();
+                    RES.SetRange("Source ID", 'KTPLPO23240011');
+                    IF RES.FindSet() then
+                        repeat
+                            RES.Delete();
+                        until res.Next() = 0;
 
                 end;
             }
@@ -201,8 +208,12 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     result: Text;
                 begin
                     //result := POS.POSAction('KTPLSO23240091', 10000, 'INVLINE', '1', '', '');
-                    result := cu.OrderConfirmationforWH(rec."No.");
+                    //result := cu.OrderConfirmationforWH(rec."No.");
                     //result := Cu.OrderConfirmationforDelivery(rec."No.");
+                    //result := CU.ItemReceipt('KTPLPO23240011', 20000, '');
+                    result := POS.AddWarranty('KTPLSO23240121', 10000, 'ZOPPER', '12');
+                    //result := cu.SerialItemTracking('KTPLPO23240011', 20000, 'PLAY002');
+
                     Message(result);
                 end;
             }

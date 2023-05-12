@@ -6,7 +6,7 @@ table 50302 "Posted Payment Lines"
 
     fields
     {
-        field(1; "Document Type"; Enum "Sales Document Type")
+        field(1; "Document Type"; Enum "Payment Document Type")
         {
             Caption = 'Document Type';
             Editable = false;

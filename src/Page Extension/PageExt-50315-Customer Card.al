@@ -6,6 +6,14 @@ pageextension 50315 Cust_card extends "Customer Card"
         {
             Visible = true;
         }
+        addafter("Salesperson Code")
+        {
+            field("Customer Reference"; Rec."Customer Reference")
+            {
+                ApplicationArea = all;
+                Caption = 'Customer Reference';
+            }
+        }
     }
 
     actions

@@ -1,6 +1,6 @@
 page 50366 "Warranty Month"
 {
-    APIGroup = 'Warranty';
+    APIGroup = 'WarrantyMonth';
     APIPublisher = 'Pacific';
     APIVersion = 'v2.0';
     ApplicationArea = All;
@@ -18,10 +18,6 @@ page 50366 "Warranty Month"
         {
             repeater(General)
             {
-                field(systemId; Rec.SystemId)
-                {
-                    Caption = 'SystemId';
-                }
                 field(monthCode; Rec."Month Code")
                 {
                     Caption = 'Month Code';
@@ -29,6 +25,10 @@ page 50366 "Warranty Month"
                 field(description; Rec.Description)
                 {
                     Caption = 'Description';
+                }
+                field(systemId; Rec.SystemId)
+                {
+                    Caption = 'SystemId';
                 }
             }
         }

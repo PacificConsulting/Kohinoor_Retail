@@ -1,6 +1,6 @@
 page 50365 "Warranty Brand"
 {
-    APIGroup = 'Warranty';
+    APIGroup = 'WarrantyBrand';
     APIPublisher = 'Pacific';
     APIVersion = 'v1.0';
     ApplicationArea = All;
@@ -18,10 +18,6 @@ page 50365 "Warranty Brand"
         {
             repeater(General)
             {
-                field(systemId; Rec.SystemId)
-                {
-                    Caption = 'SystemId';
-                }
                 field(brandCode; Rec."Brand Code")
                 {
                     Caption = 'Brand Code';
@@ -29,6 +25,10 @@ page 50365 "Warranty Brand"
                 field(description; Rec.Description)
                 {
                     Caption = 'Description';
+                }
+                field(systemId; Rec.SystemId)
+                {
+                    Caption = 'SystemId';
                 }
             }
         }

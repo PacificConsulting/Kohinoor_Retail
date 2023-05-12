@@ -4,7 +4,7 @@ table 50301 "Payment Lines"
 
     fields
     {
-        field(1; "Document Type"; Enum "Sales Document Type")
+        field(1; "Document Type"; Enum "Payment Document Type")
         {
             Caption = 'Document Type';
         }
@@ -114,6 +114,18 @@ table 50301 "Payment Lines"
             //         error('6 digit of Cheque No. is allowed only')
             // end;
         }
+        field(19; "Store No."; Code[20])
+        {
+            Caption = 'Store No.';
+            DataClassification = ToBeClassified;
+            TableRelation = Location.Code;
+
+        }
+        field(20; "Staff Id"; Code[10])
+        {
+            DataClassification = ToBeClassified;
+            TableRelation = "Staff Master".ID;
+        }
     }
 
 
@@ -147,6 +159,7 @@ table 50301 "Payment Lines"
     trigger OnInsert()
     var
         PL: record "Payment Lines";
+        SH: Record "Sales Header";
     begin
         PL.reset;
         PL.SETRANGE("Document No.", "Document No.");
@@ -154,6 +167,14 @@ table 50301 "Payment Lines"
             "Line No." := PL."Line No." + 10000
         else
             "Line No." := 10000;
+
+        SH.Reset();
+        SH.SetRange("No.", "Document No.");
+        IF SH.FindFirst() then begin
+            "Store No." := SH."Store No.";
+            "Staff Id" := sh."Staff Id";
+        end;
+
     end;
 
     trigger OnModify()

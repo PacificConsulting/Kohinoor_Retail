@@ -92,6 +92,18 @@ page 50341 "Customer List API"
                 {
                     Caption = 'Search Name';
                 }
+                field(mobilePhoneNo; Rec."Mobile Phone No.")
+                {
+                    Caption = 'Mobile Phone No.';
+                }
+                field(balanceLCY; Rec."Balance (LCY)")
+                {
+                    Caption = 'Balance (LCY)';
+                }
+                field(customerReference; Rec."Customer Reference")
+                {
+                    Caption = 'Customer Reference';
+                }
 
             }
         }

@@ -11,6 +11,7 @@ page 50337 "Transfer Order Subform API"
     PageType = API;
     SourceTable = "Transfer Line";
     ODataKeyFields = SystemId;
+    SourceTableView = where("Derived From Line No." = filter(0));
 
     layout
     {

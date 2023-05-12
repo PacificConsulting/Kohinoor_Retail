@@ -37,6 +37,14 @@ table 50318 "Warranty Master"
             Caption = 'Description';
             DataClassification = ToBeClassified;
         }
+        field(7; "From Date"; Date)
+        {
+            DataClassification = ToBeClassified;
+        }
+        field(8; "TO Date"; Date)
+        {
+            DataClassification = ToBeClassified;
+        }
     }
     keys
     {

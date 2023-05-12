@@ -150,66 +150,6 @@ codeunit 50303 "POS Procedure"
     end;
 
 
-    /// <summary>
-    /// Post Shipment for a specific order Line / TO Line
-    /// </summary>
-    procedure ShipLine(documentNo: Code[20]; LineNo: Integer; InputData: Text): text
-    var
-        SaleHeaderShip: Record "Sales Header";
-        ShiptoQty: Decimal;
-        SalesLineShip: Record "Sales Line";
-        TransferHeaderShip: record "Transfer Header";
-        TransferlineShip: Record "Transfer Line";
-        Salespost: codeunit 80;
-        Transpostship: Codeunit "TransferOrder-Post Shipment";
-    begin
-        // Clear(InputData);
-        Evaluate(ShiptoQty, InputData);
-        // SaleHeaderShip.Reset();
-        // SaleHeaderShip.SetRange("No.", DocumentNo);
-        // //SaleHeaderShip.SetRange(Status, SaleHeaderShip.Status::Open);
-        // IF SaleHeaderShip.FindFirst() then begin
-        //     IF SaleHeaderShip.Status = SaleHeaderShip.Status::Released then begin
-        //         SaleHeaderShip.Status := SaleHeaderShip.Status::Open;
-        //         SalesLineShip.Modify(true);
-        //     end;
-        //     SalesLineShip.Reset();
-        //     SalesLineShip.SetRange("Document No.", SaleHeaderShip."No.");
-        //     SalesLineShip.SetRange("Line No.", LineNo);
-        //     IF SalesLineShip.FindFirst() then begin
-        //         SalesLineShip.validate("Qty. to Ship", ShiptoQty);
-        //         SalesLineShip.Modify(true);
-        //         SaleHeaderShip.Status := SaleHeaderShip.Status::Released;
-        //         SaleHeaderShip."Store No." := 'POS';
-        //         SaleHeaderShip.Modify(true);
-        //         Salespost.Run(SaleHeaderShip);
-        //         exit('Success');
-        //     end
-        // end else begin
-        TransferHeaderShip.Reset();
-        TransferHeaderShip.SetRange("No.", DocumentNo);
-        IF TransferHeaderShip.FindFirst() then begin
-            IF TransferHeaderShip.Status = TransferHeaderShip.Status::Released then begin
-                TransferHeaderShip.Status := TransferHeaderShip.Status::Open;
-                TransferHeaderShip.Modify(true);
-            end;
-            TransferlineShip.Reset();
-            TransferlineShip.SetRange("Document No.", TransferHeaderShip."No.");
-            TransferlineShip.SetRange("Line No.", LineNo);
-            IF TransferlineShip.FindFirst() then begin
-                TransferlineShip.Validate("Qty. to Ship", ShiptoQty);
-                TransferlineShip.Modify(true);
-                TransferHeaderShip.Status := TransferHeaderShip.Status::Released;
-                TransferHeaderShip.Modify(true);
-                IF TransferlineShip."Qty. to Ship" <> ShiptoQty then
-                    exit('Failed');
-                Transpostship.Run(TransferHeaderShip);
-                //exit('Failed');
-            end;
-        end;
-
-        //end;
-    end;
 
 
     /// <summary>
@@ -270,6 +210,7 @@ codeunit 50303 "POS Procedure"
         SalespostYN: codeunit 81;
         SalesCommLine: Record 44;
         ReturnBool: Boolean;
+        ReleaseSalesDoc: Codeunit "Release Sales Document";
     begin
         // Clear(InputData);
         //Evaluate(ShipInvtoQty, InputData);
@@ -302,7 +243,8 @@ codeunit 50303 "POS Procedure"
                     SalesCommLine.Modify();
                 end;
                 //>> Comment Mandetory so We have to pass Order Comment
-                SaleHeaderInv.Status := SaleHeaderInv.Status::Released;
+                //SaleHeaderInv.Status := SaleHeaderInv.Status::Released;
+                ReleaseSalesDoc.PerformManualRelease(SaleHeaderInv);
                 SaleHeaderInv.Modify(true);
                 Salespost.Run(SaleHeaderInv);
                 //Message(FORMAT(ReturnBool));
@@ -324,10 +266,11 @@ codeunit 50303 "POS Procedure"
         Purchpost: Codeunit "Purch.-Post";
         TranspostReceived: Codeunit "TransferOrder-Post Receipt";
         ReleasePurch: codeunit "Release Purchase Document";
-
+        PurchCommLine: Record "Purch. Comment Line";
     begin
         //Clear(InputData);
         // Evaluate(QtyToReceive, InputData);
+
         PurchHeader.Reset();
         PurchHeader.SetRange("No.", DocumentNo);
         IF PurchHeader.FindFirst() then begin
@@ -337,17 +280,27 @@ codeunit 50303 "POS Procedure"
             end;
             PurchLine.Reset();
             PurchLine.SetRange("Document No.", PurchHeader."No.");
-            PurchLine.SetRange("Line No.", LineNo);
             IF PurchLine.FindFirst() then begin
-                PurchLine.validate("Qty. to Receive", PurchLine.Quantity);
-                PurchLine.Modify();
-                ReleasePurch.Run(PurchHeader);
-                //PurchHeader.Status := PurchHeader.Status::Released;
-                //PurchHeader.Modify();
-                IF PurchLine."Qty. to Receive" <> QtyToReceive then
-                    exit('Qty to Receive not Updated');
+                //<< Comment Mandetory so We have to pass Order Comment
+                PurchCommLine.Reset();
+                PurchCommLine.SetRange("No.", PurchHeader."No.");
+                IF Not PurchCommLine.FindFirst() then begin
+                    PurchCommLine.Init();
+                    PurchCommLine."Document Type" := PurchCommLine."Document Type"::Order;
+                    PurchCommLine."No." := PurchHeader."No.";
+                    PurchCommLine."Line No." := PurchLine."Line No.";
+                    PurchCommLine."Document Line No." := PurchLine."Line No.";
+                    PurchCommLine.Insert();
+                    PurchCommLine.Comment := 'Document Processed from POS';
+                    PurchCommLine.Modify();
+                end;
+                //>> Comment Mandetory so We have to pass Order Comment
+                PurchHeader.Receive := true;
+                PurchHeader.Invoice := false;
+                PurchHeader.Modify();
+                ReleasePurch.PerformManualRelease(PurchHeader);
                 Purchpost.Run(PurchHeader);
-                //exit('Failed');
+
             end
         end else begin
             TransferHeader.Reset();
@@ -359,14 +312,11 @@ codeunit 50303 "POS Procedure"
                 end;
                 Transferline.Reset();
                 Transferline.SetRange("Document No.", TransferHeader."No.");
-                Transferline.SetRange("Line No.", LineNo);
                 IF Transferline.FindFirst() then begin
-                    Transferline.Validate("Qty. to Receive", Transferline.Quantity);
+                    //   Transferline.Validate("Qty. to Receive", Transferline.Quantity);
                     //Transferline.Modify();
                     TransferHeader.Status := TransferHeader.Status::Released;
                     TransferHeader.Modify();
-                    IF Transferline."Qty. to Receive" <> QtyToReceive then
-                        exit('Qty to Receive not Updated');
                     TranspostReceived.Run(TransferHeader);
                 end;
             end //else
@@ -442,6 +392,15 @@ codeunit 50303 "POS Procedure"
                         IF TradeAggre."Last Selling Price" > SalesLineunitPrice."Unit Price Incl. of Tax" then begin
                             ApprovalMailSent(SalesLineunitPrice);
                         end;
+                    end else begin
+                        TradeAggre.SetRange("Location Code");
+                        IF TradeAggre.FindFirst() then begin
+                            IF TradeAggre."Amount In INR" < SalesLineunitPrice."Unit Price Incl. of Tax" then
+                                Error('Amount should not be more than %1 INR', TradeAggre."Amount In INR");
+                            IF TradeAggre."Last Selling Price" > SalesLineunitPrice."Unit Price Incl. of Tax" then begin
+                                ApprovalMailSent(SalesLineunitPrice);
+                            end;
+                        end;
                     end;
                 end;
                 /*
@@ -456,7 +415,7 @@ codeunit 50303 "POS Procedure"
                 SalesLineunitPrice."Old Unit Price" := SalesLineunitPrice."Unit Price Incl. of Tax";
                 SalesLineunitPrice.validate("Unit Price Incl. of Tax", NewUnitPrice);
                 SalesLineunitPrice.Modify();
-                
+
                 IF SalesLineunitPrice."Unit Price" = NewUnitPrice then
                     exit('Unit Price not updated.');
                     */
@@ -477,7 +436,13 @@ codeunit 50303 "POS Procedure"
         SalesHeader: Record 36;
         UnitP: Decimal;
         RecItem: Record 27;
+        SNlist: record 6504;
     begin
+        SNlist.Reset();
+        SNlist.SetRange("Serial No.", serialno);
+        IF SNlist.FindFirst() then
+            Error('Serial No. does not exist');
+
         SalesHeader.Reset();
         SalesHeader.SetRange("No.", documentno);
         SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
@@ -532,9 +497,8 @@ codeunit 50303 "POS Procedure"
         PurchLine: Record 39;
         DocFound: Boolean;
         BincodeEvaluate: code[20];
-
+        SNlist: record 6504;
     begin
-
         Evaluate(SerialNo, input);
         Clear(LastEntryNo);
         DocFound := false;
@@ -583,16 +547,6 @@ codeunit 50303 "POS Procedure"
                 ReservEntryInit."Creation Date" := TODAY;
                 ReservEntryInit."Created By" := USERID;
                 ReservEntryInit.INSERT;
-                SalesLine.Reset();
-                SalesLine.SetRange("Document No.", documentno);
-                SalesLine.SetRange("Line No.", lineno);
-                IF SalesLine.FindFirst() then begin
-                    // Evaluate(BincodeEvaluate,ItemLedgEntry."Back Pack/Display");
-                    //SalesLine.Validate("Bin Code", BincodeEvaluate);
-                    SalesLine.Modify();
-                end;
-
-
             End
             ELSE
                 EXIT('Insufficient Inventory'); //Until
@@ -608,8 +562,7 @@ codeunit 50303 "POS Procedure"
                 DocFound := true;
                 IF TranLine."Qty. to Ship" = 0 then begin
                     TranLine.Validate("Transfer-from Bin Code", 'BACKPACK');
-                    TranLine.Validate("Qty. to Ship", TranLine.Quantity);
-                    //TranLine.Validate("Bin Code", 'BACKPACK');
+                    TranLine.Validate("Qty. to Ship", TranLine."Qty. to Ship" + 1);
                     TranLine.Modify();
                 end;
                 ReservEntry.RESET;
@@ -633,7 +586,7 @@ codeunit 50303 "POS Procedure"
                 ReservEntryInit."Item No." := TranLine."Item No.";
                 ReservEntryInit."Location Code" := TranLine."Transfer-from Code";  //SalesLine."Location Code";
                 ReservEntryInit."Qty. per Unit of Measure" := TranLine."Qty. per Unit of Measure";
-                ReservEntryInit.VALIDATE("Quantity (Base)", TranLine.Quantity * -1);
+                ReservEntryInit.VALIDATE("Quantity (Base)", 1 * -1);
                 ReservEntryInit."Source Type" := DATABASE::"Transfer Line";
                 ReservEntryInit."Source ID" := TranLine."Document No.";
                 ReservEntryInit."Source Ref. No." := TranLine."Line No.";
@@ -646,46 +599,57 @@ codeunit 50303 "POS Procedure"
                 ReservEntryInit."Creation Date" := TODAY;
                 ReservEntryInit."Created By" := USERID;
                 ReservEntryInit.INSERT;
-                //<<<<<***********Postive Qty New Reservation Entry Created*************//
-                ReservEntry.RESET;
-                ReservEntry.LOCKTABLE;
-                IF ReservEntry.FINDLAST THEN
-                    LastEntryNo := ReservEntry."Entry No.";
-                ReservEntryInit.INIT;
-                LastEntryNo += 1;
-                ReservEntryInit."Entry No." := LastEntryNo;
-                ReservEntryInit."Reservation Status" := ReservEntryInit."Reservation Status"::Surplus;
-                ReservEntryInit.Positive := FALSE;
-                ReservEntryInit."Item No." := TranLine."Item No.";
-                ReservEntryInit."Location Code" := TranLine."Transfer-to Code";  //SalesLine."Location Code";
-                ReservEntryInit."Qty. per Unit of Measure" := TranLine."Qty. per Unit of Measure";
-                ReservEntryInit.VALIDATE("Quantity (Base)", TranLine.Quantity);
-                ReservEntryInit."Source Type" := DATABASE::"Transfer Line";
-                ReservEntryInit."Source ID" := TranLine."Document No.";
-                ReservEntryInit."Source Ref. No." := TranLine."Line No.";
-                ReservEntryInit."Source Subtype" := 1;
-                ReservEntryInit.validate("Serial No.", SerialNo/* ItemLedgEntry."Serial No."*/);
-                ReservEntryInit."Item Tracking" := ReservEntryInit."Item Tracking"::"Serial No.";
-                ReservEntryInit."Shipment Date" := TranLine."Shipment Date";
-                ReservEntryInit."Planning Flexibility" := ReservEntryInit."Planning Flexibility"::Unlimited;
-                //ReservEntry.
-                ReservEntryInit."Creation Date" := TODAY;
-                ReservEntryInit."Created By" := USERID;
-                ReservEntryInit.INSERT;
-                // End; //Until
-                //exit('Success');
+
+                // //<<<<<***********Postive Qty New Reservation Entry Created*************//
+                // ReservEntry.RESET;
+                // ReservEntry.LOCKTABLE;
+                // IF ReservEntry.FINDLAST THEN
+                //     LastEntryNo := ReservEntry."Entry No.";
+                // ReservEntryInit.INIT;
+                // LastEntryNo += 1;
+                // ReservEntryInit."Entry No." := LastEntryNo;
+                // ReservEntryInit."Reservation Status" := ReservEntryInit."Reservation Status"::Surplus;
+                // ReservEntryInit.Positive := FALSE;
+                // ReservEntryInit."Item No." := TranLine."Item No.";
+                // ReservEntryInit."Location Code" := TranLine."Transfer-to Code";  //SalesLine."Location Code";
+                // ReservEntryInit."Qty. per Unit of Measure" := TranLine."Qty. per Unit of Measure";
+                // ReservEntryInit.VALIDATE("Quantity (Base)", 1/*TranLine.Quantity*/);
+                // ReservEntryInit."Source Type" := DATABASE::"Transfer Line";
+                // ReservEntryInit."Source ID" := TranLine."Document No.";
+                // ReservEntryInit."Source Ref. No." := TranLine."Line No.";
+                // ReservEntryInit."Source Subtype" := 1;
+                // ReservEntryInit.validate("Serial No.", SerialNo/* ItemLedgEntry."Serial No."*/);
+                // ReservEntryInit."Item Tracking" := ReservEntryInit."Item Tracking"::"Serial No.";
+                // ReservEntryInit."Shipment Date" := TranLine."Shipment Date";
+                // ReservEntryInit."Planning Flexibility" := ReservEntryInit."Planning Flexibility"::Unlimited;
+                // //ReservEntry.
+                // ReservEntryInit."Creation Date" := TODAY;
+                // ReservEntryInit."Created By" := USERID;
+                // ReservEntryInit.INSERT;
+
             end;
         end;
+        Evaluate(SerialNo, input);
+        //Error(input);
+        Clear(LastEntryNo);
         PurchLine.Reset();
         PurchLine.SetRange("Document No.", documentno);
         PurchLine.SetRange("Line No.", lineno);
         IF PurchLine.FindFirst() then begin
             DocFound := true;
-            IF PurchLine."Qty. to Receive" = 0 then begin
-                PurchLine.Validate("Bin Code", 'BACKPACK');
-                PurchLine.Validate("Qty. to Receive", PurchLine.Quantity);
-                PurchLine.Modify();
-            end;
+            //IF PurchLine."Qty. to Receive" = 0 then begin
+            SNlist.Reset();
+            SNlist.SetRange("Serial No.", SerialNo);
+            IF SNlist.FindFirst() then
+                Error('Serial No. does not exist');
+
+            PurchLine.Validate("Bin Code", 'BACKPACK');
+            PurchLine.Validate("Qty. to Receive", PurchLine."Qty. to Receive" + 1);
+            PurchLine.Validate("Qty. to Invoice", 0);
+            PurchLine.Modify();
+
+
+            // end;
 
             ReservEntry.RESET;
             ReservEntry.LOCKTABLE;
@@ -700,7 +664,7 @@ codeunit 50303 "POS Procedure"
             ReservEntryInit."Item No." := PurchLine."No.";
             ReservEntryInit."Location Code" := PurchLine."Location Code";
             ReservEntryInit."Qty. per Unit of Measure" := PurchLine."Qty. per Unit of Measure";
-            ReservEntryInit.VALIDATE("Quantity (Base)", PurchLine.Quantity);
+            ReservEntryInit.VALIDATE("Quantity (Base)", 1);
             ReservEntryInit."Source Type" := DATABASE::"Purchase Line";
             ReservEntryInit."Source ID" := PurchLine."Document No.";
             ReservEntryInit."Source Ref. No." := PurchLine."Line No.";
@@ -911,45 +875,6 @@ codeunit 50303 "POS Procedure"
     end;
 
 
-    procedure AddWarranty(documentno: Code[20]; lineno: Integer; brand: Code[20]; month: Integer): Text
-    var
-        SalesLine: Record "Sales Line";
-        Saleslineinit: record "Sales Line";
-        SR: Record "Sales & Receivables Setup";
-        WarrMaster: Record "Warranty Master";
-    begin
-        SR.Get();
-        sr.TestField("Warranty G/L Code");
-
-        Saleslineinit.Init();
-        Saleslineinit."Document Type" := SalesLine."Document Type";
-        Saleslineinit."Document No." := SalesLine."Document No.";
-
-        SalesLine.Reset();
-        SalesLine.SetRange("Document No.", documentno);
-        IF SalesLine.FindLast() then
-            Saleslineinit."Line No." := SalesLine."Line No." + 10000;
-
-        Saleslineinit.Insert(true);
-        Saleslineinit.Type := Saleslineinit.Type::"G/L Account";
-        Saleslineinit.Validate("No.", SR."Warranty G/L Code");
-        Saleslineinit.Validate(Quantity, 1);
-        Saleslineinit.Validate("Location Code", SalesLine."Location Code");
-        Saleslineinit.Validate("Unit of Measure Code", 'PCS');
-        WarrMaster.Reset();
-        WarrMaster.SetRange(Brand, brand);
-        WarrMaster.SetRange(Months, month);
-        IF WarrMaster.FindFirst() then begin
-            Saleslineinit.Validate("Unit Price Incl. of Tax", WarrMaster."EW Prices");
-        end;
-        SalesLine.Reset();
-        SalesLine.SetRange("Document No.", documentno);
-        SalesLine.SetRange("Line No.", lineno);
-        IF SalesLine.FindFirst() then
-            Saleslineinit."Warranty Parent Line No." := SalesLine."Line No.";
-        Saleslineinit.Modify();
-
-    end;
 
     /*
     /// <summary>

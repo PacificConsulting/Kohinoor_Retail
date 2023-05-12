@@ -24,6 +24,14 @@ page 50358 "Warranty Master List"
                 {
                     ToolTip = 'Specifies the value of the Description field.';
                 }
+                field("From Date"; Rec."From Date")
+                {
+                    ToolTip = 'Specifies the value of the From Date field.';
+                }
+                field("TO Date"; Rec."TO Date")
+                {
+                    ToolTip = 'Specifies the value of the TO Date field.';
+                }
                 field("From Value"; Rec."From Value")
                 {
                     ToolTip = 'Specifies the value of the From Value field.';

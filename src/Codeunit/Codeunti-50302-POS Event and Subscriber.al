@@ -56,14 +56,14 @@ codeunit 50302 "POS Event and Subscriber"
                     Else
                         exit('Line Discount not updated.');
                 end;
-            'SHIPLINE':  //Not used this Function
-                begin
-                    IsResult := POSProcedure.ShipLine(documentno, lineno, input);
-                    IF IsResult = '' then
-                        exit('Success')
-                    Else
-                        exit(IsResult);
-                end;
+            // 'SHIPLINE':  //Not used this Function
+            //     begin
+            //         IsResult := POSProcedure.ShiptransferLine(documentno, lineno, input);
+            //         IF IsResult = '' then
+            //             exit('Success')
+            //         Else
+            //             exit(IsResult);
+            //     end;
             'INVLINE':  //<<<<** Sales Order's Perticuller line Ship and Invoice **>>>>
                 begin
                     IsResult := POSProcedure.InvoiceLine(documentno, lineno, parameter1, input);
@@ -175,6 +175,106 @@ codeunit 50302 "POS Event and Subscriber"
         Report.Run(101, false, false, recCust);
     end;
 
+    //Add Warranty
+    procedure AddWarranty(documentno: Code[20]; lineno: Integer; brand: Code[20]; month: text): Text
+    var
+        SalesLine: Record "Sales Line";
+        Saleslineinit: record "Sales Line";
+        SR: Record "Sales & Receivables Setup";
+        WarrMaster: Record "Warranty Master";
+        SH: Record "Sales Header";
+        SL: Record "Sales Line";
+        MonthInt: Integer;
+    begin
+        IF month <> '' then
+            Evaluate(MonthInt, month);
+
+        SR.Get();
+        sr.TestField("Warranty G/L Code");
+
+        SH.Reset();
+        SH.SetRange("No.", documentno);
+        IF SH.FindFirst() then;
+
+        SalesLine.Reset();
+        SalesLine.SetRange("Document No.", documentno);
+        SalesLine.SetRange("Line No.", lineno);
+        IF SalesLine.FindFirst() then begin
+            Saleslineinit.Init();
+            Saleslineinit."Document Type" := SalesLine."Document Type";
+            Saleslineinit."Document No." := SalesLine."Document No.";
+
+            SL.Reset();
+            SL.SetRange("Document No.", documentno);
+            IF SL.FindLast() then
+                Saleslineinit."Line No." := SL."Line No." + 10000;
+
+            Saleslineinit.Insert();
+            Saleslineinit.Type := Saleslineinit.Type::Item;
+            Saleslineinit.Validate("No.", SR."Warranty G/L Code");
+            Saleslineinit.Validate("Location Code", SalesLine."Location Code");
+            Saleslineinit.Validate("Unit of Measure Code", 'PCS');
+            Saleslineinit."Warranty Parent Line No." := SalesLine."Line No.";
+            Saleslineinit."Store No." := SalesLine."Store No.";
+            Saleslineinit.Validate("Salesperson Code", SalesLine."Salesperson Code");
+            WarrMaster.Reset();
+            WarrMaster.SetRange(Brand, brand);
+            WarrMaster.SetRange(Months, MonthInt);
+            WarrMaster.SetFilter("From Date", '<=%1', SH."Posting Date");
+            WarrMaster.SetFilter("To Date", '>=%1', SH."Posting Date");
+            WarrMaster.SetFilter("From Value", '<=%1', SalesLine."Unit Price Incl. of Tax");
+            WarrMaster.SetFilter("TO Value", '>=%1', SalesLine."Unit Price Incl. of Tax");
+            IF WarrMaster.FindFirst() then begin
+                Saleslineinit.Validate("Unit Price Incl. of Tax", WarrMaster."EW Prices");
+                Saleslineinit."Price Inclusive of Tax" := true;
+                Saleslineinit.Validate(Quantity, 1);
+            end;
+            Saleslineinit.Modify();
+            // SalesLine.Reset();
+            // SalesLine.SetRange("Document No.", documentno);
+            // SalesLine.SetRange("Line No.", lineno);
+            //// IF SalesLine.FindFirst() then
+            //Saleslineinit."Warranty Parent Line No." := SalesLine."Line No.";
+
+        End;
+    end;
+
+    /// <summary>
+    /// Post Shipment TO Line
+    /// </summary>
+    procedure ShipTransferLine(documentNo: Code[20]; LineNo: Integer; InputData: Text): text
+    var
+        SaleHeaderShip: Record "Sales Header";
+        ShiptoQty: Decimal;
+        SalesLineShip: Record "Sales Line";
+        TransferHeaderShip: record "Transfer Header";
+        TransferlineShip: Record "Transfer Line";
+        Salespost: codeunit 80;
+        Transpostship: Codeunit "TransferOrder-Post Shipment";
+        Transferrelease: codeunit "Release Transfer Document";
+    begin
+        // Clear(InputData);
+        Evaluate(ShiptoQty, InputData);
+        TransferHeaderShip.Reset();
+        TransferHeaderShip.SetRange("No.", DocumentNo);
+        IF TransferHeaderShip.FindFirst() then begin
+            // IF TransferHeaderShip.Status = TransferHeaderShip.Status::Released then begin
+            //     TransferHeaderShip.Status := TransferHeaderShip.Status::Open;
+            //     TransferHeaderShip.Modify();
+            // end;
+            TransferlineShip.Reset();
+            TransferlineShip.SetRange("Document No.", TransferHeaderShip."No.");
+            IF TransferlineShip.FindFirst() then begin
+                TransferHeaderShip.Status := TransferHeaderShip.Status::Released;
+                TransferHeaderShip.Modify();
+                Transpostship.Run(TransferHeaderShip);
+                //exit('Failed');
+            end;
+        end;
+
+        //end;
+    end;
+
 
 
     /// <summary>
@@ -203,6 +303,83 @@ codeunit 50302 "POS Event and Subscriber"
 
 
     /// <summary>
+    /// Customer Advance Payment Without Sales Order
+    /// </summary>
+    procedure CustomerAdvancePayment(customerno: Code[20]; documentno: Code[20])
+    var
+        GenJourLine: Record 81;
+        GenJourLineInit: record 81;
+        NoSeriesMgt: Codeunit 396;
+        BankAcc: Record 270;
+        PaymentLine: Record 50301;
+        PaymentMethod: record "Payment Method";
+        SR: record "Sales & Receivables Setup";
+        RecLocation: Record Location;
+        GenJnlPostBatch: Codeunit "Gen. Jnl.-Post Batch";
+    begin
+        //IF RecLocation.Get(Salesheader."Location Code") then begin
+        RecLocation.TestField("Payment Journal Template Name");
+        RecLocation.TestField("Payment Journal Batch Name");
+        //end;
+
+        PaymentLine.Reset();
+        //PaymentLine.SetRange("Document Type", Salesheader."Document Type");
+        PaymentLine.SetRange("Document No.", documentno);
+        if PaymentLine.FindSet() then
+            repeat
+                GenJourLine.Reset();
+                GenJourLine.SetRange("Journal Template Name", RecLocation."Payment Journal Template Name");
+                GenJourLine.SetRange("Journal Batch Name", RecLocation."Payment Journal Batch Name");
+                GenJourLineInit.Init();
+                GenJourLineInit."Document No." := documentno;
+                GenJourLineInit.validate("Posting Date", Today);
+                IF GenJourLine.FindLast() then
+                    GenJourLineInit."Line No." := GenJourLine."Line No." + 10000
+                else
+                    GenJourLineInit."Line No." := 10000;
+
+                GenJourLineInit."Journal Template Name" := RecLocation."Payment Journal Template Name";
+                GenJourLineInit."Journal Batch Name" := RecLocation."Payment Journal Batch Name";
+                GenJourLineInit."Document Type" := GenJourLineInit."Document Type"::Payment;
+                // GenJourLineInit.Insert();
+
+                //*******Condition Add With Payment Method code*********
+                IF PaymentMethod.Get(PaymentLine."Payment Method Code") then begin
+                    IF PaymentMethod."Bal. Account Type" = PaymentMethod."Bal. Account Type"::"G/L Account" then
+                        GenJourLineInit."Account Type" := GenJourLineInit."Account Type"::"G/L Account"
+                    else
+                        IF PaymentMethod."Bal. Account Type" = PaymentMethod."Bal. Account Type"::"Bank Account" then
+                            GenJourLineInit."Account Type" := GenJourLineInit."Account Type"::"Bank Account";
+                    GenJourLineInit.validate("Account No.", PaymentMethod."Bal. Account No.");
+                end;
+
+                GenJourLineInit."Bal. Account Type" := GenJourLine."Bal. Account Type"::Customer;
+                GenJourLineInit.Validate("Bal. Account No.", customerno);
+
+                GenJourLineInit."GST Group Code" := 'Goods';
+                GenJourLineInit.validate(Amount, PaymentLine.Amount);
+                //GenJourLineInit.Validate("Shortcut Dimension 1 Code", Salesheader."Shortcut Dimension 1 Code");
+                //GenJourLineInit.Validate("Shortcut Dimension 2 Code", Salesheader."Shortcut Dimension 2 Code");
+                GenJourLineInit.Comment := 'Auto Post';
+
+                GenJourLineInit.Insert();
+            Until PaymentLine.Next() = 0;
+        GenJnlPostBatch.Run(GenJourLineInit);
+        PaymentLine.Reset();
+        //PaymentLine.SetRange("Document Type", Salesheader."Document Type");
+        PaymentLine.SetRange("Document No.", documentno);
+        if PaymentLine.FindSet() then
+            repeat
+                PaymentLine.Posted := True;
+                PaymentLine.Modify();
+            //IsPaymentLineeditable := PaymentLine.PaymentLinesEditable()
+            Until PaymentLine.Next() = 0;
+
+    end;
+
+
+
+    /// <summary>
     /// Bank Drop Submit Function
     /// </summary>
     procedure Bankdropsubmit(entryno: Code[20]): Text
@@ -214,9 +391,6 @@ codeunit 50302 "POS Event and Subscriber"
         //Evaluate(Storedate, Format(sdate));
         BanKdrop.Reset();
         BanKdrop.SetRange("No.", entryno);
-        // BanKdrop.SetRange("Store No.", storeno);
-        // BanKdrop.SetRange("Staff ID", staffid);
-        // BanKdrop.SetRange("Store Date", Storedate);
         IF BanKdrop.FindFirst() then begin
             BanKdrop.Status := BanKdrop.Status::Release;
             BanKdrop.Modify();
@@ -296,88 +470,6 @@ codeunit 50302 "POS Event and Subscriber"
         end;
     end;
 
-    /// <summary>
-    /// Tranfer Order Ship Item Tracking
-    /// </summary>
-    /// 
-    // procedure TranferShipItemTracking(documentno: code[20]; lineno: Integer; input: text[50]): text
-    // var
-    //     ReservEntry: Record 337;
-    //     ReservEntryInit: Record 337;
-    //     LastEntryNo: Integer;
-    //     SerialNo: Code[50];
-    //     ItemLedgEntry: Record 32;
-    //     TranLine: Record "Transfer Line";
-    // begin
-    //     // exit('Success....');
-    //     Evaluate(SerialNo, input);
-    //     Clear(LastEntryNo);
-
-    //     TranLine.Reset();
-    //     TranLine.SetRange("Document No.", documentno);
-    //     TranLine.SetRange("Line No.", lineno);
-    //     IF TranLine.FindFirst() then begin
-    //         ReservEntry.RESET;
-    //         ReservEntry.LOCKTABLE;
-    //         IF ReservEntry.FINDLAST THEN
-    //             LastEntryNo := ReservEntry."Entry No.";
-    //         // ItemLedgEntry.RESET;
-    //         // ItemLedgEntry.SETCURRENTKEY("Item No.", Open, "Variant Code", Positive, "Location Code");
-    //         // ItemLedgEntry.SETRANGE("Item No.", TranLine."Item No.");
-    //         // ItemLedgEntry.SETRANGE(Open, TRUE);
-    //         // ItemLedgEntry.SETRANGE("Location Code", ItemLedgEntry."Location Code");
-    //         // ItemLedgEntry.SetRange("Serial No.", SerialNo);
-    //         // IF ItemLedgEntry.FindSet() then Begin //repeat
-    //         ReservEntryInit.INIT;
-    //         LastEntryNo += 1;
-    //         ReservEntryInit."Entry No." := LastEntryNo;
-    //         ReservEntryInit."Reservation Status" := ReservEntryInit."Reservation Status"::Surplus;
-    //         ReservEntryInit.Positive := FALSE;
-    //         ReservEntryInit."Item No." := TranLine."Item No.";
-    //         ReservEntryInit."Location Code" := TranLine."Transfer-from Code";  //SalesLine."Location Code";
-    //         ReservEntryInit."Qty. per Unit of Measure" := TranLine."Qty. per Unit of Measure";
-    //         ReservEntryInit.VALIDATE("Quantity (Base)", TranLine.Quantity * -1);
-    //         ReservEntryInit."Source Type" := DATABASE::"Transfer Line";
-    //         ReservEntryInit."Source ID" := TranLine."Document No.";
-    //         ReservEntryInit."Source Ref. No." := TranLine."Line No.";
-    //         ReservEntryInit."Source Subtype" := 0;
-    //         ReservEntryInit.validate("Serial No.", SerialNo/*ItemLedgEntry."Serial No."/*SerialNo*/);
-    //         ReservEntryInit."Item Tracking" := ReservEntryInit."Item Tracking"::"Serial No.";
-    //         ReservEntryInit."Shipment Date" := TranLine."Shipment Date";
-    //         ReservEntryInit."Planning Flexibility" := ReservEntryInit."Planning Flexibility"::Unlimited;
-    //         //ReservEntry.
-    //         ReservEntryInit."Creation Date" := TODAY;
-    //         ReservEntryInit."Created By" := USERID;
-    //         ReservEntryInit.INSERT;
-    //         //<<<<<***********Postive Qty New Reservation Entry Created*************//
-    //         ReservEntry.RESET;
-    //         ReservEntry.LOCKTABLE;
-    //         IF ReservEntry.FINDLAST THEN
-    //             LastEntryNo := ReservEntry."Entry No.";
-    //         ReservEntryInit.INIT;
-    //         LastEntryNo += 1;
-    //         ReservEntryInit."Entry No." := LastEntryNo;
-    //         ReservEntryInit."Reservation Status" := ReservEntryInit."Reservation Status"::Surplus;
-    //         ReservEntryInit.Positive := FALSE;
-    //         ReservEntryInit."Item No." := TranLine."Item No.";
-    //         ReservEntryInit."Location Code" := TranLine."Transfer-to Code";  //SalesLine."Location Code";
-    //         ReservEntryInit."Qty. per Unit of Measure" := TranLine."Qty. per Unit of Measure";
-    //         ReservEntryInit.VALIDATE("Quantity (Base)", TranLine.Quantity);
-    //         ReservEntryInit."Source Type" := DATABASE::"Transfer Line";
-    //         ReservEntryInit."Source ID" := TranLine."Document No.";
-    //         ReservEntryInit."Source Ref. No." := TranLine."Line No.";
-    //         ReservEntryInit."Source Subtype" := 1;
-    //         ReservEntryInit.validate("Serial No.", SerialNo/* ItemLedgEntry."Serial No."*/);
-    //         ReservEntryInit."Item Tracking" := ReservEntryInit."Item Tracking"::"Serial No.";
-    //         ReservEntryInit."Shipment Date" := TranLine."Shipment Date";
-    //         ReservEntryInit."Planning Flexibility" := ReservEntryInit."Planning Flexibility"::Unlimited;
-    //         //ReservEntry.
-    //         ReservEntryInit."Creation Date" := TODAY;
-    //         ReservEntryInit."Created By" := USERID;
-    //         ReservEntryInit.INSERT;
-    //         // End; //Until
-    //         //exit('Success');
-    //     end;
 
 
     // end;
@@ -558,124 +650,13 @@ codeunit 50302 "POS Event and Subscriber"
         TotalInclTaxAmount := TotalInclTaxAmount + GSTAmount + TCSAmount;
     end;
 
-    local procedure BankPayentReceiptAutoPost(Salesheader: Record "Sales Header")
-    var
-        GenJourLine: Record 81;
-        NoSeriesMgt: Codeunit 396;
-        BankAcc: Record 270;
-        PaymentLine: Record 50301;
-        GenJourLineInit: record 81;
-    begin
-        PaymentLine.Reset();
-        PaymentLine.SetRange("Document Type", Salesheader."Document Type");
-        PaymentLine.SetRange("Document No.", Salesheader."No.");
-        if PaymentLine.FindSet() then
-            repeat
-                GenJourLine.Reset();
-                GenJourLine.SetRange("Journal Template Name", 'BANK RECE');
-                GenJourLine.SetRange("Journal Batch Name", 'DEFAULT');
-                GenJourLineInit.Init();
-                GenJourLineInit."Journal Template Name" := 'BANK RECE';
-                GenJourLineInit."Journal Batch Name" := 'DEFAULT';
-                GenJourLineInit."Document No." := Salesheader."No.";
-                GenJourLineInit.Validate("Posting Date", Today);
-                IF GenJourLine.FindLast() then
-                    GenJourLine."Line No." := GenJourLine."Line No." + 10000
-                else
-                    GenJourLine."Line No." := 10000;
-
-                GenJourLineInit."Account Type" := GenJourLineInit."Account Type"::"Bank Account";
-                GenJourLineInit."Bal. Account Type" := GenJourLineInit."Bal. Account Type"::Customer;
-                GenJourLineInit.Validate("Bal. Account No.", Salesheader."Sell-to Customer No.");
-                GenJourLineInit.validate("Account No.", 'BA000009');
-                GenJourLineInit."GST Group Code" := 'Goods';
-                GenJourLineInit.validate(Amount, PaymentLine.Amount);
-                GenJourLineInit.Comment := 'Auto Post';
-                GenJourLineInit.Insert(); //This Line Will Comment when auto post below codeunit Call
-            Until PaymentLine.Next() = 0;
-
-        // IF CODEUNIT.RUN(CODEUNIT::"Gen. Jnl.-Post", GenJourLine) then begin
-        //     PaymentLine.Reset();
-        //     PaymentLine.SetRange("Document Type", Rec."Document Type");
-        //     PaymentLine.SetRange("Document No.", Rec."No.");
-        //     if PaymentLine.FindSet() then
-        //         repeat
-        //             PaymentLine.Posted := True;
-        //             PaymentLine.Modify();
-        //             IsPaymentLineeditable := PaymentLine.PaymentLinesEditable()
-        //         Until PaymentLine.Next() = 0;
-        // end;
-    end;
 
 
-    procedure GetAccessTokenForBC()
-    var
-        PromptInteraction: Enum "Prompt Interaction";
-        AuthCodeError: Text;
-        Scopes: List of [Text];
-    begin
-        Scopes.Add(Constants.GetResourceURLForApiBC() + '.default');
 
-        OAuth2.AcquireAuthorizationCodeTokenFromCache(
-        ClientId,
-        ClientSecret,
-        RedirectURL,
-        OAuthAuthorityUrl,
-        Scopes,
-        AccessTokenForBC);
-
-        GLSetup.get();
-        IF AccessTokenForBC <> '' then begin
-            //GLSetup."Access Token" := AccessTokenForBC;
-            GLSetup.Modify();
-        end;
-
-
-        if AccessTokenForBC = '' then
-            OAuth2.AcquireTokenByAuthorizationCode(
-                      ClientId,
-                      ClientSecret,
-                      OAuthAuthorityUrl,
-                      RedirectURL,
-                      Scopes,
-                      PromptInteraction::Consent,
-                      AccessTokenForBC,
-                      AuthCodeError);
-
-    end;
-
-    local procedure AccessToken()
-    var
-        myInt: Integer;
-    begin
-        ClientId := Constants.GetClientId();
-        ClientSecret := Constants.GetClientSecret();
-        RedirectURL := Constants.GetRedirectURL();
-        AadTenantId := Constants.GetAadTenantId();
-        ApiGraph := Constants.GetApiGraphMe();
-        ApiListCompanies := Constants.GetApiListCompanies();
-        OAuthAuthorityUrl := Constants.GetOAuthAuthorityUrl();
-        GetAccessTokenForBC();
-    end;
     //>>>>>>******************************** Local function created depending on original function*************
 
     var
         //GenericApiCalls: Codeunit GenericApiCalls;
-        Constants: Codeunit "Access Token API";
-        OAuth2: Codeunit Oauth2;
-        AadTenantId, APICallResponse, ClientId, ClientSecret : Text;
-        AccessTokenForBC, AccessTokenForGraph, AuthError, ErrorMessage, OAuthAuthorityUrl, RedirectURL : text;
-        ApiGraph, ApiListCompanies : Text;
-        Result1, Result2, ResultStyleExpr1, ResultStyleExpr2 : text;
-        GLSetup: record 98;
-        ApiBCUrl: Label 'https://api.businesscentral.dynamics.com/', Locked = true;
-        ApiGraphMeUrlTxt: Label 'https://graph.microsoft.com/v1.0/me', Locked = true;
-        ApiGraphUrlTxt: Label 'https://graph.microsoft.com/', Locked = true;
-        ApiListCompaniesTxt: Label '%1v2.0/%2/%3/api/beta/companies', Locked = true;
-        ClientIdTxt: Label '68750603-fadd-4441-8542-bfaaa433a309', Locked = true;
-        ClientSecretTxt: Label 'gOr8Q~UysVp6fIKqdedP4i1k1gnoDGGhKV-5TcAR', Locked = true;
-        OAuthAuthorityUrlLabel: Label 'https://login.microsoftonline.com/', Locked = true;
-        RedirectURLText: Label 'https://businesscentral.dynamics.com/OAuthLanding.htm', Locked = true;
 
         Recref: RecordRef;
         recCust: Record 18;

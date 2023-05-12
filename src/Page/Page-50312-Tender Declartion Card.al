@@ -97,7 +97,7 @@ page 50312 "Tender Declartion Card"
             part(Lines; "Tender Declartion Subform")
             {
                 ApplicationArea = all;
-                SubPageLink = "Staff ID" = field("Staff ID"), "Store No." = field("Store No."), "Store Date" = field("Store Date");
+                SubPageLink = "Document No." = field("No.");
                 UpdatePropagation = Both;
             }
         }

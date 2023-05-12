@@ -1,13 +1,13 @@
-page 50307 "Payment Lines API"
+page 50368 "Customer Adv. Payment"
 {
     APIGroup = 'PaymentGroup';
     APIPublisher = 'Pacific';
-    APIVersion = 'v4.0';
+    APIVersion = 'v5.0';
     ApplicationArea = All;
-    Caption = 'paymentLinesAPI';
+    Caption = 'CustomerAdvPayment';
     DelayedInsert = true;
-    EntityName = 'PaymentLine';
-    EntitySetName = 'PaymentLines';
+    EntityName = 'CustomerAdvPayment';
+    EntitySetName = 'CustomerAdvPayments';
     PageType = API;
     SourceTable = "Payment Lines";
     ODataKeyFields = SystemId;
@@ -106,6 +106,14 @@ page 50307 "Payment Lines API"
                 field(lineNo; Rec."Line No.")
                 {
                     Caption = 'Line No.';
+                }
+                field(staffId; Rec."Staff Id")
+                {
+                    Caption = 'Staff Id';
+                }
+                field(storeNo; Rec."Store No.")
+                {
+                    Caption = 'Store No.';
                 }
             }
         }
