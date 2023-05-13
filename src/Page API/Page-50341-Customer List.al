@@ -95,6 +95,15 @@ page 50341 "Customer List API"
                 field(mobilePhoneNo; Rec."Mobile Phone No.")
                 {
                     Caption = 'Mobile Phone No.';
+                    trigger OnValidate()
+                    var
+                        Cust: Record Customer;
+                    begin
+                        Cust.Reset();
+                        Cust.SetRange("Mobile Phone No.", rec."Mobile Phone No.");
+                        IF Cust.FindFirst() then
+                            Error('Given Mobile No. already Exist for Customer No. %1', Cust."No.");
+                    end;
                 }
                 field(balanceLCY; Rec."Balance (LCY)")
                 {

@@ -54,6 +54,10 @@ page 50333 "Purchase Order List API"
                 {
                     Caption = 'Amount Including VAT';
                 }
+                field(vendorInvoiceNo; Rec."Vendor Invoice No.")
+                {
+                    Caption = 'Vendor Invoice No.';
+                }
             }
         }
     }

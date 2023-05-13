@@ -11,6 +11,8 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
             begin
                 IF SalesHeder.Get(rec."Document Type", rec."Document No.") then;
                 TradeAggre.Reset();
+                TradeAggre.SetCurrentKey("Item No.", "From Date", "To Date", "Location Code");
+                TradeAggre.SetRange("Customer Group", TradeAggre."Customer Group"::Regular);
                 TradeAggre.SetRange("Item No.", Rec."No.");
                 TradeAggre.SetRange("Location Code", SalesHeder."Location Code");
                 TradeAggre.SetFilter("From Date", '<=%1', SalesHeder."Posting Date");
@@ -32,16 +34,53 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
             end;
 
         }
-        // modify(Quantity)
-        // {
-        //     trigger OnAfterValidate()
-        //     begin
-        //         IF Rec.Type = rec.Type::Item then begin
-        //             IF Quantity <> 0 then
-        //                 Validate("Qty. to Ship", 0);
-        //         end;
-        //     end;
-        // }
+        modify(Quantity)
+        {
+            trigger OnAfterValidate()
+            var
+                Item: Record 27;
+                GetItem: Record 27;
+                SLInit: Record 37;
+                SalesLine: Record 37;
+                SalesLineFilter: Record 37;
+            begin
+                IF GetItem.Get(rec."No.") then;
+                Item.Reset();
+                Item.SetRange("No.", GetItem."Parent Item No.");
+                IF Item.FindSet() then
+                    repeat
+                        SalesLineFilter.Reset();
+                        SalesLineFilter.SetRange("Document No.", "Document No.");
+                        SalesLineFilter.SetRange("No.", Item."No.");
+                        if Not SalesLineFilter.FindFirst() then begin
+                            //*********New Line Insert*******
+                            SLInit.Init();
+                            SLInit."Document Type" := rec."Document Type";
+                            SLInit."Document No." := rec."Document No.";
+
+                            SalesLine.Reset();
+                            SalesLine.SetRange("Document No.", "Document No.");
+                            if SalesLine.FindLast() then
+                                SLInit."Line No." := SalesLine."Line No." + 10000;
+
+                            SLInit.Insert();
+                            SLInit.Type := SLInit.Type::Item;
+                            SLInit.Validate("No.", item."No.");
+                            SLInit.Validate(Quantity, SalesLine.Quantity);
+                            SLInit.Validate("Location Code", SalesLine."Location Code");
+                            SLInit.Validate("Store No.", SalesLine."Store No.");
+                            SLInit.Validate("Salesperson Code", SalesLine."Salesperson Code");
+                            SLInit.Validate("Shortcut Dimension 1 Code", SalesLine."Shortcut Dimension 1 Code");
+                            SLInit.Validate("Shortcut Dimension 2 Code", SalesLine."Shortcut Dimension 2 Code");
+                            SLInit.Modify();
+                        end else begin
+                            //**********Modify Qty only**********
+                            SalesLineFilter.Validate(Quantity, Rec.Quantity);
+                            SalesLineFilter.Modify();
+                        end;
+                    until item.Next() = 0;
+            end;
+        }
 
         field(50301; "Store No."; Code[20])
         {

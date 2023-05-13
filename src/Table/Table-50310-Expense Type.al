@@ -15,13 +15,18 @@ table 50310 "Expense Type"
         {
             Caption = 'Name';
             DataClassification = ToBeClassified;
+
         }
     }
     keys
     {
-        key(PK; ID)
+        key(PK; ID, Name)
         {
             Clustered = true;
         }
+        // key(K2; Name)
+        // {
+
+        // }
     }
 }

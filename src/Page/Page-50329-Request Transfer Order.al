@@ -142,7 +142,7 @@ page 50329 "Request Transfer Order"
                                 //TransferHeader."Transfer-from Code" := Rec."Transfer-from Code";
                                 TransferHeader.Validate("Transfer-from Code", RrqTransferLineFilter."Transfer-from Code");
                                 TransferHeader.Validate("Transfer-to Code", rec."Transfer-to Code");
-                                IF recLocation.Get(Rec."Transfer-to Code") then begin
+                                IF recLocation.Get(Rec."Transfer-from Code") then begin
                                     TransferHeader.Validate("Shortcut Dimension 1 Code", recLocation."Global Dimension 1 Code");
                                     TransferHeader.Validate("Shortcut Dimension 2 Code", recLocation."Global Dimension 2 Code");
                                 end;

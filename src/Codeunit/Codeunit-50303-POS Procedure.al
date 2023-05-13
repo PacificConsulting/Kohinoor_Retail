@@ -359,7 +359,6 @@ codeunit 50303 "POS Procedure"
         TradeAggre: record "Trade Aggrement";
         SalesHeder: record 36;
         SL: Record 37;
-
     begin
         Clear(NewUnitPrice);
         Evaluate(NewUnitPrice, LineDocumentpara);
@@ -378,27 +377,30 @@ codeunit 50303 "POS Procedure"
                 IF SalesLineunitPrice."Unit Price Incl. of Tax" <> NewUnitPrice then begin
                     SalesLineunitPrice."Old Unit Price" := SalesLineunitPrice."Unit Price Incl. of Tax";
                     SalesLineunitPrice.validate("Unit Price Incl. of Tax", NewUnitPrice);
+                    //SalesLineunitPrice.Validate(Quantity, SalesLineunitPrice.Quantity);
+                    SalesLineunitPrice."GST Tax Amount" := (SalesLineunitPrice."Unit Price Incl. of Tax" - SalesLineunitPrice."Unit Price") * SalesLineunitPrice.Quantity;
                     SalesLineunitPrice.Modify();
                     IF SalesHeder.Get(SalesLineunitPrice."Document Type", SalesLineunitPrice."Document No.") then;
                     TradeAggre.Reset();
                     TradeAggre.SetCurrentKey("Item No.", "From Date", "To Date", "Location Code");
+                    TradeAggre.SetRange("Customer Group", TradeAggre."Customer Group"::Regular);
                     TradeAggre.SetRange("Item No.", SalesLineunitPrice."No.");
                     TradeAggre.SetRange("Location Code", SalesHeder."Location Code");
                     TradeAggre.SetFilter("From Date", '<=%1', SalesHeder."Posting Date");
                     TradeAggre.SetFilter("To Date", '>=%1', SalesHeder."Posting Date");
                     IF TradeAggre.FindFirst() then begin
-                        IF TradeAggre."Amount In INR" < SalesLineunitPrice."Unit Price Incl. of Tax" then
+                        IF TradeAggre."M.R.P" < SalesLineunitPrice."Unit Price Incl. of Tax" then
                             Error('Amount should not be more than %1 INR', TradeAggre."Amount In INR");
                         IF TradeAggre."Last Selling Price" > SalesLineunitPrice."Unit Price Incl. of Tax" then begin
-                            ApprovalMailSent(SalesLineunitPrice);
+                            ApprovalMailSent(SalesLineunitPrice, TradeAggre);
                         end;
                     end else begin
                         TradeAggre.SetRange("Location Code");
                         IF TradeAggre.FindFirst() then begin
-                            IF TradeAggre."Amount In INR" < SalesLineunitPrice."Unit Price Incl. of Tax" then
+                            IF TradeAggre."M.R.P" < SalesLineunitPrice."Unit Price Incl. of Tax" then
                                 Error('Amount should not be more than %1 INR', TradeAggre."Amount In INR");
                             IF TradeAggre."Last Selling Price" > SalesLineunitPrice."Unit Price Incl. of Tax" then begin
-                                ApprovalMailSent(SalesLineunitPrice);
+                                ApprovalMailSent(SalesLineunitPrice, TradeAggre);
                             end;
                         end;
                     end;
@@ -600,32 +602,32 @@ codeunit 50303 "POS Procedure"
                 ReservEntryInit."Created By" := USERID;
                 ReservEntryInit.INSERT;
 
-                // //<<<<<***********Postive Qty New Reservation Entry Created*************//
-                // ReservEntry.RESET;
-                // ReservEntry.LOCKTABLE;
-                // IF ReservEntry.FINDLAST THEN
-                //     LastEntryNo := ReservEntry."Entry No.";
-                // ReservEntryInit.INIT;
-                // LastEntryNo += 1;
-                // ReservEntryInit."Entry No." := LastEntryNo;
-                // ReservEntryInit."Reservation Status" := ReservEntryInit."Reservation Status"::Surplus;
-                // ReservEntryInit.Positive := FALSE;
-                // ReservEntryInit."Item No." := TranLine."Item No.";
-                // ReservEntryInit."Location Code" := TranLine."Transfer-to Code";  //SalesLine."Location Code";
-                // ReservEntryInit."Qty. per Unit of Measure" := TranLine."Qty. per Unit of Measure";
-                // ReservEntryInit.VALIDATE("Quantity (Base)", 1/*TranLine.Quantity*/);
-                // ReservEntryInit."Source Type" := DATABASE::"Transfer Line";
-                // ReservEntryInit."Source ID" := TranLine."Document No.";
-                // ReservEntryInit."Source Ref. No." := TranLine."Line No.";
-                // ReservEntryInit."Source Subtype" := 1;
-                // ReservEntryInit.validate("Serial No.", SerialNo/* ItemLedgEntry."Serial No."*/);
-                // ReservEntryInit."Item Tracking" := ReservEntryInit."Item Tracking"::"Serial No.";
-                // ReservEntryInit."Shipment Date" := TranLine."Shipment Date";
-                // ReservEntryInit."Planning Flexibility" := ReservEntryInit."Planning Flexibility"::Unlimited;
-                // //ReservEntry.
-                // ReservEntryInit."Creation Date" := TODAY;
-                // ReservEntryInit."Created By" := USERID;
-                // ReservEntryInit.INSERT;
+                //<<<<<***********Postive Qty New Reservation Entry Created*************//
+                ReservEntry.RESET;
+                ReservEntry.LOCKTABLE;
+                IF ReservEntry.FINDLAST THEN
+                    LastEntryNo := ReservEntry."Entry No.";
+                ReservEntryInit.INIT;
+                LastEntryNo += 1;
+                ReservEntryInit."Entry No." := LastEntryNo;
+                ReservEntryInit."Reservation Status" := ReservEntryInit."Reservation Status"::Surplus;
+                ReservEntryInit.Positive := true;
+                ReservEntryInit."Item No." := TranLine."Item No.";
+                ReservEntryInit."Location Code" := TranLine."Transfer-to Code";  //SalesLine."Location Code";
+                ReservEntryInit."Qty. per Unit of Measure" := TranLine."Qty. per Unit of Measure";
+                ReservEntryInit.VALIDATE("Quantity (Base)", 1/*TranLine.Quantity*/);
+                ReservEntryInit."Source Type" := DATABASE::"Transfer Line";
+                ReservEntryInit."Source ID" := TranLine."Document No.";
+                ReservEntryInit."Source Ref. No." := TranLine."Line No.";
+                ReservEntryInit."Source Subtype" := 1;
+                ReservEntryInit.validate("Serial No.", SerialNo/* ItemLedgEntry."Serial No."*/);
+                ReservEntryInit."Item Tracking" := ReservEntryInit."Item Tracking"::"Serial No.";
+                ReservEntryInit."Shipment Date" := TranLine."Shipment Date";
+                ReservEntryInit."Planning Flexibility" := ReservEntryInit."Planning Flexibility"::Unlimited;
+                //ReservEntry.
+                ReservEntryInit."Creation Date" := TODAY;
+                ReservEntryInit."Created By" := USERID;
+                ReservEntryInit.INSERT;
 
             end;
         end;
@@ -641,7 +643,13 @@ codeunit 50303 "POS Procedure"
             SNlist.Reset();
             SNlist.SetRange("Serial No.", SerialNo);
             IF SNlist.FindFirst() then
-                Error('Serial No. does not exist');
+                Error('Serial No. does not exist in Serial No information');
+
+            ReservEntry.Reset();
+            ReservEntry.SetRange("Source Type", 39);
+            ReservEntry.SetRange("Serial No.", SerialNo);
+            IF ReservEntry.FindFirst() then
+                Error('Serial No. does not exist in reservation entry');
 
             PurchLine.Validate("Bin Code", 'BACKPACK');
             PurchLine.Validate("Qty. to Receive", PurchLine."Qty. to Receive" + 1);
@@ -1217,6 +1225,7 @@ codeunit 50303 "POS Procedure"
 
                 GenJourLineInit."Bal. Account Type" := GenJourLine."Bal. Account Type"::Customer;
                 GenJourLineInit.Validate("Bal. Account No.", Salesheader."Sell-to Customer No.");
+                GenJourLineInit."External Document No." := Salesheader."No.";
 
                 GenJourLineInit."GST Group Code" := 'Goods';
                 GenJourLineInit.validate(Amount, PaymentLine.Amount);
@@ -1227,7 +1236,6 @@ codeunit 50303 "POS Procedure"
                 GenJourLineInit.Insert();
             Until PaymentLine.Next() = 0;
         GenJnlPostBatch.Run(GenJourLineInit);
-        //CODEUNIT.RUN(CODEUNIT::"Gen. Jnl.-Post", GenJourLine);// then begin
         PaymentLine.Reset();
         PaymentLine.SetRange("Document Type", Salesheader."Document Type");
         PaymentLine.SetRange("Document No.", Salesheader."No.");
@@ -1244,7 +1252,7 @@ codeunit 50303 "POS Procedure"
     /// </summary>
 
 
-    local procedure ApprovalMailSent(SalesLine: Record "Sales Line")
+    local procedure ApprovalMailSent(SalesLine: Record "Sales Line"; TradAgg: Record "Trade Aggrement")
     var
         txtFile: Text[100];
         Window: Dialog;
@@ -1265,6 +1273,11 @@ codeunit 50303 "POS Procedure"
         RecUser1: Record "User Setup";
         RecUser2: Record "User Setup";
         RecUser3: Record "User Setup";
+        RecUser4: Record "User Setup";
+        RecUser5: Record "User Setup";
+        RecUser6: Record "User Setup";
+        RecUser7: Record "User Setup";
+        Loc: Record 14;
     begin
         Sl.Reset();
         SL.SetRange("Document No.", SalesLine."Document No.");
@@ -1276,8 +1289,7 @@ codeunit 50303 "POS Procedure"
 
         GLSetup.Get();
         GLSetup.TestField("Slab Approval User 1");
-        //GLSetup.TestField("Slab Approval User 2");
-        //GLSetup.TestField("Slab Approval User 3");
+
         //Pagelink := GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List");
         Sl.Reset();
         SL.SetRange("Document No.", SalesLine."Document No.");
@@ -1288,21 +1300,35 @@ codeunit 50303 "POS Procedure"
         //  Window.OPEN(
         // 'Sending Mail#######1\');
         IF RecUser1.Get(GLSetup."Slab Approval User 1") then begin
-            RecUser1.TestField("E-Mail");
             ToRecipients.Add(RecUser1."E-Mail");
         end;
-        /*
+
         IF RecUser2.Get(GLSetup."Slab Approval User 2") then begin
-            RecUser2.TestField("E-Mail");
+            // RecUser2.TestField("E-Mail");
             ToRecipients.Add(RecUser2."E-Mail");
         end;
         IF RecUser3.Get(GLSetup."Slab Approval User 3") then begin
-            RecUser3.TestField("E-Mail");
+            //RecUser3.TestField("E-Mail");
             ToRecipients.Add(RecUser3."E-Mail");
         end;
-        */
+        IF RecUser4.Get(GLSetup."Slab Approval User 4") then begin
+            // RecUser1.TestField("E-Mail");
+            ToRecipients.Add(RecUser4."E-Mail");
+        end;
 
-
+        IF RecUser5.Get(GLSetup."Slab Approval User 5") then begin
+            // RecUser2.TestField("E-Mail");
+            ToRecipients.Add(RecUser5."E-Mail");
+        end;
+        IF RecUser6.Get(GLSetup."Slab Approval User 6") then begin
+            //RecUser3.TestField("E-Mail");
+            ToRecipients.Add(RecUser6."E-Mail");
+        end;
+        IF RecUser7.Get(GLSetup."Slab Approval User 7") then begin
+            //RecUser3.TestField("E-Mail");
+            ToRecipients.Add(RecUser7."E-Mail");
+        end;
+        IF Loc.Get(SL."Store No.") then;
         Emailmessage.Create(ToRecipients/*'niwagh16@gmail.com'*/, 'Approval Slab', '', true);
         Emailmessage.AppendToBody('<p><font face="Georgia">Dear <B>Sir,</B></font></p>');
         Char := 13;
@@ -1310,10 +1336,16 @@ codeunit 50303 "POS Procedure"
         Emailmessage.AppendToBody('<p><font face="Georgia"> <B>!!!Greetings!!!</B></font></p>');
         Emailmessage.AppendToBody(FORMAT(Char));
         Emailmessage.AppendToBody(FORMAT(Char));
-        Emailmessage.AppendToBody('<p><font face="Georgia"><BR>Please find below Approval Link Approve Date</BR></font></p>');
+        Emailmessage.AppendToBody('<p><font face="Georgia"><BR> in this Sales Order ' + FORMAT(SL."Document No.") + ' Price Approval is requested from Store ' + FORMAT(LOC.Name) +
+      ' for ' + FORMAT(SL.Description) + ', Old price ' + FORMAT(SL."Old Unit Price") + ', New price ' + FORMAT(SL."Unit Price Incl. of Tax") + ', FNNLC Price ' + FORMAT(TradAgg.FNNLC) +
+      ', NNLC Price ' + FORMAT(TradAgg.NNLC) + '</BR></font></p>');
+
         Emailmessage.AppendToBody(FORMAT(Char));
         Emailmessage.AppendToBody(FORMAT(Char));
-        Emailmessage.AppendToBody('<a href=' + Pagelink + '/">Web Link!</a>');
+        Emailmessage.AppendToBody('<p><font face="Georgia"><BR>Please find below Approval Link Approve Price</BR></font></p>');
+        Emailmessage.AppendToBody(FORMAT(Char));
+        Emailmessage.AppendToBody(FORMAT(Char));
+        //Emailmessage.AppendToBody('<a href=' + Pagelink + '/">Web Link!</a>');
         Emailmessage.AppendToBody(Pagelink);
         Emailmessage.AppendToBody(FORMAT(Char));
         Emailmessage.AppendToBody(FORMAT(Char));

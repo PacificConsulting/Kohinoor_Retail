@@ -10,7 +10,8 @@ page 50370 "Transfer Order Line API"
     EntitySetName = 'TransferOrderLines';
     PageType = API;
     SourceTable = "Transfer Line";
-    ODataKeyFields = SystemId;
+    ODataKeyFields = SystemId;//
+    SourceTableView = where("Derived From Line No." = filter(0));
 
     layout
     {

@@ -4,7 +4,21 @@ codeunit 50301 "Event and Subscribers"
     begin
 
     end;
-
+    //START**********************************CU-5708*******************************************
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Release Transfer Document", 'OnAfterReleaseTransferDoc', '', false, false)]
+    local procedure OnAfterReleaseTransferDoc(var TransferHeader: Record "Transfer Header")
+    var
+        TL: Record "Transfer Line";
+    begin
+        TL.Reset();
+        TL.SetRange("Document No.", TransferHeader."No.");
+        IF TL.FindSet() then
+            repeat
+                TL.Validate("Qty. to Ship", 0);
+                TL.Modify();
+            until TL.Next() = 0;
+    end;
+    //END**********************************CU-5708*******************************************
 
     //START**********************************Table-37*******************************************
     //[EventSubscriber(ObjectType::Table, Database::"Sales Line", 'OnAfterUpdateAmountsDone', '', false, false)]

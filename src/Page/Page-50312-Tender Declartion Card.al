@@ -28,7 +28,7 @@ page 50312 "Tender Declartion Card"
                     Editable = false;
                     ApplicationArea = all;
                     // trigger OnValidate()
-                    // var
+                    // var//
                     //     StaffMaster: Record "Staff Master";
                     //     TenderHdr: Record "Tender Declartion Header";
                     //     PagetenderCard: page "Tender Declartion Card";

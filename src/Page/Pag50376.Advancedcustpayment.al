@@ -1,17 +1,10 @@
-page 50368 "Customer Adv. Payment"
+page 50376 "Advanced cust payment"
 {
-    APIGroup = 'PaymentGroup';
-    APIPublisher = 'Pacific';
-    APIVersion = 'v5.0';
     ApplicationArea = All;
-    Caption = 'CustomerAdvPayment';
-    DelayedInsert = true;
-    EntityName = 'CustomerAdvPayment';
-    EntitySetName = 'CustomerAdvPayments';
-    PageType = API;
+    Caption = 'Advanced cust payment';
+    PageType = List;
     SourceTable = "Payment Lines";
-    ODataKeyFields = SystemId;
-
+    UsageCategory = Lists;
 
     layout
     {

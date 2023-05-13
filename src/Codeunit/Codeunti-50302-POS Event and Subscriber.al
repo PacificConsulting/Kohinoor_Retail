@@ -228,7 +228,8 @@ codeunit 50302 "POS Event and Subscriber"
                 Saleslineinit.Validate("Unit Price Incl. of Tax", WarrMaster."EW Prices");
                 Saleslineinit."Price Inclusive of Tax" := true;
                 Saleslineinit.Validate(Quantity, 1);
-            end;
+            end else
+                Error('Warranty not found');
             Saleslineinit.Modify();
             // SalesLine.Reset();
             // SalesLine.SetRange("Document No.", documentno);
@@ -242,37 +243,19 @@ codeunit 50302 "POS Event and Subscriber"
     /// <summary>
     /// Post Shipment TO Line
     /// </summary>
-    procedure ShipTransferLine(documentNo: Code[20]; LineNo: Integer; InputData: Text): text
+    procedure ShipTransferLine(documentno: Code[20]; lineno: Integer; inputdata: Text): text
     var
-        SaleHeaderShip: Record "Sales Header";
-        ShiptoQty: Decimal;
-        SalesLineShip: Record "Sales Line";
         TransferHeaderShip: record "Transfer Header";
         TransferlineShip: Record "Transfer Line";
-        Salespost: codeunit 80;
         Transpostship: Codeunit "TransferOrder-Post Shipment";
         Transferrelease: codeunit "Release Transfer Document";
     begin
-        // Clear(InputData);
-        Evaluate(ShiptoQty, InputData);
         TransferHeaderShip.Reset();
         TransferHeaderShip.SetRange("No.", DocumentNo);
         IF TransferHeaderShip.FindFirst() then begin
-            // IF TransferHeaderShip.Status = TransferHeaderShip.Status::Released then begin
-            //     TransferHeaderShip.Status := TransferHeaderShip.Status::Open;
-            //     TransferHeaderShip.Modify();
-            // end;
-            TransferlineShip.Reset();
-            TransferlineShip.SetRange("Document No.", TransferHeaderShip."No.");
-            IF TransferlineShip.FindFirst() then begin
-                TransferHeaderShip.Status := TransferHeaderShip.Status::Released;
-                TransferHeaderShip.Modify();
-                Transpostship.Run(TransferHeaderShip);
-                //exit('Failed');
-            end;
+            Transpostship.Run(TransferHeaderShip);
+            Transferrelease.Run(TransferHeaderShip);
         end;
-
-        //end;
     end;
 
 
@@ -305,7 +288,7 @@ codeunit 50302 "POS Event and Subscriber"
     /// <summary>
     /// Customer Advance Payment Without Sales Order
     /// </summary>
-    procedure CustomerAdvancePayment(customerno: Code[20]; documentno: Code[20])
+    procedure CustomerAdvancePayment(customerno: Code[20]; documentno: Code[20]): Text
     var
         GenJourLine: Record 81;
         GenJourLineInit: record 81;
@@ -316,22 +299,31 @@ codeunit 50302 "POS Event and Subscriber"
         SR: record "Sales & Receivables Setup";
         RecLocation: Record Location;
         GenJnlPostBatch: Codeunit "Gen. Jnl.-Post Batch";
+        PaymentFilter: record "Payment Lines";
+        GenBatch: Record 232;
     begin
-        //IF RecLocation.Get(Salesheader."Location Code") then begin
-        RecLocation.TestField("Payment Journal Template Name");
-        RecLocation.TestField("Payment Journal Batch Name");
-        //end;
+
+        PaymentFilter.Reset();
+        PaymentFilter.SetRange("Document No.", documentno);
+        If PaymentFilter.FindFirst() then;
+
+        IF RecLocation.Get(PaymentFilter."Store No.") then begin
+            RecLocation.TestField("Payment Journal Template Name");
+            RecLocation.TestField("Payment Journal Batch Name");
+        end;
+
+        IF GenBatch.Get(RecLocation."Payment Journal Template Name", RecLocation."Payment Journal Batch Name") then;
 
         PaymentLine.Reset();
-        //PaymentLine.SetRange("Document Type", Salesheader."Document Type");
+        PaymentLine.SetRange(Posted, false);
         PaymentLine.SetRange("Document No.", documentno);
-        if PaymentLine.FindSet() then
+        if PaymentLine.FindSet() then begin
             repeat
                 GenJourLine.Reset();
                 GenJourLine.SetRange("Journal Template Name", RecLocation."Payment Journal Template Name");
                 GenJourLine.SetRange("Journal Batch Name", RecLocation."Payment Journal Batch Name");
                 GenJourLineInit.Init();
-                GenJourLineInit."Document No." := documentno;
+                GenJourLineInit."Document No." := documentno;//NoSeriesMgt.GetNextNo(GenBatch."No. Series", today, true);
                 GenJourLineInit.validate("Posting Date", Today);
                 IF GenJourLine.FindLast() then
                     GenJourLineInit."Line No." := GenJourLine."Line No." + 10000
@@ -355,26 +347,26 @@ codeunit 50302 "POS Event and Subscriber"
 
                 GenJourLineInit."Bal. Account Type" := GenJourLine."Bal. Account Type"::Customer;
                 GenJourLineInit.Validate("Bal. Account No.", customerno);
+                GenJourLineInit."External Document No." := documentno;
 
                 GenJourLineInit."GST Group Code" := 'Goods';
                 GenJourLineInit.validate(Amount, PaymentLine.Amount);
-                //GenJourLineInit.Validate("Shortcut Dimension 1 Code", Salesheader."Shortcut Dimension 1 Code");
-                //GenJourLineInit.Validate("Shortcut Dimension 2 Code", Salesheader."Shortcut Dimension 2 Code");
+                GenJourLineInit.Validate("Shortcut Dimension 1 Code", RecLocation."Global Dimension 1 Code");
+                GenJourLineInit.Validate("Shortcut Dimension 2 Code", RecLocation."Global Dimension 2 Code");
                 GenJourLineInit.Comment := 'Auto Post';
-
                 GenJourLineInit.Insert();
             Until PaymentLine.Next() = 0;
+        end else
+            Error('Payment line not found.');
         GenJnlPostBatch.Run(GenJourLineInit);
         PaymentLine.Reset();
-        //PaymentLine.SetRange("Document Type", Salesheader."Document Type");
         PaymentLine.SetRange("Document No.", documentno);
         if PaymentLine.FindSet() then
             repeat
                 PaymentLine.Posted := True;
                 PaymentLine.Modify();
-            //IsPaymentLineeditable := PaymentLine.PaymentLinesEditable()
             Until PaymentLine.Next() = 0;
-
+        exit('Success');
     end;
 
 
@@ -392,7 +384,7 @@ codeunit 50302 "POS Event and Subscriber"
         BanKdrop.Reset();
         BanKdrop.SetRange("No.", entryno);
         IF BanKdrop.FindFirst() then begin
-            BanKdrop.Status := BanKdrop.Status::Release;
+            BanKdrop.Status := BanKdrop.Status::Released;
             BanKdrop.Modify();
             IF BanKdrop.Status = BanKdrop.Status::Open then
                 exit('Failed');

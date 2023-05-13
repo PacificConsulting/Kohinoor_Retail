@@ -77,6 +77,7 @@ page 50361 "Slab Approval List"
                         SalesLine."Approved By" := UserId;
                         SalesLine."Approved On" := Today;
                         SalesLine.Modify();
+                        Message('Price is Approved Successfully.');
                     end;
                 end;
             }
@@ -97,7 +98,10 @@ page 50361 "Slab Approval List"
                     IF SalesLine.FindFirst() then begin
                         SalesLine."Approval Status" := SalesLine."Approval Status"::" ";
                         SalesLine.Validate("Unit Price Incl. of Tax", rec."Old Unit Price");
+                        SalesLine."GST Tax Amount" := (SalesLine."Unit Price Incl. of Tax" - SalesLine."Unit Price") * SalesLine.Quantity;
                         SalesLine.Modify();
+                        Message('Price is Rejected Successfully.');
+
                     end;
                 end;
             }

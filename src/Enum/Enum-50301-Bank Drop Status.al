@@ -6,8 +6,8 @@ enum 50301 "Bank Drop Status"
     {
         Caption = 'Open';
     }
-    value(1; Release)
+    value(1; Released)
     {
-        Caption = 'Release';
+        Caption = 'Released';
     }
 }
