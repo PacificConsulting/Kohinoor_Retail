@@ -184,8 +184,7 @@ page 50329 "Request Transfer Order"
                             end;
                         //end
                         until RrqTransferLineFilter.Next() = 0;
-                    //TransferRelease.Run(TransferHeader);
-                    Message('Transfer Order Craeted with Trasfer Order No.');
+                    Message('Transfer Order Created successfully.');
                     RH.Reset();
                     RH.SetRange("No.", Rec."No.");
                     IF RH.FindFirst() then
