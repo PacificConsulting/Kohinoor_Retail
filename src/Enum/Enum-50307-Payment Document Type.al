@@ -9,6 +9,6 @@ enum 50307 "Payment Document Type"
     value(3; "Credit Memo") { Caption = 'Credit Memo'; }
     value(4; "Blanket Order") { Caption = 'Blanket Order'; }
     value(5; "Return Order") { Caption = 'Return Order'; }
-    value(6; "Advanced Payment") { Caption = 'Advance Payment'; }
+    value(6; "Advance Payment") { Caption = 'Advance Payment'; }
 
 }

@@ -10,6 +10,7 @@ table 50316 "Shift Details"
             Caption = 'Entry No.';
             DataClassification = ToBeClassified;
             Editable = false;
+            AutoIncrement = true;
 
         }
         field(2; "Shift Type"; Option)
@@ -53,12 +54,9 @@ table 50316 "Shift Details"
     var
         SD: Record 50316;
     begin
-        SD.reset;
-        SD.SETRANGE("Entry No.", "Entry No.");
-        IF SD.findlast then
-            "Entry No." := SD."Entry No." + 1
-        else
-            "Entry No." := 1;
+
+        //"Entry No." := "Entry No." + 1
+
 
     end;
 }

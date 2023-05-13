@@ -1,17 +1,17 @@
-page 50354 "Shift End"
+page 50353 "Shift Log"
 {
     APIGroup = 'ShiftGroup';
     APIPublisher = 'Pacific';
     APIVersion = 'v1.0';
     ApplicationArea = All;
-    Caption = 'shiftend';
+    Caption = 'shiftLog';
     DelayedInsert = true;
-    EntityName = 'Shiftend';
-    EntitySetName = 'Shiftends';
+    EntityName = 'ShiftLog';
+    EntitySetName = 'ShiftLogs';
     PageType = API;
     SourceTable = "Shift Details";
     ODataKeyFields = SystemId;
-    SourceTableView = where("Shift Type" = filter("End"));
+
 
     layout
     {
@@ -22,7 +22,6 @@ page 50354 "Shift End"
                 // field(entryNo; Rec."Entry No.")
                 // {
                 //     Caption = 'Entry No.';
-                //     Editable = false;
                 // }
                 field(shiftType; Rec."Shift Type")
                 {
@@ -44,6 +43,11 @@ page 50354 "Shift End"
                 {
                     Caption = 'SystemId';
                 }
+                field(entryDetails; Rec."Entry Details")
+                {
+                    Caption = 'Entry Details';
+                }
+
 
             }
         }

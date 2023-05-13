@@ -21,7 +21,7 @@ codeunit 50303 "POS Procedure"
         IF SalesHeder.FindFirst() then begin
             IF SalesHeder.Status = SalesHeder.Status::Released then begin
                 SalesHeder.Status := SalesHeder.Status::Open;
-                SalesHeder.Modify(true);
+                SalesHeder.Modify();
             end;
             SalesLineDel.Reset();
             SalesLineDel.SetRange("Document No.", SalesHeder."No.");
@@ -377,7 +377,6 @@ codeunit 50303 "POS Procedure"
                 IF SalesLineunitPrice."Unit Price Incl. of Tax" <> NewUnitPrice then begin
                     SalesLineunitPrice."Old Unit Price" := SalesLineunitPrice."Unit Price Incl. of Tax";
                     SalesLineunitPrice.validate("Unit Price Incl. of Tax", NewUnitPrice);
-                    //SalesLineunitPrice.Validate(Quantity, SalesLineunitPrice.Quantity);
                     SalesLineunitPrice."GST Tax Amount" := (SalesLineunitPrice."Unit Price Incl. of Tax" - SalesLineunitPrice."Unit Price") * SalesLineunitPrice.Quantity;
                     SalesLineunitPrice.Modify();
                     IF SalesHeder.Get(SalesLineunitPrice."Document Type", SalesLineunitPrice."Document No.") then;
@@ -390,7 +389,9 @@ codeunit 50303 "POS Procedure"
                     TradeAggre.SetFilter("To Date", '>=%1', SalesHeder."Posting Date");
                     IF TradeAggre.FindFirst() then begin
                         IF TradeAggre."M.R.P" < SalesLineunitPrice."Unit Price Incl. of Tax" then
-                            Error('Amount should not be more than %1 INR', TradeAggre."Amount In INR");
+                            Error('Amount should not be more than %1 INR', TradeAggre."M.R.P");
+                        IF TradeAggre.FNNLC > SalesLineunitPrice."Unit Price Incl. of Tax" then
+                            Error('Amount should not be less than %1 INR', TradeAggre.FNNLC);
                         IF TradeAggre."Last Selling Price" > SalesLineunitPrice."Unit Price Incl. of Tax" then begin
                             ApprovalMailSent(SalesLineunitPrice, TradeAggre);
                         end;
@@ -398,29 +399,16 @@ codeunit 50303 "POS Procedure"
                         TradeAggre.SetRange("Location Code");
                         IF TradeAggre.FindFirst() then begin
                             IF TradeAggre."M.R.P" < SalesLineunitPrice."Unit Price Incl. of Tax" then
-                                Error('Amount should not be more than %1 INR', TradeAggre."Amount In INR");
+                                Error('Amount should not be more than %1 INR', TradeAggre."M.R.P");
+                            IF TradeAggre.FNNLC > SalesLineunitPrice."Unit Price Incl. of Tax" then
+                                Error('Amount should not be less than %1 INR', TradeAggre.FNNLC);
                             IF TradeAggre."Last Selling Price" > SalesLineunitPrice."Unit Price Incl. of Tax" then begin
                                 ApprovalMailSent(SalesLineunitPrice, TradeAggre);
                             end;
                         end;
                     end;
                 end;
-                /*
-                SalesLineunitPrice."Approval Status" := SalesLineunitPrice."Approval Status"::"Pending for Approval";
-                SalesLineunitPrice."Approval Sent By" := UserId;
-                SalesLineunitPrice."Approval Sent On" := Today;
-                */
-                //  IF SalesLineunitPrice."Approval Status" = SalesLineunitPrice."Approval Status"::" " then begin
-                //SalesLineunitPrice."Old Unit Price" := SalesLineunitPrice."Unit Price";
-                //SalesLineunitPrice.validate("Unit Price", NewUnitPrice);
-                /*
-                SalesLineunitPrice."Old Unit Price" := SalesLineunitPrice."Unit Price Incl. of Tax";
-                SalesLineunitPrice.validate("Unit Price Incl. of Tax", NewUnitPrice);
-                SalesLineunitPrice.Modify();
 
-                IF SalesLineunitPrice."Unit Price" = NewUnitPrice then
-                    exit('Unit Price not updated.');
-                    */
             end;
 
         end;
@@ -1186,11 +1174,14 @@ codeunit 50303 "POS Procedure"
         SR: record "Sales & Receivables Setup";
         RecLocation: Record Location;
         GenJnlPostBatch: Codeunit "Gen. Jnl.-Post Batch";
+        GenBatch: Record 232;
     begin
         IF RecLocation.Get(Salesheader."Location Code") then begin
             RecLocation.TestField("Payment Journal Template Name");
             RecLocation.TestField("Payment Journal Batch Name");
         end;
+
+        IF GenBatch.Get(RecLocation."Payment Journal Template Name", RecLocation."Payment Journal Batch Name") then;
 
         PaymentLine.Reset();
         PaymentLine.SetRange("Document Type", Salesheader."Document Type");
@@ -1208,8 +1199,8 @@ codeunit 50303 "POS Procedure"
                 else
                     GenJourLineInit."Line No." := 10000;
 
-                GenJourLineInit."Journal Template Name" := RecLocation."Payment Journal Template Name";
-                GenJourLineInit."Journal Batch Name" := RecLocation."Payment Journal Batch Name";
+                GenJourLineInit.validate("Journal Template Name", RecLocation."Payment Journal Template Name");
+                GenJourLineInit.validate("Journal Batch Name", RecLocation."Payment Journal Batch Name");
                 GenJourLineInit."Document Type" := GenJourLineInit."Document Type"::Payment;
                 // GenJourLineInit.Insert();
 
@@ -1232,6 +1223,7 @@ codeunit 50303 "POS Procedure"
                 GenJourLineInit.Validate("Shortcut Dimension 1 Code", Salesheader."Shortcut Dimension 1 Code");
                 GenJourLineInit.Validate("Shortcut Dimension 2 Code", Salesheader."Shortcut Dimension 2 Code");
                 GenJourLineInit.Comment := 'Auto Post';
+                GenJourLineInit.Validate("Posting No. Series", GenBatch."Posting No. Series");
                 //GenJourLineInit.modify();
                 GenJourLineInit.Insert();
             Until PaymentLine.Next() = 0;

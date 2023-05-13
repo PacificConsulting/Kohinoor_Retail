@@ -330,8 +330,8 @@ codeunit 50302 "POS Event and Subscriber"
                 else
                     GenJourLineInit."Line No." := 10000;
 
-                GenJourLineInit."Journal Template Name" := RecLocation."Payment Journal Template Name";
-                GenJourLineInit."Journal Batch Name" := RecLocation."Payment Journal Batch Name";
+                GenJourLineInit.validate("Journal Template Name", RecLocation."Payment Journal Template Name");
+                GenJourLineInit.validate("Journal Batch Name", RecLocation."Payment Journal Batch Name");
                 GenJourLineInit."Document Type" := GenJourLineInit."Document Type"::Payment;
                 // GenJourLineInit.Insert();
 
@@ -354,6 +354,7 @@ codeunit 50302 "POS Event and Subscriber"
                 GenJourLineInit.Validate("Shortcut Dimension 1 Code", RecLocation."Global Dimension 1 Code");
                 GenJourLineInit.Validate("Shortcut Dimension 2 Code", RecLocation."Global Dimension 2 Code");
                 GenJourLineInit.Comment := 'Auto Post';
+                GenJourLineInit.Validate("Posting No. Series", GenBatch."Posting No. Series");
                 GenJourLineInit.Insert();
             Until PaymentLine.Next() = 0;
         end else
