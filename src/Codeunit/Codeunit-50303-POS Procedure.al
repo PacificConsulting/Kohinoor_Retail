@@ -6,6 +6,65 @@ codeunit 50303 "POS Procedure"
     end;
 
     /// <summary>
+    /// Advance Adjustment
+    /// </summary>
+    /// 
+
+    procedure AdjustAdvance(documentno: Code[20]): Text
+    var
+        SH: Record 36;
+        SL: Record 37;
+        PaymentLine: Record "Payment Lines";
+        TotalPayemtamt: Decimal;
+        SalesHeader: Record "Sales Header";
+        AmountToCust: decimal;
+        TotalGSTAmount1: Decimal;
+        TotalAmt: Decimal;
+        TotalTCSAmt: Decimal;
+        DueAmt: Decimal;
+        PayInit: record "Payment Lines";
+    begin
+        Clear(TotalAmt);
+        Clear(TotalGSTAmount1);
+        Clear(TotalTCSAmt);
+        Clear(DueAmt);
+
+        SalesHeader.Reset();
+        SalesHeader.SetRange("No.", DocumentNo);
+        if SalesHeader.FindFirst() then begin
+            GetGSTAmountTotal(SalesHeader, TotalGSTAmount1);
+            GetTCSAmountTotal(SalesHeader, TotalTCSAmt);
+            GetSalesorderStatisticsAmount(SalesHeader, TotalAmt);
+            SalesHeader."Amount To Customer" := ROUND(TotalAmt + TotalGSTAmount1 + TotalTCSAmt, 1);
+            SalesHeader.Modify();
+
+            Clear(TotalPayemtamt);
+            PaymentLine.Reset();
+            PaymentLine.SetRange("Document No.", SalesHeader."No.");
+            if PaymentLine.FindSet() then
+                repeat
+                    TotalPayemtamt += PaymentLine.Amount;
+                until PaymentLine.Next() = 0;
+
+            DueAmt := SalesHeader."Amount To Customer" - TotalPayemtamt;
+
+            PayInit.Init();
+            PayInit."Document Type" := PayInit."Document Type"::"Advance Payment";
+            PaymentLine.Reset();
+            PaymentLine.SetRange("Document No.", SalesHeader."No.");
+            if PaymentLine.FindSet() then
+                PayInit."Line No." := PaymentLine."Line No." + 10000
+            else
+                PayInit."Line No." := 10000;
+
+            PayInit.Amount := DueAmt;
+            PayInit.validate("Payment Method Code", 'ADVANCE');
+            PayInit.Insert();
+        end;
+    end;
+
+
+    /// <summary>
     /// Sales Line Deletion
     /// </summary>
     /// 
@@ -754,19 +813,8 @@ codeunit 50303 "POS Procedure"
                             SalesLine.Validate("Shortcut Dimension 2 Code", SalesHeader."Shortcut Dimension 2 Code");
                             SalesLine.Modify()
                         until SalesLine.Next() = 0;
-
-                    // SalesLine.Reset();
-                    // SalesLine.SetRange("Document No.", SalesHeader."No.");
-                    // SalesLine.SetRange(Type, SalesLine.Type::Item);
-                    // IF SalesLine.FindFirst() then
-                    //     repeat
-                    //         SalesLine.Validate("Qty. to Ship", 0);
-                    //         SalesLine.Modify();
-                    //     until SalesLine.Next() = 0;
                     ReleaseSalesDoc.PerformManualRelease(SalesHeader);
-                    //SalesHeader.Status := SalesHeader.Status::Released;
-                    //SalesHeader.Modify();
-                    //Exit('Success');
+
                 end;
             end;
         end; //else

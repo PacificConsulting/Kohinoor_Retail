@@ -11,7 +11,7 @@ page 50325 "Location API"
     PageType = API;
     SourceTable = Location;
     ODataKeyFields = SystemId;
-    SourceTableView = where(Store = filter(true));
+    // SourceTableView = where(Store = filter(true));
     layout
     {
         area(content)

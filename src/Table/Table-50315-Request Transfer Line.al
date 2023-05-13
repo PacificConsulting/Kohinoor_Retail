@@ -25,10 +25,15 @@ table 50315 "Request Transfer Line"
             trigger OnValidate()
             var
                 RItem: Record 27;
+                RH: Record "Request Transfer Header";
             begin
                 IF RItem.Get("Item No.") then begin
                     "Item Description" := RItem.Description;
                 end;
+
+                IF RH.Get(rec."Document No.") then
+                    Validate("Transfer-from Code", RH."Transfer-from Code");
+
             end;
         }
         field(4; "Item Description"; text[100])

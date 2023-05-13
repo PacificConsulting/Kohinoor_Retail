@@ -56,14 +56,14 @@ codeunit 50302 "POS Event and Subscriber"
                     Else
                         exit('Line Discount not updated.');
                 end;
-            // 'SHIPLINE':  //Not used this Function
-            //     begin
-            //         IsResult := POSProcedure.ShiptransferLine(documentno, lineno, input);
-            //         IF IsResult = '' then
-            //             exit('Success')
-            //         Else
-            //             exit(IsResult);
-            //     end;
+            'ADJADV':  //Not used this Function
+                begin
+                    IsResult := POSProcedure.AdjustAdvance(documentno);
+                    IF IsResult = '' then
+                        exit('Success')
+                    Else
+                        exit(IsResult);
+                end;
             'INVLINE':  //<<<<** Sales Order's Perticuller line Ship and Invoice **>>>>
                 begin
                     IsResult := POSProcedure.InvoiceLine(documentno, lineno, parameter1, input);
@@ -408,7 +408,7 @@ codeunit 50302 "POS Event and Subscriber"
         IF RequestTranHdr.FindFirst() then begin
             RequestTranHdr.Status := RequestTranHdr.Status::"Pending for Approval";
             RequestTranHdr.Modify();
-            //Exit('Success')
+            Exit('Success');
         end;
         IF RequestTranHdr.Status <> RequestTranHdr.Status::"Pending for Approval" then
             exit('Failed');

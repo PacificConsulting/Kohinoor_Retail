@@ -128,6 +128,7 @@ page 50329 "Request Transfer Order"
                     RrqTransferLineNew: record "Request Transfer Line";
                     TransferOrderNo: list of [Text];
                     recLocation: Record 14;
+                    RH: Record "Request Transfer Header";
                 begin
                     RrqTransferLineFilter.Reset();
                     RrqTransferLineFilter.SetRange("Document No.", Rec."No.");
@@ -185,6 +186,11 @@ page 50329 "Request Transfer Order"
                         until RrqTransferLineFilter.Next() = 0;
                     //TransferRelease.Run(TransferHeader);
                     Message('Transfer Order Craeted with Trasfer Order No.');
+                    RH.Reset();
+                    RH.SetRange("No.", Rec."No.");
+                    IF RH.FindFirst() then
+                        RH.Delete(true);
+
                     // if InstructionMgt.IsEnabled(InstructionMgt.ShowPostesdConfirmationMessageCode()) then
                     //     ShowPostedConfirmationMessage(TransferHeader."No.");
                 end;
