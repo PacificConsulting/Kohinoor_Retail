@@ -220,6 +220,7 @@ codeunit 50303 "POS Procedure"
         SalesLine: Record 37;
         SalesCommLine: Record 44;
         Salespost: codeunit 80;
+        ReleaseSalesDoc: Codeunit "Release Sales Document";
     Begin
         SalesHdr.Reset();
         SalesHdr.SetRange("No.", DocumentNo);
@@ -250,8 +251,9 @@ codeunit 50303 "POS Procedure"
                 SalesCommLine.Modify();
             end;
             //>> Comment Mandetory so We have to pass Order Comment
-            SalesHdr.Status := SalesHdr.Status::Released;
-            SalesHdr.Modify();
+            //SalesHdr.Status := SalesHdr.Status::Released;
+            //SalesHdr.Modify();
+            ReleaseSalesDoc.PerformManualRelease(SalesHdr);
             Salespost.Run(SalesHdr);
             //exit('Failed');
         end;
@@ -448,9 +450,9 @@ codeunit 50303 "POS Procedure"
                     TradeAggre.SetFilter("To Date", '>=%1', SalesHeder."Posting Date");
                     IF TradeAggre.FindFirst() then begin
                         IF TradeAggre."M.R.P" < SalesLineunitPrice."Unit Price Incl. of Tax" then
-                            Error('Amount should not be more than %1 INR', TradeAggre."M.R.P");
+                            Exit('Amount should not be more than %1 INR ' + Format(TradeAggre."M.R.P"));
                         IF TradeAggre.FNNLC > SalesLineunitPrice."Unit Price Incl. of Tax" then
-                            Error('Amount should not be less than %1 INR', TradeAggre.FNNLC);
+                            Exit('Amount should not be less than %1 INR ' + Format(TradeAggre.FNNLC));
                         IF TradeAggre."Last Selling Price" > SalesLineunitPrice."Unit Price Incl. of Tax" then begin
                             ApprovalMailSent(SalesLineunitPrice, TradeAggre);
                         end;
@@ -458,9 +460,9 @@ codeunit 50303 "POS Procedure"
                         TradeAggre.SetRange("Location Code");
                         IF TradeAggre.FindFirst() then begin
                             IF TradeAggre."M.R.P" < SalesLineunitPrice."Unit Price Incl. of Tax" then
-                                Error('Amount should not be more than %1 INR', TradeAggre."M.R.P");
+                                Exit('Amount should not be more than %1 INR ' + Format(TradeAggre."M.R.P"));
                             IF TradeAggre.FNNLC > SalesLineunitPrice."Unit Price Incl. of Tax" then
-                                Error('Amount should not be less than %1 INR', TradeAggre.FNNLC);
+                                Exit('Amount should not be less than %1 INR ' + Format(TradeAggre.FNNLC));
                             IF TradeAggre."Last Selling Price" > SalesLineunitPrice."Unit Price Incl. of Tax" then begin
                                 ApprovalMailSent(SalesLineunitPrice, TradeAggre);
                             end;
@@ -522,7 +524,6 @@ codeunit 50303 "POS Procedure"
             SalesLineInit."Serial No." := serialno;
             SalesLineInit."Exchange Item No." := exchangeitem;
             SalesLineInit."Store No." := SalesLine."Store No.";
-
             SalesLineInit.Modify();
 
             IF (SalesLineInit."Serial No." <> serialno) or (SalesLineInit."Exchange Item No." <> exchangeitem) then
@@ -752,6 +753,8 @@ codeunit 50303 "POS Procedure"
         SalesRec11: record "Sales & Receivables Setup";
         SalesLine: Record 37;
         ReleaseSalesDoc: Codeunit "Release Sales Document";
+        SR: Record "Sales & Receivables Setup";
+        RecItem: Record 27;
     begin
         clear(TotalGSTAmount1);
         Clear(TotalTCSAmt);
@@ -770,11 +773,8 @@ codeunit 50303 "POS Procedure"
         SalesHeader.SetRange("No.", DocumentNo);
         IF SalesHeader.FindFirst() then begin
             SalesHeader.TestField(Status, SalesHeader.Status::Open);
-            // IF SalessHeader.Status = SalesHeader.Status::Released then begin
-            //     SalesHeader.Status := SalesHeader.Status::Open;
-            //     SalesHeader.Modify();
-            // end;
         end;
+
         SalesHeader.Reset();
         SalesHeader.SetRange("No.", DocumentNo);
         if SalesHeader.FindFirst() then begin
@@ -813,6 +813,29 @@ codeunit 50303 "POS Procedure"
                             SalesLine.Validate("Shortcut Dimension 2 Code", SalesHeader."Shortcut Dimension 2 Code");
                             SalesLine.Modify()
                         until SalesLine.Next() = 0;
+
+                    SalesLine.Reset();
+                    SalesLine.SetRange("Document No.", DocumentNo);
+                    SalesLine.SetFilter("Warranty Parent Line No.", '<>%1', 0);
+                    IF SalesLine.FindSet() then
+                        repeat
+                            IF RecItem.Get(SalesLine."No.") then begin
+                                IF RecItem."Item Category Code" = 'SECOND HAND' then begin
+                                    SalesLine.Validate("Qty. to Ship", SalesLine.Quantity);
+                                    SalesLine.Modify()
+                                end;
+                            end;
+                        until SalesLine.Next() = 0;
+
+                    SalesLine.Reset();
+                    SalesLine.SetRange(Type, SalesLine.Type::"G/L Account");
+                    SalesLine.SetRange("No.", SalesRec11."Exchange Item G/L");
+                    IF SalesLine.FindSet() then begin
+                        repeat
+                            SalesLine.Validate("Qty. to Ship", SalesLine.Quantity);
+                            SalesLine.Modify()
+                        until SalesLine.Next() = 0;
+                    end;
                     ReleaseSalesDoc.PerformManualRelease(SalesHeader);
 
                 end;
@@ -838,6 +861,8 @@ codeunit 50303 "POS Procedure"
         SalesLine: record 37;
         SalesCommLine: Record 44;
         ReleaseSalesDoc: Codeunit "Release Sales Document";
+        SR: record "Sales & Receivables Setup";
+        RecItem: Record 27;
     begin
         clear(TotalGSTAmount1);
         Clear(TotalTCSAmt);
@@ -852,6 +877,12 @@ codeunit 50303 "POS Procedure"
             repeat
                 SalesLine.TestField("Salesperson Code");
             until SalesLine.Next() = 0;
+
+        SalesHdr.Reset();
+        SalesHdr.SetRange("No.", DocumentNo);
+        IF SalesHdr.FindFirst() then begin
+            SalesHdr.TestField(Status, SalesHdr.Status::Open);
+        end;
 
         SalesHdr.Reset();
         SalesHdr.SetRange("No.", DocumentNo);
@@ -910,12 +941,36 @@ codeunit 50303 "POS Procedure"
                         end;
                     until SalesLine.Next() = 0;
 
+
+                SalesLine.Reset();
+                SalesLine.SetRange("Document No.", DocumentNo);
+                SalesLine.SetFilter("Warranty Parent Line No.", '<>%1', 0);
+                IF SalesLine.FindSet() then
+                    repeat
+                        IF RecItem.Get(SalesLine."No.") then begin
+                            IF RecItem."Item Category Code" = 'SECOND HAND' then begin
+                                SalesLine.Validate("Qty. to Ship", SalesLine.Quantity);
+                                SalesLine.Modify()
+                            end;
+                        end;
+                    until SalesLine.Next() = 0;
+
+                SalesLine.Reset();
+                SalesLine.SetRange(Type, SalesLine.Type::"G/L Account");
+                SalesLine.SetRange("No.", SalesRec."Exchange Item G/L");
+                IF SalesLine.FindSet() then begin
+                    repeat
+                        SalesLine.Validate("Qty. to Ship", SalesLine.Quantity);
+                        SalesLine.Modify()
+                    until SalesLine.Next() = 0;
+                end;
+
                 ReleaseSalesDoc.PerformManualRelease(SalesHdr);
                 //SalesHdr.Status := SalesHdr.Status::Released;
                 //SalesHdr.Modify();
             end;
         end else
-            exit('Failed');
+            exit('Order does not exist');
     end;
 
 
@@ -1319,6 +1374,7 @@ codeunit 50303 "POS Procedure"
         RecUser7: Record "User Setup";
         Loc: Record 14;
     begin
+        Clear(Pagelink);
         Sl.Reset();
         SL.SetRange("Document No.", SalesLine."Document No.");
         SL.SetRange("Line No.", SalesLine."Line No.");
@@ -1337,38 +1393,32 @@ codeunit 50303 "POS Procedure"
         IF SL.FindFirst() then
             Pagelink := GETURL(CURRENTCLIENTTYPE, 'Kohinoor Televideo Pvt. Ltd.', ObjectType::Page, 50361, SL, true);
 
-        //  Window.OPEN(
-        // 'Sending Mail#######1\');
+
         IF RecUser1.Get(GLSetup."Slab Approval User 1") then begin
             ToRecipients.Add(RecUser1."E-Mail");
         end;
 
         IF RecUser2.Get(GLSetup."Slab Approval User 2") then begin
-            // RecUser2.TestField("E-Mail");
             ToRecipients.Add(RecUser2."E-Mail");
         end;
         IF RecUser3.Get(GLSetup."Slab Approval User 3") then begin
-            //RecUser3.TestField("E-Mail");
             ToRecipients.Add(RecUser3."E-Mail");
         end;
         IF RecUser4.Get(GLSetup."Slab Approval User 4") then begin
-            // RecUser1.TestField("E-Mail");
             ToRecipients.Add(RecUser4."E-Mail");
         end;
 
         IF RecUser5.Get(GLSetup."Slab Approval User 5") then begin
-            // RecUser2.TestField("E-Mail");
             ToRecipients.Add(RecUser5."E-Mail");
         end;
         IF RecUser6.Get(GLSetup."Slab Approval User 6") then begin
-            //RecUser3.TestField("E-Mail");
             ToRecipients.Add(RecUser6."E-Mail");
         end;
         IF RecUser7.Get(GLSetup."Slab Approval User 7") then begin
-            //RecUser3.TestField("E-Mail");
             ToRecipients.Add(RecUser7."E-Mail");
         end;
         IF Loc.Get(SL."Store No.") then;
+
         Emailmessage.Create(ToRecipients/*'niwagh16@gmail.com'*/, 'Approval Slab', '', true);
         Emailmessage.AppendToBody('<p><font face="Georgia">Dear <B>Sir,</B></font></p>');
         Char := 13;
@@ -1382,11 +1432,12 @@ codeunit 50303 "POS Procedure"
 
         Emailmessage.AppendToBody(FORMAT(Char));
         Emailmessage.AppendToBody(FORMAT(Char));
-        Emailmessage.AppendToBody('<p><font face="Georgia"><BR>Please find below Approval Link Approve Price</BR></font></p>');
+        Emailmessage.AppendToBody('<p><font face="Georgia"><BR>Please find below Approval Link to Approve Price</BR></font></p>');
         Emailmessage.AppendToBody(FORMAT(Char));
         Emailmessage.AppendToBody(FORMAT(Char));
         //Emailmessage.AppendToBody('<a href=' + Pagelink + '/">Web Link!</a>');
         Emailmessage.AppendToBody(Pagelink);
+        Emailmessage.AppendToBody('<p><font face="Georgia"><BR>POWER APPS</BR></font></p>');
         Emailmessage.AppendToBody(FORMAT(Char));
         Emailmessage.AppendToBody(FORMAT(Char));
         Emailmessage.AppendToBody('<p><font face="Georgia"><BR>Thanking you,</BR></font></p>');
@@ -1402,9 +1453,7 @@ codeunit 50303 "POS Procedure"
             SL."Approval Sent On" := Today;
             SL.Modify();
         end;
-        //Rec."Approval Sent By" := UserId;
-        //Rec."Approval Sent On" := Today;
-        // Rec.Modify();
+
         Message('Approval mail sent successfully');
 
     end;

@@ -38,6 +38,10 @@ page 50344 "Post Code/City API"
                 {
                     Caption = 'SystemId';
                 }
+                field(stateCode; Rec."State Code")
+                {
+                    Caption = 'State Code';
+                }
             }
         }
     }

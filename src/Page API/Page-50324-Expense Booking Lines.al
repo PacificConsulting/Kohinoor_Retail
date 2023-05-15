@@ -49,4 +49,5 @@ page 50324 "Expense Booking Lines"
             }
         }
     }
+
 }

@@ -70,10 +70,17 @@ codeunit 50301 "Event and Subscribers"
             end
         end;
     end;
+    // [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnBeforeCheckHeaderPostingType', '', false, false)]
+    // local procedure OnBeforeCheckHeaderPostingType(var SalesHeader: Record "Sales Header"; var IsHandled: Boolean)
+    // begin
+    //     SalesHeader.Ship := true;
+    //     SalesHeader.Invoice := true;
+    // end;
 
 
-    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnAfterPostSalesDoc', '', false, false)]
-    local procedure OnAfterPostSalesDoc(var SalesHeader: Record "Sales Header"; var GenJnlPostLine: Codeunit "Gen. Jnl.-Post Line"; SalesShptHdrNo: Code[20]; RetRcpHdrNo: Code[20]; SalesInvHdrNo: Code[20]; SalesCrMemoHdrNo: Code[20]; CommitIsSuppressed: Boolean; InvtPickPutaway: Boolean; var CustLedgerEntry: Record "Cust. Ledger Entry"; WhseShip: Boolean; WhseReceiv: Boolean; PreviewMode: Boolean)
+    //[EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnAfterPostSalesDoc', '', false, false)]
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnBeforeFinalizePosting', '', false, false)]
+    local procedure OnBeforeFinalizePosting(var SalesHeader: Record "Sales Header"; var TempSalesLineGlobal: Record "Sales Line" temporary; var EverythingInvoiced: Boolean; SuppressCommit: Boolean; var GenJnlPostLine: Codeunit "Gen. Jnl.-Post Line")
     Var
         ItemJ: record 83;
         ItemJInit: record 83;
@@ -82,13 +89,19 @@ codeunit 50301 "Event and Subscribers"
         ReservEntryInit: Record 337;
         ReservEntry: Record 337;
         ItemJnlPostBatch: Codeunit "Item Jnl.-Post Batch";
+        SR: Record "Sales & Receivables Setup";
     begin
         //<<***********Auto Postive Item Journal Line Created and Post*************
+
+        SR.Get();
         SalesLine.reset();
         SalesLine.SetRange("Document No.", SalesHeader."No.");
+        SalesLine.SetRange(Type, SalesLine.Type::"G/L Account");
+        SalesLine.SetRange("No.", SR."Exchange Item G/L");
         SalesLine.SetFilter("Exchange Item No.", '<>%1', '');
         IF SalesLine.findset() then
             repeat
+                // IF SalesLine."Exchange Item No." <> '' then begin
                 ItemJInit.Init();
                 ItemJInit."Journal Template Name" := 'ITEM';
                 ItemJInit."Journal Batch Name" := 'TEST';
@@ -100,11 +113,12 @@ codeunit 50301 "Event and Subscribers"
                 else
                     ItemJInit."Line No." := 10000;
 
-                ItemJInit."Document No." := SalesInvHdrNo;
+                ItemJInit."Document No." := SalesHeader."No."; //SalesInvHdrNo;
                 ItemJInit.Validate("Posting Date", Today);
                 ItemJInit."Entry Type" := ItemJInit."Entry Type"::"Positive Adjmt.";
                 ItemJInit.Validate("Item No.", SalesLine."Exchange Item No.");
                 ItemJInit.Validate("Location Code", SalesLine."Location Code");
+                ItemJInit.Validate("Bin Code", 'BACKPACK');
                 ItemJInit.validate(Quantity, SalesLine.Quantity);
                 ItemJInit.Validate("Unit of Measure Code", SalesLine."Unit of Measure Code");
                 ItemJInit.Validate("Unit Amount", ABS(SalesLine."Unit Price"));
@@ -120,21 +134,22 @@ codeunit 50301 "Event and Subscribers"
                 ReservEntryInit."Entry No." := ReservEntry."Entry No." + 1;
                 ReservEntryInit."Item No." := ItemJInit."Item No.";
                 ReservEntryInit."Location Code" := ItemJInit."Location Code";
-                ReservEntryInit.Quantity := ItemJInit.Quantity;
+                ReservEntryInit.validate("Quantity (Base)", ItemJInit.Quantity);
                 ReservEntryInit."Reservation Status" := ReservEntryInit."Reservation Status"::Prospect;
                 ReservEntryInit."Source Type" := DATABASE::"Item Journal Line";
                 ReservEntryInit."Source Subtype" := 2;
                 ReservEntryInit."Source ID" := ItemJInit."Journal Template Name";
                 ReservEntryInit."Source Batch Name" := ItemJInit."Journal Batch Name";
                 ReservEntryInit."Source Ref. No." := ItemJInit."Line No.";
-                ReservEntryInit."Source ID" := SalesLine."Document No.";
                 ReservEntryInit."Creation Date" := Today;
                 ReservEntryInit."Created By" := UserId;
-                ReservEntryInit.Validate("Serial No.", SalesLine."Serial No.");
+                ReservEntryInit."Serial No." := SalesLine."Serial No.";
+                ReservEntryInit."Expected Receipt Date" := Today;
                 ReservEntryInit.Positive := true;
-                ReservEntry.Insert();
-
+                ReservEntryInit."Item Tracking" := ReservEntryInit."Item Tracking"::"Serial No.";
+                ReservEntryInit.Insert();
                 ItemJnlPostBatch.Run(ItemJInit);
+            //end;
             until SalesLine.next() = 0;
 
     end;
@@ -176,10 +191,12 @@ codeunit 50301 "Event and Subscribers"
     [EventSubscriber(ObjectType::Table, Database::Customer, 'OnAfterLookupPostCode', '', false, false)]
     local procedure OnAfterLookupPostCode(var Customer: Record Customer; xCustomer: Record Customer; var PostCodeRec: Record "Post Code")
     begin
-        Customer."State Code" := PostCodeRec."State Code";
+        //Customer."State Code" := PostCodeRec."State Code";
     end;
 
     //END**********************************Table-18***************************************
+
+    //******************* Local Function Created ***************************************
     local procedure DeletePayemntLines(salesHeaderRec: record "Sales Header"; RecPaymentLine: Record "Payment Lines")
     var
     begin
@@ -189,30 +206,6 @@ codeunit 50301 "Event and Subscribers"
         if RecPaymentLine.FindFirst() then
             RecPaymentLine.DeleteAll();
     end;
-    //
-
-    // [EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnRunOnBeforeCheckTotalInvoiceAmount', '', false, false)]
-    // local procedure OnRunOnBeforeCheckTotalInvoiceAmount(var SalesHeader: Record "Sales Header")
-    // var
-    //     TempPaymentLineRec: Record 50101 temporary;
-    // begin
-    //     Cod50101.CopyToTempPaymentLines(SalesHeader, TempPaymentLineRec);
-
-    // end;
-
-    // procedure CopyToTempPaymentLines(SalesHeader: Record "Sales Header"; var TempPaymentLine: Record 50101 temporary)
-    // var
-    //     PaymentLine: Record 50101;
-    // begin
-    //     PaymentLine.SetRange("Document Type", SalesHeader."Document Type");
-    //     PaymentLine.SetRange("Document No.", SalesHeader."No.");
-    //     if PaymentLine.FindSet() then
-    //         repeat
-    //             TempPaymentLine := PaymentLine;
-    //             TempPaymentLine.Insert();
-    //         until PaymentLine.Next() = 0;
-
-    // end;
 
     var
 

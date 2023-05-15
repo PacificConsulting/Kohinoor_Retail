@@ -175,7 +175,15 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     RES: Record 337;
 
                 begin
+                    //result := Cu.OrderConfirmationforDelivery(rec."No.");
                     Message('hi');
+                    RES.Reset();
+                    RES.SetRange("Entry No.", 456);
+                    if RES.FindFirst() then begin
+                        RES.Validate("Quantity (Base)", 1);
+                        RES.Modify();
+                    end;
+
                     // result := POS.POSAction('KTPLSO23240091', 0, 'INVLINE', '', '', '');
                     //result := CU.OrderConfirmationforWH(rec."No.");
                     // SL.Reset();
@@ -184,12 +192,12 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     // Hyperlink(GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List", SL));
                     // result := GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List", SL);
                     //Message(result);
-                    RES.Reset();
-                    RES.SetRange("Source ID", 'KTPLPO23240011');
-                    IF RES.FindSet() then
-                        repeat
-                            RES.Delete();
-                        until res.Next() = 0;
+                    // RES.Reset();
+                    // RES.SetRange("Source ID", 'KTPLPO23240011');
+                    // IF RES.FindSet() then
+                    //     repeat
+                    //         RES.Delete();
+                    //     until res.Next() = 0;
 
                 end;
             }
@@ -213,7 +221,7 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     //result := CU.ItemReceipt('KTPLPO23240011', 20000, '');
                     //result := POS.AddWarranty('KTPLSO23240121', 10000, 'ZOPPER', '12');
                     //result := POS.ShipTransferLine('KTRO029', 10000, '1');
-                    result := cu.ChangeUnitPrice('KTPLSO23240125', 10000, '27000');
+                    result := cu.InvoiceComplete(Rec."No.");
 
                     Message(result);
                 end;

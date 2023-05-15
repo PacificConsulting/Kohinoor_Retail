@@ -231,11 +231,6 @@ codeunit 50302 "POS Event and Subscriber"
             end else
                 Error('Warranty not found');
             Saleslineinit.Modify();
-            // SalesLine.Reset();
-            // SalesLine.SetRange("Document No.", documentno);
-            // SalesLine.SetRange("Line No.", lineno);
-            //// IF SalesLine.FindFirst() then
-            //Saleslineinit."Warranty Parent Line No." := SalesLine."Line No.";
 
         End;
     end;
@@ -263,25 +258,18 @@ codeunit 50302 "POS Event and Subscriber"
     /// <summary>
     /// Update Tender Status Update to released as Submited
     /// </summary>
-    procedure TenderSubmit(storeno: Code[20]; staffid: Code[20]; sdate: Text): Text
+    procedure TenderSubmit(entryno: code[20]): Text
     var
         TenderHdr: Record "Tender Declartion Header";
         Vdate: date;
     begin
         //exit('Sucess');
-        Evaluate(Vdate, sdate);
         TenderHdr.Reset();
-        TenderHdr.SetRange("Store No.", storeno);
-        TenderHdr.SetRange("Staff ID", staffid);
-        TenderHdr.SetRange("Store Date", Vdate);
+        TenderHdr.SetRange("No.", entryno);
         IF TenderHdr.FindFirst() then begin
             TenderHdr.Status := TenderHdr.Status::Released;
             TenderHdr.Modify();
-            //exit('Sucess');
-            IF TenderHdr.Status <> TenderHdr.Status::Released then
-                exit('Failed');
-        end else
-            exit('Failed');
+        end;
     end;
 
 

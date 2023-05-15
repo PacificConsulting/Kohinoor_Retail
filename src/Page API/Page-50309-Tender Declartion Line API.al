@@ -50,6 +50,15 @@ page 50309 "Tender Declartion API Line "
                 {
                     Caption = 'SystemId';
                 }
+                field(documentNo; Rec."Document No.")
+                {
+                    Caption = 'Document No.';
+                }
+                field(status; Status)
+                {
+                    Caption = 'Status';
+                }
+
             }
         }
     }
@@ -71,5 +80,15 @@ page 50309 "Tender Declartion API Line "
     }
 
     var
-        myInt: Integer;
+        Status: Enum "Tender Header Dec.Status";
+
+    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    var
+        TDH: Record "Tender Declartion Header";
+    begin
+        TDH.Reset();
+        TDH.SetRange("No.", Rec."Document No.");
+        IF TDH.FindFirst() then
+            Status := TDH.Status;
+    end;
 }

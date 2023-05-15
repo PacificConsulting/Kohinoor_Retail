@@ -127,7 +127,7 @@ page 50362 "Sales Line New Subform"
         IF Rec.Type = rec.Type::"G/L Account" then
             TotalLineAmount := rec."Line Amount"
         else
-            IF Rec.Type = rec.Type::"G/L Account" then
+            IF Rec.Type = rec.Type::Item then
                 TotalLineAmount := rec."Total UPIT Amount";
 
     end;

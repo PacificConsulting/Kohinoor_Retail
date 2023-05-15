@@ -45,7 +45,7 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
                 SalesLineFilter: Record 37;
             begin
                 //IF GetItem.Get(rec."No.") then;
-                IF Quantity <> 0 then begin
+                IF Quantity > 0 then begin
                     Item.Reset();
                     Item.SetRange("Parent Item No.", Rec."No.");
                     IF Item.FindSet() then
@@ -97,7 +97,7 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
             DataClassification = ToBeClassified;
 
         }
-        field(50303; "Approval Sent By"; Text[50])
+        field(50303; "Approval Sent By"; Text[50])//
         {
             DataClassification = ToBeClassified;
         }

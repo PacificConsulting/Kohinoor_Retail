@@ -28,6 +28,7 @@ page 50374 "Expense Booking"
                 }
                 field("Date"; Rec."Date")
                 {
+                    //Editable = false;
                     ToolTip = 'Specifies the value of the Store Date field.';
                 }
             }

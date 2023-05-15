@@ -16,7 +16,7 @@ table 50312 "Expense Booking Header"
         {
             DataClassification = ToBeClassified;
             Caption = 'Store Date';
-            //Editable = false;
+            Editable = false;
 
         }
         field(3; "Staff ID"; code[10])
@@ -31,6 +31,7 @@ table 50312 "Expense Booking Header"
                 IF Staff.Get("Staff ID") then begin
                     "Store No." := Staff."Store No.";
                     Date := Today;
+
                 end;
             end;
 
@@ -39,6 +40,7 @@ table 50312 "Expense Booking Header"
         {
             DataClassification = ToBeClassified;
             Editable = false;
+
         }
     }
     keys

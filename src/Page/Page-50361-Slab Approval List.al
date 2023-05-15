@@ -5,6 +5,9 @@ page 50361 "Slab Approval List"
     PageType = List;
     SourceTable = "Sales Line";
     UsageCategory = Lists;
+    InsertAllowed = false;
+    DeleteAllowed = false;
+
     SourceTableView = where("Approval Status" = filter("Pending for Approval"));
 
     layout
