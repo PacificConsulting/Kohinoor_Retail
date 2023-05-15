@@ -82,7 +82,17 @@ page 50309 "Tender Declartion API Line "
     var
         Status: Enum "Tender Header Dec.Status";
 
-    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    // trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    // var
+    //     TDH: Record "Tender Declartion Header";
+    // begin
+    //     TDH.Reset();
+    //     TDH.SetRange("No.", Rec."Document No.");
+    //     IF TDH.FindFirst() then
+    //         Status := TDH.Status;
+    // end;
+
+    trigger OnAfterGetRecord()
     var
         TDH: Record "Tender Declartion Header";
     begin

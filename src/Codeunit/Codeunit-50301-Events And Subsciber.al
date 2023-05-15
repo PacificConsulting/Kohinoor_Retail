@@ -4,6 +4,12 @@ codeunit 50301 "Event and Subscribers"
     begin
 
     end;
+
+    // [EventSubscriber(ObjectType::Codeunit, Codeunit::"Item Jnl.-Post Line", 'OnAfterInsertTransferEntry', '', false, false)]
+    // local procedure OnAfterInsertTransferEntry(var ItemJournalLine: Record "Item Journal Line"; NewItemLedgerEntry: Record "Item Ledger Entry"; OldItemLedgerEntry: Record "Item Ledger Entry")
+    // begin
+    //     NewItemLedgerEntry."External Document No." := UserId;
+    // end;
     //START**********************************CU-5708*******************************************
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Release Transfer Document", 'OnAfterReleaseTransferDoc', '', false, false)]
     local procedure OnAfterReleaseTransferDoc(var TransferHeader: Record "Transfer Header")

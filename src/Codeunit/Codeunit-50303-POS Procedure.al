@@ -23,11 +23,14 @@ codeunit 50303 "POS Procedure"
         TotalTCSAmt: Decimal;
         DueAmt: Decimal;
         PayInit: record "Payment Lines";
+        Cust: record 18;
+        Balance: Decimal;
     begin
         Clear(TotalAmt);
         Clear(TotalGSTAmount1);
         Clear(TotalTCSAmt);
         Clear(DueAmt);
+        Clear(Balance);
 
         SalesHeader.Reset();
         SalesHeader.SetRange("No.", DocumentNo);
@@ -48,8 +51,21 @@ codeunit 50303 "POS Procedure"
 
             DueAmt := SalesHeader."Amount To Customer" - TotalPayemtamt;
 
+            IF cust.get(SalesHeader."Sell-to Customer No.") then begin
+                Cust.CalcFields("Balance (LCY)");
+                Balance := Cust."Balance (LCY)";
+
+                IF Balance > 0 then
+                    Exit('Customer does not have enough balance');
+            end;
+
+            SL.Reset();
+            SL.SetRange("Document No.", SalesHeader."No.");
+            IF SL.FindFirst() then;
+
             PayInit.Init();
-            PayInit."Document Type" := PayInit."Document Type"::"Advance Payment";
+            PayInit."Document Type" := PayInit."Document Type"::Order;
+            PayInit."Document No." := SL."Document No.";
             PaymentLine.Reset();
             PaymentLine.SetRange("Document No.", SalesHeader."No.");
             if PaymentLine.FindSet() then
@@ -57,7 +73,11 @@ codeunit 50303 "POS Procedure"
             else
                 PayInit."Line No." := 10000;
 
-            PayInit.Amount := DueAmt;
+            IF dueamt <= ABS(balance) then
+                PayInit.Amount := DueAmt
+            else
+                PayInit.Amount := ABS(Balance);
+
             PayInit.validate("Payment Method Code", 'ADVANCE');
             PayInit.Insert();
         end;
@@ -1289,6 +1309,7 @@ codeunit 50303 "POS Procedure"
         PaymentLine.Reset();
         PaymentLine.SetRange("Document Type", Salesheader."Document Type");
         PaymentLine.SetRange("Document No.", Salesheader."No.");
+        PaymentLine.SetFilter("Payment Method Code", '<>%1', 'ADVANCE');
         if PaymentLine.FindSet() then
             repeat
                 GenJourLine.Reset();

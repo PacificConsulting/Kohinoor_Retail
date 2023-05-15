@@ -102,4 +102,30 @@ page 50312 "Tender Declartion Card"
             }
         }
     }
+    // actions
+    // {
+    //     area(Processing)
+    //     {
+    //         action(Status11)
+    //         {
+    //             ApplicationArea = all;
+    //             Caption = 'Status';
+    //             trigger OnAction()
+    //             var
+    //                 TDH: Record "Tender Declartion Header";
+    //                 Status: Enum "Tender Header Dec.Status";
+    //                 Sta: Text;
+    //             begin
+    //                 TDH.Reset();
+    //                 TDH.SetRange("No.", Rec."No.");
+    //                 IF TDH.FindFirst() then begin
+    //                     Status := TDH.Status;
+    //                     //Sta:=TDH.Status;
+    //                 end;
+    //                 Message(FORMAT(Status));
+    //                 Message('Text %1', Sta);
+    //             end;
+    //         }
+    //     }
+    // }
 }
