@@ -3,7 +3,7 @@ page 50358 "Warranty Master List"
     ApplicationArea = All;
     Caption = 'Warranty Master List';
     PageType = List;
-    SourceTable = "Warranty Master";
+    SourceTable = "Warranty Master new";
     UsageCategory = Lists;
 
     layout

@@ -33,6 +33,7 @@ codeunit 50303 "POS Procedure"
         Clear(Balance);
 
         SalesHeader.Reset();
+        SalesHeader.SetCurrentKey("No.");
         SalesHeader.SetRange("No.", DocumentNo);
         if SalesHeader.FindFirst() then begin
             GetGSTAmountTotal(SalesHeader, TotalGSTAmount1);
@@ -43,6 +44,7 @@ codeunit 50303 "POS Procedure"
 
             Clear(TotalPayemtamt);
             PaymentLine.Reset();
+            PaymentLine.SetCurrentKey("Document Type", "Document No.");
             PaymentLine.SetRange("Document No.", SalesHeader."No.");
             if PaymentLine.FindSet() then
                 repeat
@@ -96,6 +98,7 @@ codeunit 50303 "POS Procedure"
         ResultError: text;
     begin
         SalesHeder.Reset();
+        SalesHeder.SetCurrentKey("No.");
         SalesHeder.SetRange("No.", "Document No.");
         IF SalesHeder.FindFirst() then begin
             IF SalesHeder.Status = SalesHeder.Status::Released then begin
@@ -103,6 +106,7 @@ codeunit 50303 "POS Procedure"
                 SalesHeder.Modify();
             end;
             SalesLineDel.Reset();
+            SalesLineDel.SetCurrentKey("Document No.", "Line No.");
             SalesLineDel.SetRange("Document No.", SalesHeder."No.");
             SalesLineDel.SetRange("Line No.", "Line No.");
             IF SalesLineDel.FindFirst() then begin
@@ -110,6 +114,7 @@ codeunit 50303 "POS Procedure"
 
                 //******* Warranty Line delete code ******
                 SalesLineDel.Reset();
+                SalesLineDel.SetCurrentKey("Document No.", "Warranty Parent Line No.");
                 SalesLineDel.SetRange("Document No.", SalesHeder."No.");
                 SalesLineDel.SetRange("Warranty Parent Line No.", "Line No.");
                 IF SalesLineDel.FindFirst() then
@@ -131,14 +136,17 @@ codeunit 50303 "POS Procedure"
         SalesLineDelete: Record 37;
     begin
         SalesHeaderDelete.Reset();
+        SalesHeaderDelete.SetCurrentKey("No.");
         SalesHeaderDelete.SetRange("No.", documentno);
         if SalesHeaderDelete.FindFirst() then begin
             SalesHeaderDelete.Delete();
             SalesLineDelete.Reset();
+            SalesLineDelete.SetCurrentKey("Document No.");
             SalesLineDelete.SetRange("Document No.", documentno);
             IF SalesLineDelete.FindFirst() then
                 SalesLineDelete.DeleteAll();
             PaymentLineDelete.reset();
+            PaymentLineDelete.SetCurrentKey("Document No.");
             PaymentLineDelete.SetRange("Document No.", DocumentNo);
             IF PaymentLineDelete.FindFirst() then begin
                 PaymentLineDelete.DeleteAll();
@@ -159,6 +167,7 @@ codeunit 50303 "POS Procedure"
         PayLineDelete: Record "Payment Lines";
     begin
         PayLineDelete.Reset();
+        PayLineDelete.SetCurrentKey("Document No.", "Line No.", Posted);
         PayLineDelete.SetRange("Document No.", DocumentNo);
         PayLineDelete.SetRange("Line No.", LineNo);
         PayLineDelete.SetRange(Posted, false);
@@ -184,6 +193,7 @@ codeunit 50303 "POS Procedure"
         Clear(LineDicountDecimal);
         Evaluate(LineDicountDecimal, LineDocumentpara);
         SaleHeaderDisc.Reset();
+        SalesLineDisc.SetCurrentKey("No.");
         SaleHeaderDisc.SetRange("No.", DocumentNo);
         IF SaleHeaderDisc.FindFirst() then begin
             IF SaleHeaderDisc.Status = SaleHeaderDisc.Status::Released then begin
@@ -191,6 +201,7 @@ codeunit 50303 "POS Procedure"
                 SaleHeaderDisc.Modify(true);
             end;
             SalesLineDisc.Reset();
+            SalesLineDisc.SetCurrentKey("Document No.", "Line No.");
             SalesLineDisc.SetRange("Document No.", SaleHeaderDisc."No.");
             SalesLineDisc.SetRange("Line No.", LineNo);
             IF SalesLineDisc.FindFirst() then begin
@@ -243,6 +254,7 @@ codeunit 50303 "POS Procedure"
         ReleaseSalesDoc: Codeunit "Release Sales Document";
     Begin
         SalesHdr.Reset();
+        SalesHdr.SetCurrentKey("No.");
         SalesHdr.SetRange("No.", DocumentNo);
         IF SalesHdr.FindFirst() then begin
             IF SalesHdr.Status = SalesHdr.Status::Released then begin
@@ -250,6 +262,7 @@ codeunit 50303 "POS Procedure"
                 SalesHdr.Modify();
             end;
             SalesLine.Reset();
+            salesline.SetCurrentKey("Document No.");
             SalesLine.SetRange("Document No.", SalesHdr."No.");
             IF SalesLine.FindSet() then
                 repeat
@@ -259,6 +272,7 @@ codeunit 50303 "POS Procedure"
                 until SalesLine.Next() = 0;
             //<< Comment Mandetory so We have to pass Order Comment
             SalesCommLine.Reset();
+            SalesCommLine.SetCurrentKey("No.");
             SalesCommLine.SetRange("No.", SalesHdr."No.");
             IF Not SalesCommLine.FindFirst() then begin
                 SalesCommLine.Init();
@@ -297,6 +311,7 @@ codeunit 50303 "POS Procedure"
         //Evaluate(ShipInvtoQty, InputData);
         SaleHeaderInv.Reset();
         SaleHeaderInv.SetRange("No.", DocumentNo);
+        SaleHeaderInv.SetCurrentKey("No.");
         IF SaleHeaderInv.FindFirst() then begin
             //  EXIT('Found');
             IF SaleHeaderInv.Status = SaleHeaderInv.Status::Released then begin
@@ -304,6 +319,7 @@ codeunit 50303 "POS Procedure"
                 SaleHeaderInv.Modify(true);
             end;
             SaleLinerInv.Reset();
+            SaleLinerInv.SetCurrentKey("Document No.", "Line No.");
             SaleLinerInv.SetRange("Document No.", SaleHeaderInv."No.");
             SaleLinerInv.SetRange("Line No.", LineNo);
             IF SaleLinerInv.FindFirst() then begin
@@ -353,6 +369,7 @@ codeunit 50303 "POS Procedure"
         // Evaluate(QtyToReceive, InputData);
 
         PurchHeader.Reset();
+        PurchHeader.SetCurrentKey("No.");
         PurchHeader.SetRange("No.", DocumentNo);
         IF PurchHeader.FindFirst() then begin
             IF PurchHeader.Status = PurchHeader.Status::Released then begin
@@ -360,10 +377,12 @@ codeunit 50303 "POS Procedure"
                 PurchHeader.Modify();
             end;
             PurchLine.Reset();
+            PurchLine.SetCurrentKey("Document No.");
             PurchLine.SetRange("Document No.", PurchHeader."No.");
             IF PurchLine.FindFirst() then begin
                 //<< Comment Mandetory so We have to pass Order Comment
                 PurchCommLine.Reset();
+                PurchCommLine.SetCurrentKey("No.");
                 PurchCommLine.SetRange("No.", PurchHeader."No.");
                 IF Not PurchCommLine.FindFirst() then begin
                     PurchCommLine.Init();
@@ -385,6 +404,7 @@ codeunit 50303 "POS Procedure"
             end
         end else begin
             TransferHeader.Reset();
+            TransferHeader.SetCurrentKey("No.");
             TransferHeader.SetRange("No.", DocumentNo);
             IF TransferHeader.FindFirst() then begin
                 IF TransferHeader.Status = TransferHeader.Status::Released then begin
@@ -392,6 +412,7 @@ codeunit 50303 "POS Procedure"
                     TransferHeader.Modify();
                 end;
                 Transferline.Reset();
+                Transferline.SetCurrentKey("Document No.");
                 Transferline.SetRange("Document No.", TransferHeader."No.");
                 IF Transferline.FindFirst() then begin
                     //   Transferline.Validate("Qty. to Receive", Transferline.Quantity);
@@ -416,6 +437,7 @@ codeunit 50303 "POS Procedure"
     begin
         Evaluate(DeliveryDate, InputData);
         SalesHeder.Reset();
+        SalesHeder.SetCurrentKey("No.");
         SalesHeder.SetRange("No.", DocumentNo);
         IF SalesHeder.FindFirst() then begin
             IF SalesHeder.Status = SalesHeder.Status::Released then begin
@@ -444,6 +466,7 @@ codeunit 50303 "POS Procedure"
         Clear(NewUnitPrice);
         Evaluate(NewUnitPrice, LineDocumentpara);
         SaleHeaderUnitPrice.Reset();
+        SaleHeaderUnitPrice.SetCurrentKey("No.");
         SaleHeaderUnitPrice.SetRange("No.", DocumentNo);
         IF SaleHeaderUnitPrice.FindFirst() then begin
             IF SaleHeaderUnitPrice.Status = SaleHeaderUnitPrice.Status::Released then begin
@@ -451,6 +474,7 @@ codeunit 50303 "POS Procedure"
                 SaleHeaderUnitPrice.Modify();
             end;
             SalesLineunitPrice.Reset();
+            SalesLineunitPrice.SetCurrentKey("Document No.", "Line No.");
             SalesLineunitPrice.SetRange("Document No.", SaleHeaderUnitPrice."No.");
             SalesLineunitPrice.SetRange("Line No.", LineNo);
             IF SalesLineunitPrice.FindFirst() then begin
@@ -515,6 +539,7 @@ codeunit 50303 "POS Procedure"
             Error('Serial No. does not exist');
 
         SalesHeader.Reset();
+        SalesHeader.SetCurrentKey("Document Type", "No.");
         SalesHeader.SetRange("No.", documentno);
         SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
         IF SalesHeader.FindFirst() then begin
@@ -581,12 +606,12 @@ codeunit 50303 "POS Procedure"
             SalesLine.Validate("Qty. to Ship", SalesLine."Qty. to Ship" + 1);
             SalesLine.Modify();
 
-
             //exit('Error');
             ReservEntry.RESET;
             ReservEntry.LOCKTABLE;
             IF ReservEntry.FINDLAST THEN
                 LastEntryNo := ReservEntry."Entry No.";
+
             ItemLedgEntry.RESET;
             ItemLedgEntry.SETCURRENTKEY("Item No.", Open, "Variant Code", Positive, "Location Code");
             ItemLedgEntry.SETRANGE("Item No.", SalesLine."No.");
@@ -626,6 +651,7 @@ codeunit 50303 "POS Procedure"
             Clear(LastEntryNo);
 
             TranLine.Reset();
+            TranLine.SetCurrentKey("Document No.", "Line No.");
             TranLine.SetRange("Document No.", documentno);
             TranLine.SetRange("Line No.", lineno);
             IF TranLine.FindFirst() then begin
@@ -703,6 +729,7 @@ codeunit 50303 "POS Procedure"
         //Error(input);
         Clear(LastEntryNo);
         PurchLine.Reset();
+        PurchLine.SetCurrentKey("Document No.", "Line No.");
         PurchLine.SetRange("Document No.", documentno);
         PurchLine.SetRange("Line No.", lineno);
         IF PurchLine.FindFirst() then begin
@@ -714,6 +741,7 @@ codeunit 50303 "POS Procedure"
                 Error('Serial No. does not exist in Serial No information');
 
             ReservEntry.Reset();
+            ReservEntry.SetCurrentKey("Source Type", "Serial No.");
             ReservEntry.SetRange("Source Type", 39);
             ReservEntry.SetRange("Serial No.", SerialNo);
             IF ReservEntry.FindFirst() then
@@ -782,6 +810,7 @@ codeunit 50303 "POS Procedure"
         SalesRec11.get();
 
         SalesLine.Reset();
+        SalesLine.SetCurrentKey("Document No.", Type);
         SalesLine.SetRange("Document No.", DocumentNo);
         SalesLine.SetRange(Type, SalesLine.Type::Item);
         IF SalesLine.FindSet() then
@@ -791,11 +820,13 @@ codeunit 50303 "POS Procedure"
 
         SalesHeader.Reset();
         SalesHeader.SetRange("No.", DocumentNo);
+        SalesHeader.SetCurrentKey("No.");
         IF SalesHeader.FindFirst() then begin
             SalesHeader.TestField(Status, SalesHeader.Status::Open);
         end;
 
         SalesHeader.Reset();
+        SalesHeader.SetCurrentKey("No.");
         SalesHeader.SetRange("No.", DocumentNo);
         if SalesHeader.FindFirst() then begin
             GetGSTAmountTotal(SalesHeader, TotalGSTAmount1);
@@ -806,6 +837,7 @@ codeunit 50303 "POS Procedure"
 
             Clear(TotalPayemtamt);
             PaymentLine.Reset();
+            PaymentLine.SetCurrentKey("Document No.");
             PaymentLine.SetRange("Document No.", SalesHeader."No.");
             if PaymentLine.FindSet() then
                 repeat
@@ -818,6 +850,7 @@ codeunit 50303 "POS Procedure"
                 BankPayentReceiptAutoPost(SalesHeader);
                 SalesHeader.Reset();
                 SalesHeader.SetRange("No.", SalesHeader."No.");
+                SalesHeader.SetCurrentKey("No.");
                 If SalesHeader.FindFirst() then begin
                     // SalesHeader.Validate("Location Code", SalesRec11."Default Warehouse");
                     //SalesHdr."Staff Id" :=
@@ -825,6 +858,7 @@ codeunit 50303 "POS Procedure"
                     SalesHeader.Modify();
 
                     SalesLine.Reset();
+                    SalesLine.SetCurrentKey("Document No.");
                     SalesLine.SetRange("Document No.", DocumentNo);
                     IF SalesLine.FindSet() then
                         repeat
@@ -835,6 +869,7 @@ codeunit 50303 "POS Procedure"
                         until SalesLine.Next() = 0;
 
                     SalesLine.Reset();
+                    SalesLine.SetCurrentKey("Document No.", "Warranty Parent Line No.");
                     SalesLine.SetRange("Document No.", DocumentNo);
                     SalesLine.SetFilter("Warranty Parent Line No.", '<>%1', 0);
                     IF SalesLine.FindSet() then
@@ -848,6 +883,7 @@ codeunit 50303 "POS Procedure"
                         until SalesLine.Next() = 0;
 
                     SalesLine.Reset();
+                    SalesLine.SetCurrentKey(Type, "No.");
                     SalesLine.SetRange(Type, SalesLine.Type::"G/L Account");
                     SalesLine.SetRange("No.", SalesRec11."Exchange Item G/L");
                     IF SalesLine.FindSet() then begin
@@ -891,6 +927,7 @@ codeunit 50303 "POS Procedure"
 
 
         SalesLine.Reset();
+        SalesLine.SetCurrentKey("Document No.", Type);
         SalesLine.SetRange("Document No.", DocumentNo);
         SalesLine.SetRange(Type, SalesLine.Type::Item);
         IF SalesLine.FindSet() then
@@ -899,12 +936,14 @@ codeunit 50303 "POS Procedure"
             until SalesLine.Next() = 0;
 
         SalesHdr.Reset();
+        SalesHdr.SetCurrentKey("No.");
         SalesHdr.SetRange("No.", DocumentNo);
         IF SalesHdr.FindFirst() then begin
             SalesHdr.TestField(Status, SalesHdr.Status::Open);
         end;
 
         SalesHdr.Reset();
+        SalesHdr.SetCurrentKey("No.");
         SalesHdr.SetRange("No.", DocumentNo);
         if SalesHdr.FindFirst() then begin
             SalesHdr.TestField(Status, SalesHdr.Status::Open);
@@ -916,6 +955,7 @@ codeunit 50303 "POS Procedure"
 
             Clear(TotalPayemtamt);
             PaymentLine.Reset();
+            PaymentLine.SetCurrentKey("Document No.");
             PaymentLine.SetRange("Document No.", SalesHdr."No.");
             if PaymentLine.FindSet() then
                 repeat
@@ -927,6 +967,7 @@ codeunit 50303 "POS Procedure"
             else begin
                 BankPayentReceiptAutoPost(SalesHdr);
                 SalesHdr.Reset();
+                SalesHdr.SetCurrentKey("No.");
                 SalesHdr.SetRange("No.", SalesHdr."No.");
                 If SalesHdr.FindFirst() then begin
                     SalesHdr.Status := SalesHdr.Status::Open;
@@ -938,6 +979,7 @@ codeunit 50303 "POS Procedure"
 
                 end;
                 SalesLine.Reset();
+                SalesLine.SetCurrentKey("Document No.");
                 SalesLine.SetRange("Document No.", DocumentNo);
                 IF SalesLine.FindSet() then
                     repeat
@@ -963,6 +1005,7 @@ codeunit 50303 "POS Procedure"
 
 
                 SalesLine.Reset();
+                SalesLine.SetCurrentKey("Document No.", "Warranty Parent Line No.");
                 SalesLine.SetRange("Document No.", DocumentNo);
                 SalesLine.SetFilter("Warranty Parent Line No.", '<>%1', 0);
                 IF SalesLine.FindSet() then
@@ -976,6 +1019,7 @@ codeunit 50303 "POS Procedure"
                     until SalesLine.Next() = 0;
 
                 SalesLine.Reset();
+                SalesLine.SetCurrentKey(Type, "No.");
                 SalesLine.SetRange(Type, SalesLine.Type::"G/L Account");
                 SalesLine.SetRange("No.", SalesRec."Exchange Item G/L");
                 IF SalesLine.FindSet() then begin
@@ -1307,6 +1351,7 @@ codeunit 50303 "POS Procedure"
         IF GenBatch.Get(RecLocation."Payment Journal Template Name", RecLocation."Payment Journal Batch Name") then;
 
         PaymentLine.Reset();
+        PaymentLine.SetCurrentKey("Document Type", "Document No.", "Payment Method Code");
         PaymentLine.SetRange("Document Type", Salesheader."Document Type");
         PaymentLine.SetRange("Document No.", Salesheader."No.");
         PaymentLine.SetFilter("Payment Method Code", '<>%1', 'ADVANCE');
@@ -1353,6 +1398,7 @@ codeunit 50303 "POS Procedure"
             Until PaymentLine.Next() = 0;
         GenJnlPostBatch.Run(GenJourLineInit);
         PaymentLine.Reset();
+        PaymentLine.SetCurrentKey("Document Type", "Document No.");
         PaymentLine.SetRange("Document Type", Salesheader."Document Type");
         PaymentLine.SetRange("Document No.", Salesheader."No.");
         if PaymentLine.FindSet() then
@@ -1397,6 +1443,7 @@ codeunit 50303 "POS Procedure"
     begin
         Clear(Pagelink);
         Sl.Reset();
+        sl.SetCurrentKey("Document No.", "Line No.");
         SL.SetRange("Document No.", SalesLine."Document No.");
         SL.SetRange("Line No.", SalesLine."Line No.");
         IF SL.FindFirst() then begin
@@ -1409,6 +1456,7 @@ codeunit 50303 "POS Procedure"
 
         //Pagelink := GetUrl(ClientType::Current, Rec.CurrentCompany, ObjectType::Page, Page::"Slab Approval List");
         Sl.Reset();
+        SL.SetCurrentKey("Document No.", "Line No.");
         SL.SetRange("Document No.", SalesLine."Document No.");
         SL.SetRange("Line No.", SalesLine."Line No.");
         IF SL.FindFirst() then
@@ -1467,6 +1515,7 @@ codeunit 50303 "POS Procedure"
         EMail.Send(Emailmessage, Enum::"Email Scenario"::Default);
         //Window.CLOSE;
         Sl.Reset();
+        SL.SetCurrentKey("Document No.", "Line No.");
         SL.SetRange("Document No.", SalesLine."Document No.");
         SL.SetRange("Line No.", SalesLine."Line No.");
         IF SL.FindFirst() then begin
@@ -1476,7 +1525,6 @@ codeunit 50303 "POS Procedure"
         end;
 
         Message('Approval mail sent successfully');
-
     end;
 
 

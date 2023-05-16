@@ -26,6 +26,10 @@ page 50371 "Salesperson"
                 {
                     Caption = 'Name';
                 }
+                field(storeNo; Rec."Store No.")
+                {
+                    Caption = 'Store No.';
+                }
             }
         }
     }

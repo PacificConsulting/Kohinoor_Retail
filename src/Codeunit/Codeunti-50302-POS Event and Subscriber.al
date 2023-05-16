@@ -181,7 +181,7 @@ codeunit 50302 "POS Event and Subscriber"
         SalesLine: Record "Sales Line";
         Saleslineinit: record "Sales Line";
         SR: Record "Sales & Receivables Setup";
-        WarrMaster: Record "Warranty Master";
+        WarrMaster: Record "Warranty Master new";
         SH: Record "Sales Header";
         SL: Record "Sales Line";
         MonthInt: Integer;
@@ -197,6 +197,7 @@ codeunit 50302 "POS Event and Subscriber"
         IF SH.FindFirst() then;
 
         SalesLine.Reset();
+        SalesLine.SetCurrentKey("Document No.", "Line No.");
         SalesLine.SetRange("Document No.", documentno);
         SalesLine.SetRange("Line No.", lineno);
         IF SalesLine.FindFirst() then begin
@@ -218,6 +219,7 @@ codeunit 50302 "POS Event and Subscriber"
             Saleslineinit."Store No." := SalesLine."Store No.";
             Saleslineinit.Validate("Salesperson Code", SalesLine."Salesperson Code");
             WarrMaster.Reset();
+            WarrMaster.SetCurrentKey(Brand, Months, "From Date", "TO Date", "From Value", "To Value");
             WarrMaster.SetRange(Brand, brand);
             WarrMaster.SetRange(Months, MonthInt);
             WarrMaster.SetFilter("From Date", '<=%1', SH."Posting Date");
@@ -246,6 +248,7 @@ codeunit 50302 "POS Event and Subscriber"
         Transferrelease: codeunit "Release Transfer Document";
     begin
         TransferHeaderShip.Reset();
+        TransferHeaderShip.SetCurrentKey("No.");
         TransferHeaderShip.SetRange("No.", DocumentNo);
         IF TransferHeaderShip.FindFirst() then begin
             Transpostship.Run(TransferHeaderShip);
@@ -265,6 +268,7 @@ codeunit 50302 "POS Event and Subscriber"
     begin
         //exit('Sucess');
         TenderHdr.Reset();
+        TenderHdr.SetCurrentKey("No.");
         TenderHdr.SetRange("No.", entryno);
         IF TenderHdr.FindFirst() then begin
             TenderHdr.Status := TenderHdr.Status::Released;
@@ -292,6 +296,7 @@ codeunit 50302 "POS Event and Subscriber"
     begin
 
         PaymentFilter.Reset();
+        PaymentFilter.SetCurrentKey("Document No.");
         PaymentFilter.SetRange("Document No.", documentno);
         If PaymentFilter.FindFirst() then;
 
@@ -303,6 +308,7 @@ codeunit 50302 "POS Event and Subscriber"
         IF GenBatch.Get(RecLocation."Payment Journal Template Name", RecLocation."Payment Journal Batch Name") then;
 
         PaymentLine.Reset();
+        PaymentLine.SetCurrentKey(Posted, "Document No.");
         PaymentLine.SetRange(Posted, false);
         PaymentLine.SetRange("Document No.", documentno);
         if PaymentLine.FindSet() then begin
@@ -349,6 +355,7 @@ codeunit 50302 "POS Event and Subscriber"
             Error('Payment line not found.');
         GenJnlPostBatch.Run(GenJourLineInit);
         PaymentLine.Reset();
+        PaymentLine.SetCurrentKey("Document No.");
         PaymentLine.SetRange("Document No.", documentno);
         if PaymentLine.FindSet() then
             repeat
@@ -432,6 +439,7 @@ codeunit 50302 "POS Event and Subscriber"
         ShiptoAdd: record 222;
     begin
         SalesHeader.Reset();
+        SalesHeader.SetCurrentKey("No.");
         SalesHeader.SetRange("No.", DocumentNo);
         IF SalesHeader.FindFirst() then begin
             IF SalesHeader.Status = SalesHeader.Status::Released then begin
@@ -591,6 +599,7 @@ codeunit 50302 "POS Event and Subscriber"
 
     begin
         RecSalesLine.Reset();
+        RecSalesLine.SetCurrentKey("Document No.", "Line No.");
         RecSalesLine.SetRange("Document No.", DocumentNo);
         RecSalesLine.SetRange("Line No.", LineNo);
         IF RecSalesLine.FindFirst() then begin

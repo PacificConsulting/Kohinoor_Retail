@@ -5,11 +5,11 @@ codeunit 50301 "Event and Subscribers"
 
     end;
 
-    // [EventSubscriber(ObjectType::Codeunit, Codeunit::"Item Jnl.-Post Line", 'OnAfterInsertTransferEntry', '', false, false)]
-    // local procedure OnAfterInsertTransferEntry(var ItemJournalLine: Record "Item Journal Line"; NewItemLedgerEntry: Record "Item Ledger Entry"; OldItemLedgerEntry: Record "Item Ledger Entry")
-    // begin
-    //     NewItemLedgerEntry."External Document No." := UserId;
-    // end;
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Item Jnl.-Post Line", 'OnAfterInsertTransferEntry', '', false, false)]
+    local procedure OnAfterInsertTransferEntry(var ItemJournalLine: Record "Item Journal Line"; NewItemLedgerEntry: Record "Item Ledger Entry"; OldItemLedgerEntry: Record "Item Ledger Entry")
+    begin
+        NewItemLedgerEntry."External Document No." := UserId;
+    end;
     //START**********************************CU-5708*******************************************
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Release Transfer Document", 'OnAfterReleaseTransferDoc', '', false, false)]
     local procedure OnAfterReleaseTransferDoc(var TransferHeader: Record "Transfer Header")
@@ -191,7 +191,7 @@ codeunit 50301 "Event and Subscribers"
     [EventSubscriber(ObjectType::Table, Database::Customer, 'OnBeforeValidatePostCode', '', false, false)]
     local procedure OnBeforeValidatePostCode(var Customer: Record Customer; var PostCodeRec: Record "Post Code"; CurrentFieldNo: Integer; var IsHandled: Boolean)
     begin
-        Customer."State Code" := PostCodeRec."State Code";
+        // Customer."State Code" := PostCodeRec."State Code";
     end;
 
     [EventSubscriber(ObjectType::Table, Database::Customer, 'OnAfterLookupPostCode', '', false, false)]

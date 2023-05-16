@@ -1,4 +1,4 @@
-permissionset 50301 GeneratedPermretail
+permissionset 50301 GeneratedPermiRetail
 {
     Assignable = true;
     Permissions = tabledata "Bank Drop Entry"=RIMD,
@@ -21,6 +21,7 @@ permissionset 50301 GeneratedPermretail
         tabledata "Trade Aggrement"=RIMD,
         tabledata "Warranty Barnd Master"=RIMD,
         tabledata "Warranty Master"=RIMD,
+        tabledata "Warranty Master new"=RIMD,
         tabledata "Warranty Month Master"=RIMD,
         table "Bank Drop Entry"=X,
         table "Customer Reference"=X,
@@ -42,6 +43,7 @@ permissionset 50301 GeneratedPermretail
         table "Trade Aggrement"=X,
         table "Warranty Barnd Master"=X,
         table "Warranty Master"=X,
+        table "Warranty Master new"=X,
         table "Warranty Month Master"=X,
         codeunit "Access Token API"=X,
         codeunit APICalls=X,
@@ -95,6 +97,7 @@ permissionset 50301 GeneratedPermretail
         page "Sales Order Subform API"=X,
         page Salesperson=X,
         page "Shift Log"=X,
+        page "Shift Logs"=X,
         page "Ship To Address API"=X,
         page "Shipping method"=X,
         page "Slab Approval List"=X,

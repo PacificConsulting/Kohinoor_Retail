@@ -1,7 +1,7 @@
 page 50307 "Payment Lines API"
 {
     APIGroup = 'PaymentGroup';
-    APIPublisher = 'Pacific';
+    APIPublisher = 'PC';
     APIVersion = 'v4.0';
     ApplicationArea = All;
     Caption = 'paymentLinesAPI';
@@ -11,7 +11,6 @@ page 50307 "Payment Lines API"
     PageType = API;
     SourceTable = "Payment Lines";
     ODataKeyFields = SystemId;
-
 
     layout
     {
