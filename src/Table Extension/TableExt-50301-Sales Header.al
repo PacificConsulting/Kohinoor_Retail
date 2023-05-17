@@ -19,8 +19,12 @@ tableextension 50301 Sales_Header_AmttoCust extends "Sales Header"
             trigger OnAfterValidate()
             var
                 ShiptoAdd: record 222;
-
+                Cust: Record 18;
             begin
+                IF Cust.get("Sell-to Customer No.") then begin
+                    If Cust."GST Customer Type" = Cust."GST Customer Type"::" " then
+                        Error('GST Customer type should not be blank for Customer No. %1', Cust."No.");
+                end;
                 ShiptoAdd.Reset();
                 ShiptoAdd.SetRange("Customer No.", Rec."Sell-to Customer No.");
                 IF ShiptoAdd.FindFirst() then begin

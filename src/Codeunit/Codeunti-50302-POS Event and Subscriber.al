@@ -230,6 +230,7 @@ codeunit 50302 "POS Event and Subscriber"
                 Saleslineinit.Validate("Unit Price Incl. of Tax", WarrMaster."EW Prices");
                 Saleslineinit."Price Inclusive of Tax" := true;
                 Saleslineinit.Validate(Quantity, 1);
+                Saleslineinit.Description := WarrMaster.Description;
             end else
                 Error('Warranty not found');
             Saleslineinit.Modify();

@@ -2,12 +2,14 @@ tableextension 50316 "Purchase Line Ext" extends "Purchase Line"
 {
     fields
     {
+
         modify("No.")
         {
             trigger OnAfterValidate()
             var
                 TradeAggre: record "Trade Aggrement";
                 PurchHeder: record 38;
+                RecLoc: Record 14;
             begin
                 IF PurchHeder.Get(rec."Document Type", rec."Document No.") then;
                 TradeAggre.Reset();
@@ -24,6 +26,10 @@ tableextension 50316 "Purchase Line Ext" extends "Purchase Line"
                         Validate("Direct Unit Cost", TradeAggre."Purchase Price");
                         // "Price Inclusive of Tax" := true
                     end;
+                end;
+                IF RecLoc.Get(PurchHeder."Location Code") then begin
+                    IF RecLoc."Default Receipt Bin" <> '' then
+                        "Bin Code" := RecLoc."Default Receipt Bin";
                 end;
             end;
 

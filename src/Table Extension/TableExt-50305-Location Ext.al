@@ -22,6 +22,16 @@ tableextension 50305 "Location_Ext_retail" extends Location
             DataClassification = ToBeClassified;
             // TableRelation = "Gen. Journal Batch".Name;
         }
+        field(50305; "Default Receipt Bin"; Code[20])
+        {
+            DataClassification = ToBeClassified;
+            TableRelation = Bin.Code WHERE("Location Code" = FIELD(Code));
+        }
+        // field(50306; "Sales Order Nos"; Code[10])
+        // {
+        //     DataClassification = ToBeClassified;
+        //     TableRelation = "No. Series";
+        // }
     }
 
     var

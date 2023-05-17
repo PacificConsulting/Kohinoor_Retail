@@ -19,10 +19,6 @@ page 50352 "Sales Order List API"
         {
             repeater(General)
             {
-                // field(CustSystemID; ID)
-                // {
-                //     Caption = 'Customer System ID';
-                // }
                 field(no; Rec."No.")
                 {
                     Caption = 'No.';
@@ -43,13 +39,6 @@ page 50352 "Sales Order List API"
                 }
                 field(sellToCustomerNo; Rec."Sell-to Customer No.")
                 {
-                    Caption = 'Sell-to Customer No.';
-                    trigger OnValidate()
-                    var
-
-                    begin
-
-                    end;
                 }
                 field(sellToCustomerName; Rec."Sell-to Customer Name")
                 {
@@ -122,25 +111,6 @@ page 50352 "Sales Order List API"
         end;
     end;
 
-    // trigger OnInsertRecord(BelowxRec: Boolean): Boolean
-    // var
-    //     SH: Record 36;
-    //     NoSeries: Codeunit NoSeriesManagement;
-    //     NewCust: Record 18;
-    //     NewID: Guid;
-    // begin
-    //     IF Cust.get(rec."Sell-to Customer No.") then begin
-    //         ID := Cust.SystemId;
-    //         SH.Init();
-    //         SH."Document Type" := SH."Document Type"::Order;
-    //         SH."No." := NoSeries.GetNextNo('SO', SH."Posting Date", true);
-    //         NewCust.Reset();
-    //         NewCust.SetRange(SystemId, NewID);
-    //         IF NewCust.FindFirst() then
-    //             SH."Sell-to Customer No." := NewCust."No.";
-    //         SH.Insert(true);
-    //     end;
-    // end;
 
 
 }

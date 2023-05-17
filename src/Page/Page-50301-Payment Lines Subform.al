@@ -111,6 +111,11 @@ page 50301 "Payment Lines Subform"
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Subvention by Dealer field.';
                 }
+                field("Payment Attachment"; Rec."Payment Attachment")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the value of the Payment Attachment field.';
+                }
             }
         }
     }

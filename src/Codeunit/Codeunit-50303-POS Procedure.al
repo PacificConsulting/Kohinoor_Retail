@@ -747,13 +747,10 @@ codeunit 50303 "POS Procedure"
             IF ReservEntry.FindFirst() then
                 Error('Serial No. does not exist in reservation entry');
 
-            PurchLine.Validate("Bin Code", 'BACKPACK');
+            //PurchLine.Validate("Bin Code", 'BACKPACK'); //Comment 170523 Kunal Ask to and modify on Item No selection of Purchase line
             PurchLine.Validate("Qty. to Receive", PurchLine."Qty. to Receive" + 1);
             PurchLine.Validate("Qty. to Invoice", 0);
             PurchLine.Modify();
-
-
-            // end;
 
             ReservEntry.RESET;
             ReservEntry.LOCKTABLE;
@@ -1342,10 +1339,15 @@ codeunit 50303 "POS Procedure"
         RecLocation: Record Location;
         GenJnlPostBatch: Codeunit "Gen. Jnl.-Post Batch";
         GenBatch: Record 232;
+        TenderPOSSetup: Record "Tender POS No.Series Setup";
     begin
-        IF RecLocation.Get(Salesheader."Location Code") then begin
-            RecLocation.TestField("Payment Journal Template Name");
-            RecLocation.TestField("Payment Journal Batch Name");
+        // IF RecLocation.Get(Salesheader."Location Code") then begin
+        //     RecLocation.TestField("Payment Journal Template Name");
+        //     RecLocation.TestField("Payment Journal Batch Name");
+        // end;
+        if TenderPOSSetup.Get(Salesheader."Location Code") then begin
+            TenderPOSSetup.TestField("Journal Template Name");
+            TenderPOSSetup.TestField("Journal Batch Name");
         end;
 
         IF GenBatch.Get(RecLocation."Payment Journal Template Name", RecLocation."Payment Journal Batch Name") then;
@@ -1358,8 +1360,8 @@ codeunit 50303 "POS Procedure"
         if PaymentLine.FindSet() then
             repeat
                 GenJourLine.Reset();
-                GenJourLine.SetRange("Journal Template Name", RecLocation."Payment Journal Template Name");
-                GenJourLine.SetRange("Journal Batch Name", RecLocation."Payment Journal Batch Name");
+                GenJourLine.SetRange("Journal Template Name", TenderPOSSetup."Journal Template Name");
+                GenJourLine.SetRange("Journal Batch Name", TenderPOSSetup."Journal Batch Name");
                 GenJourLineInit.Init();
                 GenJourLineInit."Document No." := Salesheader."No.";
                 GenJourLineInit.validate("Posting Date", Today);
@@ -1368,8 +1370,8 @@ codeunit 50303 "POS Procedure"
                 else
                     GenJourLineInit."Line No." := 10000;
 
-                GenJourLineInit.validate("Journal Template Name", RecLocation."Payment Journal Template Name");
-                GenJourLineInit.validate("Journal Batch Name", RecLocation."Payment Journal Batch Name");
+                GenJourLineInit.validate("Journal Template Name", TenderPOSSetup."Journal Template Name");
+                GenJourLineInit.validate("Journal Batch Name", TenderPOSSetup."Journal Batch Name");
                 GenJourLineInit."Document Type" := GenJourLineInit."Document Type"::Payment;
                 // GenJourLineInit.Insert();
 
@@ -1392,7 +1394,10 @@ codeunit 50303 "POS Procedure"
                 GenJourLineInit.Validate("Shortcut Dimension 1 Code", Salesheader."Shortcut Dimension 1 Code");
                 GenJourLineInit.Validate("Shortcut Dimension 2 Code", Salesheader."Shortcut Dimension 2 Code");
                 GenJourLineInit.Comment := 'Auto Post';
-                GenJourLineInit.Validate("Posting No. Series", GenBatch."Posting No. Series");
+                if PaymentLine."Payment Method Code" = 'CASH' then
+                    GenJourLineInit.Validate("Posting No. Series", TenderPOSSetup."Cash Voucher No. Series")
+                else
+                    GenJourLineInit.Validate("Posting No. Series", TenderPOSSetup."Tender Voucher No. Series");
                 //GenJourLineInit.modify();
                 GenJourLineInit.Insert();
             Until PaymentLine.Next() = 0;
@@ -1405,9 +1410,8 @@ codeunit 50303 "POS Procedure"
             repeat
                 PaymentLine.Posted := True;
                 PaymentLine.Modify();
-            //IsPaymentLineeditable := PaymentLine.PaymentLinesEditable()
             Until PaymentLine.Next() = 0;
-        //end;
+
     end;
     // <summary>
     /// Update the Unit Price Sales Line

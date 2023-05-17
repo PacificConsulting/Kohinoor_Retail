@@ -126,6 +126,10 @@ table 50301 "Payment Lines"
             DataClassification = ToBeClassified;
             TableRelation = "Staff Master".ID;
         }
+        field(21; "Payment Attachment"; Text[250])
+        {
+            DataClassification = ToBeClassified;
+        }
     }
 
 

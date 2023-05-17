@@ -32,7 +32,7 @@ table 50318 "Warranty Master"
             Caption = 'EW Prices';
             DataClassification = ToBeClassified;
         }
-        field(6; Description; Text[30])
+        field(6; Description; Text[100])
         {
             Caption = 'Description';
             DataClassification = ToBeClassified;

@@ -12,7 +12,7 @@ table 50308 "Staff Master"
         {
             DataClassification = ToBeClassified;
         }
-        field(3; "E-Mail"; Text[20])
+        field(3; "E-Mail"; Text[80])
         {
             DataClassification = ToBeClassified;
         }

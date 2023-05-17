@@ -174,6 +174,7 @@ page 50329 "Request Transfer Order"
                                         TransferLine.Insert(true);
                                         TransferLine.Validate("Item No.", RrqTransferLine."Item No.");
                                         TransferLine.Validate(Quantity, RrqTransferLine.Quantity);
+                                        TransferLine.Validate("Transfer-To Bin Code", recLocation."Default Receipt Bin");
                                         TransferLine.Modify();
                                         RrqTransferLine."Line Created" := True;
                                         RrqTransferLine.Modify();

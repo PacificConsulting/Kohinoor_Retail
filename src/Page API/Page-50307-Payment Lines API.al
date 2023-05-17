@@ -106,6 +106,11 @@ page 50307 "Payment Lines API"
                 {
                     Caption = 'Line No.';
                 }
+                field(paymentAttachment; Rec."Payment Attachment")
+                {
+                    Caption = 'Payment Attachment';
+                }
+
             }
         }
     }

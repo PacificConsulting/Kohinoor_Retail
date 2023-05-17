@@ -71,7 +71,6 @@ page 50345 "Bank Drop Entry "
                 Promoted = true;
                 trigger OnAction()
                 var
-
                 begin
                     CurrPage.SetSelectionFilter(Rec);
                     GenerateContraVoucher();
@@ -99,7 +98,7 @@ page 50345 "Bank Drop Entry "
         GenJourLineFilter.SetRange("Journal Batch Name", GLSetup."Bank Drop Batch");
 
         GenJourLine.Init();
-        GenJourLine."Journal Template Name" := 'JOURNAL V';
+        GenJourLine."Journal Template Name" := 'CONTRA VO';
         GenJourLine."Journal Batch Name" := GLSetup."Bank Drop Batch";
         GenJourLine.Validate("Posting Date", Today);
 
@@ -110,7 +109,7 @@ page 50345 "Bank Drop Entry "
 
 
         GenJourLine.Insert(true);
-        GenJourLine."Document No." := NoSeriesMgt.GetNextNo('JOURNALV', Today, false);
+        GenJourLine."Document No." := NoSeriesMgt.GetNextNo('CONTRA VO', Today, false);
         GenJourLine."Document Type" := GenJourLine."Document Type"::Payment;
         GenJourLine."Account Type" := GenJourLine."Account Type"::"G/L Account";
         GenJourLine.Validate("Account No.", rec."Cash Account");
@@ -123,6 +122,7 @@ page 50345 "Bank Drop Entry "
         GenJourLine.Comment := 'Auto Post';
         GenJourLine.Modify();
         Message('Contra Voucher Created with Docuemt No. %1 and Batch Name %2', GenJourLine."Document No.", GenJourLine."Journal Batch Name");
+        Codeunit.Run(Codeunit::"Gen. Jnl.-Post", GenJourLine);
     end;
 
 

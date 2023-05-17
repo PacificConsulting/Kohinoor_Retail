@@ -79,6 +79,7 @@ page 50334 "Purchase Order Subform API"
         end;
     end;
 
+
     var
         VendorName: text[100];
 }

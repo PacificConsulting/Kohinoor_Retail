@@ -2,6 +2,23 @@ pageextension 50308 Location_Card extends "Location Card"
 {
     layout
     {
+        // addafter(Dimensions)
+        // {
+        //     group("No. Series")
+        //     {
+        //         field("Sales Order Nos"; Rec."Sales Order Nos")
+        //         {
+        //             ApplicationArea = all;
+        //         }
+        //     }
+        //}
+        addafter("Receipt Bin Code")
+        {
+            field("Default Receipt Bin"; Rec."Default Receipt Bin")
+            {
+                ApplicationArea = all;
+            }
+        }
         addafter("Use As In-Transit")
         {
             field(Store; Rec.Store)
@@ -22,6 +39,7 @@ pageextension 50308 Location_Card extends "Location Card"
                 ApplicationArea = All;
                 ToolTip = 'Specifies the value of the Payment Journal Batch Name field.';
             }
+
 
         }
     }
