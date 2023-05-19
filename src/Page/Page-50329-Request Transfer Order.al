@@ -26,6 +26,7 @@ page 50329 "Request Transfer Order"
                 field("Staff ID"; Rec."Staff ID")
                 {
                     ToolTip = 'Specifies the value of the Staff ID field.';
+                    Editable = false;
                 }
                 field("Posting Date"; Rec."Posting Date")
                 {

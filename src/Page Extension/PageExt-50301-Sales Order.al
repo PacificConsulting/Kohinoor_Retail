@@ -221,7 +221,8 @@ pageextension 50301 "Sales Order Payment Ext" extends "Sales Order"
                     //result := CU.ItemReceipt('KTPLPO23240011', 20000, '');
                     //result := POS.AddWarranty('KTPLSO23240121', 10000, 'ZOPPER', '12');
                     //result := POS.ShipTransferLine('KTRO029', 10000, '1');
-                    result := cu.InvoiceComplete(Rec."No.");
+                    //result := cu.InvoiceComplete(Rec."No.");
+                    result := POS.AzureStorageReport();
 
                     Message(result);
                 end;

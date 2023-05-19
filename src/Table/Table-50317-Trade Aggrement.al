@@ -78,12 +78,12 @@ table 50317 "Trade Aggrement"
             Caption = 'Sellout';
             DataClassification = ToBeClassified;
         }
-        field(15; "Sellout Text"; Text[50])
+        field(15; "Sellout Text"; Text[100])
         {
             Caption = 'Sellout Text';
             DataClassification = ToBeClassified;
         }
-        field(16; "Detailed NNLC"; Text[50])
+        field(16; "Detailed NNLC"; Text[100])
         {
             Caption = 'Detailed NNLC';
             DataClassification = ToBeClassified;
@@ -95,7 +95,7 @@ table 50317 "Trade Aggrement"
         }
         field(18; "SLAB 1 - X-PRICE"; Decimal)
         {
-            Caption = 'SLAB 1 - X-PRICE';
+            Caption = 'SLAB 1 - Exc-PRICE';
             DataClassification = ToBeClassified;
         }
         field(19; "SLAB 2 - PRICE"; Decimal)
@@ -105,7 +105,7 @@ table 50317 "Trade Aggrement"
         }
         field(20; "SLAB 2 - X-PRICE"; Decimal)
         {
-            Caption = 'SLAB 2 - X-PRICE';
+            Caption = 'SLAB 2 - Exc-PRICE';
             DataClassification = ToBeClassified;
         }
         field(21; "SLAB 2 - INC"; Decimal)
