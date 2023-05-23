@@ -136,7 +136,7 @@ tableextension 50303 "Sales Line Retail" extends "Sales Line"
         {
             Caption = 'Salesperson Code';
             DataClassification = ToBeClassified;
-            TableRelation = "Salesperson/Purchaser".Code;
+            TableRelation = "Salesperson/Purchaser".Code where("Global Dimension 2 Code" = field("Shortcut Dimension 2 Code"));
             trigger OnValidate()
             var
                 SP: Record "Salesperson/Purchaser";

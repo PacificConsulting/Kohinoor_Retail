@@ -18,5 +18,13 @@ enum 50304 "Payment Type Ext"
     {
         Caption = 'Cheque';
     }
+    value(4; UPI)
+    {
+        Caption = 'UPI';
+    }
+    value(5; Wallet)
+    {
+        Caption = 'Wallet';
+    }
 
 }
